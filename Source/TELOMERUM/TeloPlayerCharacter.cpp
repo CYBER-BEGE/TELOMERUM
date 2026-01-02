@@ -28,9 +28,6 @@ ATeloPlayerCharacter::ATeloPlayerCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false; // 카메라가 컨트롤러 회전에 따라 회전하지 않음
 
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
-	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
-
 	// 초기 상태 설정
 	MaxHealth = 100.0f;
 	MoveSpeedScale = 1.5f;
@@ -83,7 +80,7 @@ void ATeloPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//UE_LOG(LogTemp, Warning, TEXT("Velocity: %s"), *InputVector.ToString());
+
 }
 
 // Called to bind functionality to input
@@ -95,7 +92,6 @@ void ATeloPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	{
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATeloPlayerCharacter::MoveInput);
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &ATeloPlayerCharacter::MoveInputEnd);
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ATeloPlayerCharacter::LookInput);
@@ -116,7 +112,7 @@ void ATeloPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 		//// Block
 		//EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::DoBlockStart);
-		////EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Completed, this, &ATeloPlayerCharacter::DoBlockEnd);
+		//EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Completed, this, &ATeloPlayerCharacter::DoBlockEnd);
 	}
 	else
 	{
@@ -146,23 +142,15 @@ void ATeloPlayerCharacter::Landed(const FHitResult& Hit)
 
 void ATeloPlayerCharacter::MoveInput(const FInputActionValue& Value)
 {
-	InputVector = Value.Get<FVector2D>();
+	FVector2D MovementVector = Value.Get<FVector2D>();
 
-	DoMove(InputVector.X, InputVector.Y);
-}
-
-void ATeloPlayerCharacter::MoveInputEnd(const FInputActionValue& Value)
-{
-	InputVector = FVector2D::ZeroVector;
+	DoMove(MovementVector.X, MovementVector.Y);
 }
 
 void ATeloPlayerCharacter::DoMove(float Right, float Forward)
 {
 	if (GetController())
 	{
-		//AddMovementInput(GetActorRightVector(), Right * MoveSpeedScale);
-		//AddMovementInput(GetActorForwardVector(), Forward * MoveSpeedScale);
-
 		// 카메라의 Yaw 회전에 따른 이동 방향 설정
 		const FRotator Rotation = GetController()->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -228,24 +216,21 @@ void ATeloPlayerCharacter::DoCrouchEnd()
 // 현재 움직임과 상관없이 입력 값으로 대시
 void ATeloPlayerCharacter::DoDashStart()
 {
-	if (!bCanDash || bIsDashing) return;		// 대시 불가능/대시 중일 시 종료
-	if (InputVector.IsNearlyZero()) return;		// 이동 입력이 없을 시 종료
+	if (!bCanDash || bIsDashing) return; // 대시 불가능/대시 중일 시 종료
+	if (GetCharacterMovement()->GetCurrentAcceleration().IsNearlyZero()) return; // 가속이 없을 시 종료 (입력 없을 시)
 
 	bIsDashing = true;
 	bCanDash = false;
 
-	FRotator CameraRot = Controller->GetControlRotation(); // 카메라 회전값
-	FVector ForwardDir = FRotationMatrix(CameraRot).GetUnitAxis(EAxis::X);
-	FVector RightDir = FRotationMatrix(CameraRot).GetUnitAxis(EAxis::Y);
-	FVector DashDir = (ForwardDir * InputVector.Y + RightDir * InputVector.X).GetSafeNormal();
-
-	LaunchCharacter(DashDir * 2000.0f, true, true); // 임펄스 적용
+	FVector DashDir = GetActorForwardVector();
 
 	GetCharacterMovement()->Velocity = FVector::ZeroVector;		// 이동 정지
 	GetCharacterMovement()->GravityScale = 0.0f;				// 중력 0
 	GetCharacterMovement()->GroundFriction = 0.0f;				// 마찰력 0
 	GetCharacterMovement()->BrakingDecelerationWalking = 0.0f;	// 감속력 0
 	GetCharacterMovement()->MaxWalkSpeed = 0.0f;				// 이동 속도 0
+
+	LaunchCharacter(DashDir * 2000.0f, true, true); // 임펄스 적용
 
 	GetWorldTimerManager().SetTimer(DashTimerHandle, this, &ATeloPlayerCharacter::DoDashEnd, 0.2f, false);
 }
