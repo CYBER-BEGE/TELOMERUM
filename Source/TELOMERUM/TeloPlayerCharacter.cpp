@@ -30,6 +30,28 @@ ATeloPlayerCharacter::ATeloPlayerCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	// 초기 상태 설정
+	MaxHealth = 100.0f;
+	MoveSpeedScale = 1.5f;
+	JumpPowerScale = 2.0f;
+
+	// CharacterMovement 세팅
+	GetCharacterMovement()->bOrientRotationToMovement = true;				// 캐릭터가 이동 방향에 따라 회전하도록 설정
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
+
+	GetCharacterMovement()->BrakingDecelerationFalling = 50.0f;				// 공중 감속력
+	GetCharacterMovement()->AirControl = 0.7f;								// 공중 제어
+	GetCharacterMovement()->GravityScale = 2.0f;							// 중력 배율
+
+	GetCharacterMovement()->GroundFriction = 8.0f;							// 마찰력
+	GetCharacterMovement()->BrakingDecelerationWalking = 2048.0f;			// 감속력
+
+	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;	// 웅크리기 가능
+	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;			// 웅크리고 턱을 내려가기 가능
+
+	GetCharacterMovement()->MaxWalkSpeed *= MoveSpeedScale;					// 이동 속도
+	GetCharacterMovement()->JumpZVelocity *= JumpPowerScale;				// 점프 힘
 }
 
 // Called when the game starts or when spawned
@@ -54,28 +76,6 @@ void ATeloPlayerCharacter::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] AttackAction is NULL"));
 	if (BlockAction == NULL)
 		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] BlockAction is NULL"));
-
-	// 초기 상태 설정
-	MaxHealth = 100.0f;
-	MoveSpeedScale = 1.5f;
-	JumpPowerScale = 2.0f;
-
-	// CharacterMovement 세팅
-	GetCharacterMovement()->bOrientRotationToMovement = true;				// 캐릭터가 이동 방향에 따라 회전하도록 설정
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
-
-	GetCharacterMovement()->BrakingDecelerationFalling = 50.0f;				// 공중 감속력
-	GetCharacterMovement()->AirControl = 0.7f;								// 공중 제어
-	GetCharacterMovement()->GravityScale = 2.0f;							// 중력 배율
-
-	GetCharacterMovement()->GroundFriction = 8.0f;							// 마찰력
-	GetCharacterMovement()->BrakingDecelerationWalking = 2048.0f;			// 감속력
-
-	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;	// 웅크리기 가능
-	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;			// 웅크리고 턱을 내려가기 가능
-
-	GetCharacterMovement()->MaxWalkSpeed *= MoveSpeedScale;					// 이동 속도
-	GetCharacterMovement()->JumpZVelocity *= JumpPowerScale;				// 점프 힘
 }
 
 // Called every frame
