@@ -30,11 +30,11 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
-	/** Camera boom positioning the camera behind the character */
+	/* Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
-	/** Follow camera */
+	/* Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 
@@ -68,7 +68,7 @@ private:
 	void ResetMovementComps();
 
 	/* Move */
-	FVector2D MovementVector; // 인풋 받은 이동 벡터
+	FVector2D InputVector; // 인풋 받은 이동 벡터
 	void MoveInput(const struct FInputActionValue& Value);
 	void MoveInputEnd(const struct FInputActionValue& Value);
 	void DoMove(float Right, float Forward);

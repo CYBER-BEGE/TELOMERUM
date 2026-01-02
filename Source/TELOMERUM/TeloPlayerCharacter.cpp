@@ -140,14 +140,14 @@ void ATeloPlayerCharacter::Landed(const FHitResult& Hit)
 
 void ATeloPlayerCharacter::MoveInput(const FInputActionValue& Value)
 {
-	MovementVector = Value.Get<FVector2D>();
+	InputVector = Value.Get<FVector2D>();
 
-	DoMove(MovementVector.X, MovementVector.Y);
+	DoMove(InputVector.X, InputVector.Y);
 }
 
 void ATeloPlayerCharacter::MoveInputEnd(const FInputActionValue& Value)
 {
-	MovementVector = FVector2D::ZeroVector;
+	InputVector = FVector2D::ZeroVector;
 }
 
 void ATeloPlayerCharacter::DoMove(float Right, float Forward)
@@ -185,6 +185,7 @@ void ATeloPlayerCharacter::DoJumpEnd()
 	StopJumping();
 }
 
+// 입력 값이 없어도 움직이고 있다면 슬라이딩
 void ATeloPlayerCharacter::DoCrouchStart()
 {
 	Crouch();
@@ -208,11 +209,12 @@ void ATeloPlayerCharacter::DoCrouchEnd()
 	ResetMovementComps(); // 본래 마찰력/감속력 복구
 }
 
+// 움직임이 있더라도 입력 값이 없으면 대시 불가
 void ATeloPlayerCharacter::DoDashStart()
 {
 	//if (!HasJetpack) return;					// 제트팩 없을 시 종료
 	if (!bCanDash || bIsDashing) return;		// 대시 불가능/대시 중일 시 종료
-	if (MovementVector.IsNearlyZero()) return;	// 이동 입력이 없을 시 종료
+	if (InputVector.IsNearlyZero()) return;	// 이동 입력이 없을 시 종료
 
 	bIsDashing = true;
 	bCanDash = false;
@@ -220,7 +222,7 @@ void ATeloPlayerCharacter::DoDashStart()
 	FRotator CameraRot = Controller->GetControlRotation(); // 카메라 회전값
 	FVector ForwardDir = FRotationMatrix(CameraRot).GetUnitAxis(EAxis::X);
 	FVector RightDir = FRotationMatrix(CameraRot).GetUnitAxis(EAxis::Y);
-	FVector DashDir = (ForwardDir * MovementVector.Y + RightDir * MovementVector.X).GetSafeNormal();
+	FVector DashDir = (ForwardDir * InputVector.Y + RightDir * InputVector.X).GetSafeNormal();
 
 	LaunchCharacter(DashDir * 2000.0f, true, true); // 임펄스 적용
 
