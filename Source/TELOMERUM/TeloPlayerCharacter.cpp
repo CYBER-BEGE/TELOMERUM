@@ -14,16 +14,19 @@ ATeloPlayerCharacter::ATeloPlayerCharacter()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Create a camera boom (pulls in towards the player if there is a collision)
+	// 캐릭터가 컨트롤러 회전에 따라 회전하지 않음
+	bUseControllerRotationYaw = false;
+
+	// 카메라 붐 생성 (캐릭터 뒤에 위치시키기 위함)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 400.0f;
-	CameraBoom->bUsePawnControlRotation = true;
+	CameraBoom->bUsePawnControlRotation = true; // 컨트롤러 회전에 따라 회전
 
-	// Create a follow camera
+	// 팔로우 카메라 생성
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	FollowCamera->bUsePawnControlRotation = false;
+	FollowCamera->bUsePawnControlRotation = false; // 카메라가 컨트롤러 회전에 따라 회전하지 않음
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -36,7 +39,7 @@ void ATeloPlayerCharacter::BeginPlay()
 
 	PlayerController = Cast<APlayerController>(GetController());
 
-	/* 컴포넌트 값 확인 */
+	// 컴포넌트 값 확인
 	if (MoveAction == NULL)
 		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] MoveAction is NULL"));
 	if (LookAction == NULL)
@@ -52,12 +55,15 @@ void ATeloPlayerCharacter::BeginPlay()
 	if (BlockAction == NULL)
 		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] BlockAction is NULL"));
 
-	/* 초기 상태 설정 */
+	// 초기 상태 설정
 	MaxHealth = 100.0f;
 	MoveSpeedScale = 1.5f;
 	JumpPowerScale = 2.0f;
 
-	/* CharacterMovement 세팅 */
+	// CharacterMovement 세팅
+	GetCharacterMovement()->bOrientRotationToMovement = true;				// 캐릭터가 이동 방향에 따라 회전하도록 설정
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
+
 	GetCharacterMovement()->BrakingDecelerationFalling = 50.0f;				// 공중 감속력
 	GetCharacterMovement()->AirControl = 0.7f;								// 공중 제어
 	GetCharacterMovement()->GravityScale = 2.0f;							// 중력 배율
@@ -77,7 +83,7 @@ void ATeloPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//UE_LOG(LogTemp, Warning, TEXT("Velocity: %s"), *MovementVector.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("Velocity: %s"), *InputVector.ToString());
 }
 
 // Called to bind functionality to input
@@ -154,8 +160,18 @@ void ATeloPlayerCharacter::DoMove(float Right, float Forward)
 {
 	if (GetController())
 	{
-		AddMovementInput(GetActorRightVector(), Right * MoveSpeedScale);
-		AddMovementInput(GetActorForwardVector(), Forward * MoveSpeedScale);
+		//AddMovementInput(GetActorRightVector(), Right * MoveSpeedScale);
+		//AddMovementInput(GetActorForwardVector(), Forward * MoveSpeedScale);
+
+		// 카메라의 Yaw 회전에 따른 이동 방향 설정
+		const FRotator Rotation = GetController()->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		AddMovementInput(ForwardDirection, Forward * MoveSpeedScale);
+		AddMovementInput(RightDirection, Right * MoveSpeedScale);
 	}
 }
 
@@ -209,12 +225,11 @@ void ATeloPlayerCharacter::DoCrouchEnd()
 	ResetMovementComps(); // 본래 마찰력/감속력 복구
 }
 
-// 움직임이 있더라도 입력 값이 없으면 대시 불가
+// 현재 움직임과 상관없이 입력 값으로 대시
 void ATeloPlayerCharacter::DoDashStart()
 {
-	//if (!HasJetpack) return;					// 제트팩 없을 시 종료
 	if (!bCanDash || bIsDashing) return;		// 대시 불가능/대시 중일 시 종료
-	if (InputVector.IsNearlyZero()) return;	// 이동 입력이 없을 시 종료
+	if (InputVector.IsNearlyZero()) return;		// 이동 입력이 없을 시 종료
 
 	bIsDashing = true;
 	bCanDash = false;
