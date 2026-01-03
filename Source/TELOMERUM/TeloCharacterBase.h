@@ -27,9 +27,12 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
-	/* State */
+	/* HP */
 	UPROPERTY(EditAnywhere, Category = "State")
-	float MaxHealth = 100.0f;
+	float MaxHP = 100.0f;
+
+	UPROPERTY(EditAnywhere, Category = "State")
+	float NowHP = MaxHP;
 
 	UPROPERTY(EditAnywhere, Category = "State")
 	float MoveSpeedScale = 1.0f;
