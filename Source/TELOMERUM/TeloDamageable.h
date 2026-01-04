@@ -13,13 +13,13 @@ class UTeloDamageable : public UInterface
 	GENERATED_BODY()
 };
 
-/**
- * 
- */
 class TELOMERUM_API ITeloDamageable
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+	UFUNCTION(BlueprintCallable, Category = "Damageable")
+	virtual void ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse) = 0;
+
 };
