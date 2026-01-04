@@ -7,7 +7,7 @@
 #include "TeloDamageable.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI)
+UINTERFACE(MinimalAPI, NotBlueprintable)
 class UTeloDamageable : public UInterface
 {
 	GENERATED_BODY()

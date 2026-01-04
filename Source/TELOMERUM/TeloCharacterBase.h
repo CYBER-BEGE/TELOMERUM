@@ -27,6 +27,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
+	/* Properties */
+
 	/* HP */
 	UPROPERTY(EditAnywhere, Category = "State")
 	float MaxHP = 100.0f;
@@ -34,14 +36,20 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "State")
 	float NowHP = MaxHP;
 
+	/* Movement */
 	UPROPERTY(EditAnywhere, Category = "State")
 	float MoveSpeedScale = 1.0f;
 
 	UPROPERTY(EditAnywhere, Category = "State")
 	float JumpPowerScale = 1.0f;
 
-	/* Component */
-	//UPROPERTY(EditAnywhere)
-	//UFrogHealthComponent* HealthComponent;
+public:
+	/* Interfaces */
+
+	/* Damageable */
+	virtual void ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse);
+	
+	/* Functions */
+	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 };
