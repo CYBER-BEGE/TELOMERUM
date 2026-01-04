@@ -2,12 +2,14 @@
 
 #pragma once
 
+#include "TeloDamageable.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "TeloCharacterBase.generated.h"
 
 UCLASS()
-class TELOMERUM_API ATeloCharacterBase : public ACharacter
+class TELOMERUM_API ATeloCharacterBase : public ACharacter, public ITeloDamageable
 {
 	GENERATED_BODY()
 
