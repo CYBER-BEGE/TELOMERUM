@@ -101,4 +101,8 @@ private:
 protected:
 	void Landed(const FHitResult& Hit) override;
 
+public:
+	/* Animation State */
+	UFUNCTION(BlueprintPure, Category = "Animation State")
+	bool IsDashing() const { return bIsDashing; }
 };
