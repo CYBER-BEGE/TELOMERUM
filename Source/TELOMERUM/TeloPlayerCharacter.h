@@ -60,6 +60,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* BlockAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input Action")
+	class UInputAction* LockOnAction;
+
 	/* Player Controller */
 	UPROPERTY()
 	APlayerController* PlayerController;
@@ -99,6 +102,10 @@ private:
 	void DoDashStart();
 	void DoDashEnd();
 	void DashCooldown();			// 대시 쿨타임 완료 함수
+
+	/* Lock On */
+
+	void DoLockOn();
 
 protected:
 	void Landed(const FHitResult& Hit) override;

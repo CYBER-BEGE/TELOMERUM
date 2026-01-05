@@ -113,6 +113,9 @@ void ATeloPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		//// Block
 		//EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::DoBlockStart);
 		//EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Completed, this, &ATeloPlayerCharacter::DoBlockEnd);
+
+		// Lock On
+		EnhancedInputComponent->BindAction(LockOnAction, ETriggerEvent::Completed, this, &ATeloPlayerCharacter::DoLockOn);
 	}
 	else
 	{
@@ -251,4 +254,9 @@ void ATeloPlayerCharacter::DoDashEnd()
 void ATeloPlayerCharacter::DashCooldown()
 {
 	bCanDash = true;
+}
+
+void ATeloPlayerCharacter::DoLockOn()
+{
+	// 잠금 기능 구현 예정
 }
