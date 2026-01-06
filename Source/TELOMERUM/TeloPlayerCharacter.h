@@ -86,6 +86,8 @@ private:
 	void DoJumpEnd();
 
 	/* Crouch */
+	//bool bIsSliding = false;		// 웅크리고 있는지 여부
+
 	void DoCrouchStart();
 	void DoCrouchEnd();
 
@@ -101,4 +103,11 @@ private:
 protected:
 	void Landed(const FHitResult& Hit) override;
 
+public:
+	/* Animation State */
+	UFUNCTION(BlueprintPure, Category = "Animation State")
+	bool IsDashing() const { return bIsDashing; }
+
+	//UFUNCTION(BlueprintPure, Category = "Animation State")
+	//bool IsSliding() const { return bIsSliding; }
 };
