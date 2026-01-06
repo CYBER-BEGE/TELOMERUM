@@ -2,12 +2,14 @@
 
 #pragma once
 
+#include "TeloDamageable.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "TeloCharacterBase.generated.h"
 
 UCLASS()
-class TELOMERUM_API ATeloCharacterBase : public ACharacter
+class TELOMERUM_API ATeloCharacterBase : public ACharacter, public ITeloDamageable
 {
 	GENERATED_BODY()
 
@@ -27,18 +29,39 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
-	/* State */
-	UPROPERTY(EditAnywhere, Category = "State")
-	float MaxHealth = 100.0f;
+	/* Properties */
 
+	/* HP */
+	UPROPERTY(EditAnywhere, Category = "State")
+	float MaxHP = 100.0f;
+
+	UPROPERTY(EditAnywhere, Category = "State")
+	float NowHP = MaxHP;
+
+	/* Movement */
 	UPROPERTY(EditAnywhere, Category = "State")
 	float MoveSpeedScale = 1.0f;
 
 	UPROPERTY(EditAnywhere, Category = "State")
 	float JumpPowerScale = 1.0f;
 
-	/* Component */
-	//UPROPERTY(EditAnywhere)
-	//UFrogHealthComponent* HealthComponent;
+private:
+	/* Properties */
+	
+	/* Take Damage */
+	bool bIsDamageable = true;
+	FTimerHandle DamageTimerHandle;
+
+public:
+	/* Interfaces */
+
+	/* Take Damage */
+	virtual void ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse);
+	
+	/* Functions */
+
+	/* Take Damage */
+	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	void DamageCooldown();
 
 };
