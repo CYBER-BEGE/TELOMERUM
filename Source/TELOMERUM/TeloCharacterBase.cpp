@@ -35,13 +35,19 @@ void ATeloCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 void ATeloCharacterBase::ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse)
 {
+	if (!bIsDamageable) return;
+	bIsDamageable = false;
+
 	FDamageEvent DamageEvent;
 	const float ActualDamage = TakeDamage(Damage, DamageEvent, nullptr, DamageCauser);
+
+	GetWorldTimerManager().SetTimer(DamageTimerHandle, this, &ATeloCharacterBase::DamageCooldown, 0.2f, false);
 }
 
 float ATeloCharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	if (NowHP <= 0.0f) return 0.0f;
+
 	UE_LOG(LogTemp, Display, TEXT("[%s] %s에게 피격당함"), *this->GetActorLabel(), *DamageCauser->GetActorLabel());
 	
 	NowHP -= Damage;
@@ -61,4 +67,9 @@ float ATeloCharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEve
 	}
 
 	return 0.0f;
+}
+
+void ATeloCharacterBase::DamageCooldown()
+{
+	bIsDamageable = true;
 }

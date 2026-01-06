@@ -45,13 +45,23 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "State")
 	float JumpPowerScale = 1.0f;
 
+private:
+	/* Properties */
+	
+	/* Take Damage */
+	bool bIsDamageable = true;
+	FTimerHandle DamageTimerHandle;
+
 public:
 	/* Interfaces */
 
-	/* Damageable */
+	/* Take Damage */
 	virtual void ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse);
 	
 	/* Functions */
+
+	/* Take Damage */
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	void DamageCooldown();
 
 };
