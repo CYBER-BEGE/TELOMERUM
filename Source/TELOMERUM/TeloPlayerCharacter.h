@@ -114,7 +114,4 @@ public:
 	/* Animation State */
 	UFUNCTION(BlueprintPure, Category = "Animation State")
 	bool IsDashing() const { return bIsDashing; }
-
-	//UFUNCTION(BlueprintPure, Category = "Animation State")
-	//bool IsSliding() const { return bIsSliding; }
 };
