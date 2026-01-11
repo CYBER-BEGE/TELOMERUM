@@ -29,3 +29,8 @@ void ATeloEnemyCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
+
+FVector ATeloEnemyCharacter::GetLockOnPointLocation() const
+{
+	return (LockOnPoint != nullptr) ? LockOnPoint->GetComponentLocation() : GetActorLocation();
+}

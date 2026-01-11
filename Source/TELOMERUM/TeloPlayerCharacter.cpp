@@ -7,6 +7,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "TeloLockOnComponent.h"
 
 // Sets default values
 ATeloPlayerCharacter::ATeloPlayerCharacter()
@@ -21,12 +22,16 @@ ATeloPlayerCharacter::ATeloPlayerCharacter()
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 400.0f;
+	CameraBoom->SetRelativeLocation(FVector(0.0f, 0.0f, 75.0f)); // 캐릭터 머리 위쪽에 위치
 	CameraBoom->bUsePawnControlRotation = true; // 컨트롤러 회전에 따라 회전
 
 	// 팔로우 카메라 생성
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false; // 카메라가 컨트롤러 회전에 따라 회전하지 않음
+
+	// Lock On 컴포넌트 생성
+	LockOnComponent = CreateDefaultSubobject<UTeloLockOnComponent>(TEXT("LockOnComponent"));
 
 	// 초기 상태 설정
 	MaxHealth = 100.0f;
@@ -260,5 +265,8 @@ void ATeloPlayerCharacter::DashCooldown()
 
 void ATeloPlayerCharacter::DoLockOn()
 {
-	// 잠금 기능 구현 예정
+	if (LockOnComponent)
+	{
+		LockOnComponent->ToggleLockOn();
+	}
 }

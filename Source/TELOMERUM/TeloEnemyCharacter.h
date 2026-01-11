@@ -31,4 +31,8 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class USceneComponent* LockOnPoint;
 
+public:
+	UFUNCTION(BlueprintPure, Category = "LockOn")
+	FVector GetLockOnPointLocation() const;
+
 };
