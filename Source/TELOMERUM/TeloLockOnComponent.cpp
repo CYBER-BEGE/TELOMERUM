@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values for this component's properties
 UTeloLockOnComponent::UTeloLockOnComponent()
@@ -210,56 +211,76 @@ bool UTeloLockOnComponent::HasLineOfSightToTarget(ATeloEnemyCharacter* InTarget)
 // 최적의 타겟 찾기
 ATeloEnemyCharacter* UTeloLockOnComponent::FindBestTarget() const
 {
-	APlayerController* PC = GetOwnerPlayerController();
 	ACharacter* OwnerChar = GetOwnerCharacter();
-	if (!PC || !OwnerChar)
+	APlayerController* PC = GetOwnerPlayerController();
+	if (!OwnerChar || !PC)
 		return nullptr;
 
+	UWorld* World = GetWorld();
+	if (!World)
+		return nullptr;
+
+	// 카메라(플레이어 시점)
 	FVector ViewLoc;
 	FRotator ViewRot;
 	PC->GetPlayerViewPoint(ViewLoc, ViewRot);
 
-	const FVector ViewForward = ViewRot.Vector(); // 카메라 정면 벡터
+	const FVector ViewForward = ViewRot.Vector(); // 카메라 전방 벡터
 	const float MaxAngleRad = FMath::DegreesToRadians(MaxLockOnAngleDeg); // 최대 각도 라디안
 
-	// 주변 적 수집 (월드의 ATeloEnemyCharacter 전부 중 거리/각도 필터)
-	TArray<AActor*> Found;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATeloEnemyCharacter::StaticClass(), Found); // 월드의 모든 적 수집
+	// 근처 Pawn만 가져오기
+	TArray<AActor*> OverlappedActors;								// 오버랩된 액터들
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;				// 오브젝트 타입 배열
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));	// Pawn 채널
 
-	ATeloEnemyCharacter* BestTarget = nullptr;
-	float BestScore = TNumericLimits<float>::Max(); // 최저 점수 초기화
+	TArray<AActor*> ActorsToIgnore; // 무시할 액터들
+	ActorsToIgnore.Add(OwnerChar);	// 오너 캐릭터는 무시
 
-	// 수집된 적들 중에서 최적 타겟 탐색
-	for (AActor* Actor : Found)
+	const bool bFoundAny = UKismetSystemLibrary::SphereOverlapActors(
+		World,
+		OwnerChar->GetActorLocation(),
+		SearchRadius,
+		ObjectTypes,
+		ATeloEnemyCharacter::StaticClass(),  // Enemy만
+		ActorsToIgnore,
+		OverlappedActors
+	);
+
+	// 아무도 없으면 종료
+	if (!bFoundAny)
+		return nullptr;
+
+	// 각도/LOS/점수로 Best 선택
+	ATeloEnemyCharacter* BestTarget = nullptr;		// 최적 타겟
+	float BestScore = TNumericLimits<float>::Max(); // 최적 점수(낮을수록 좋음)
+
+	for (AActor* Actor : OverlappedActors)
 	{
-		ATeloEnemyCharacter* Enemy = Cast<ATeloEnemyCharacter>(Actor); // 적 캐릭터로 캐스팅
-		if (!Enemy) // 캐스팅 실패 시 해당 회차 무시
+		ATeloEnemyCharacter* Enemy = Cast<ATeloEnemyCharacter>(Actor);
+		if (!Enemy)
 			continue;
 
-		// 오너와 적 간 거리
-		const float Dist = FVector::Dist(OwnerChar->GetActorLocation(), Enemy->GetActorLocation()); 
-		if (Dist > SearchRadius) // 탐색 반경 초과 시 해당 회차 무시
+		const FVector LockPoint = Enemy->GetLockOnPointLocation();	// 타겟의 락온 포인트 월드 위치
+		const FVector ToTarget = LockPoint - ViewLoc;				// 카메라 -> 타겟 벡터
+
+		const float Dist = ToTarget.Size();
+		if (Dist < KINDA_SMALL_NUMBER) // 너무 가까우면 무시
 			continue;
 
-		// 카메라 정면 기준 각도 계산
-		const FVector LockPoint = Enemy->GetLockOnPointLocation();	// 적의 락온 포인트 위치
-		const FVector ToTarget = (LockPoint - ViewLoc);				// 카메라에서 타겟으로 향하는 벡터
-		const float ToTargetLen = ToTarget.Size();					// 타겟까지 거리
-		if (ToTargetLen < KINDA_SMALL_NUMBER) // 너무 가까우면 해당 회차 무시
-			continue;
-
-		// 각도 계산
-		const FVector Dir = ToTarget / ToTargetLen;
+		const FVector Dir = ToTarget / Dist;
 		const float Angle = FMath::Acos(FMath::Clamp(FVector::DotProduct(ViewForward, Dir), -1.0f, 1.0f));
-		if (Angle > MaxAngleRad) // 최대 각도 초과 시 해당 회차 무시
+
+		if (Angle > MaxAngleRad)
 			continue;
 
-		if (!HasLineOfSightToTarget(Enemy)) // 시야 확보 불가 시 해당 회차 무시
+		if (!HasLineOfSightToTarget(Enemy))
 			continue;
 
-		// 점수: 각도 우선, 그 다음 거리 (각도 작은 게 최우선)
+		// 점수 = 중앙(각도) 우선 + 거리 보조
 		const float Score = Angle * 1000.0f + Dist;
-		if (Score < BestScore) // 최저 점수 갱신
+
+		// 점수 갱신
+		if (Score < BestScore)
 		{
 			BestScore = Score;
 			BestTarget = Enemy;

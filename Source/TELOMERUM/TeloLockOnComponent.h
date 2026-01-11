@@ -50,7 +50,7 @@ private:
 	// ====== Tuning ======
 	/** 적 탐색 반경 */
 	UPROPERTY(EditAnywhere, Category = "LockOn|Search")
-	float SearchRadius = 1500.0f;
+	float SearchRadius = 3000.0f;
 
 	/** 카메라 전방 기준 최대 각도(도). 화면 중앙에 가까운 적만 락온 */
 	UPROPERTY(EditAnywhere, Category = "LockOn|Search")
@@ -58,7 +58,7 @@ private:
 
 	/** 락온 유지 최대 거리(초과 시 해제) */
 	UPROPERTY(EditAnywhere, Category = "LockOn|Maintain")
-	float BreakDistance = 2000.0f;
+	float BreakDistance = 3500.0f;
 
 	/** LOS가 끊겨도 바로 해제하지 않고 버티는 시간(초) */
 	UPROPERTY(EditAnywhere, Category = "LockOn|Maintain", meta = (ClampMin = "0.0"))
