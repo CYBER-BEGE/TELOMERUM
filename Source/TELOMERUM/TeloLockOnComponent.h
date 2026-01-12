@@ -46,6 +46,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "LockOn")
 	FVector GetTargetPointWorldLocation() const;
 
+	/** 타겟 마커 설정 */
+	UFUNCTION(BlueprintCallable, Category = "LockOn")
+	void SetMarker(ATeloEnemyCharacter* NewTarget);
+
 private:
 	// ====== Tuning ======
 	/** 적 탐색 반경 */

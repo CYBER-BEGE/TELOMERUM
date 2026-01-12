@@ -31,8 +31,16 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class USceneComponent* LockOnPoint;
 
+	/* 락온 마커 위젯 컴포넌트 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	class UWidgetComponent* LockOnMarkerWidget;
+
 public:
+	/* 현재 락온 포인트 월드 위치 */
 	UFUNCTION(BlueprintPure, Category = "LockOn")
 	FVector GetLockOnPointLocation() const;
 
+	/* 락온 마커 보이기/숨기기 */
+	UFUNCTION(BlueprintCallable, Category = "LockOn")
+	void SetLockOnMarkerVisible(bool bVisible);
 };

@@ -106,6 +106,9 @@ void UTeloLockOnComponent::ToggleLockOn()
 
 	// 락온 시 이동 모드 적용
 	ApplyLockOnMovementMode(true);
+
+	// 타겟에게 락온 마커 보이기
+	SetMarker(Best);
 }
 
 // 락온 강제 해제
@@ -113,6 +116,9 @@ void UTeloLockOnComponent::ClearLockOn()
 {
 	if (!bIsLockOn && !Target.IsValid())
 		return;
+
+	// 마커 숨기기
+	SetMarker(nullptr); 
 
 	Target.Reset();
 	bIsLockOn = false;
@@ -139,6 +145,22 @@ APlayerController* UTeloLockOnComponent::GetOwnerPlayerController() const
 {
 	ACharacter* OwnerChar = GetOwnerCharacter();
 	return OwnerChar ? Cast<APlayerController>(OwnerChar->GetController()) : nullptr;
+}
+
+// 타겟에 마커 설정
+void UTeloLockOnComponent::SetMarker(ATeloEnemyCharacter* NewTarget)
+{
+	if (ATeloEnemyCharacter* Old = Target.Get())
+	{
+		Old->SetLockOnMarkerVisible(false);
+	}
+
+	Target = NewTarget;
+
+	if (NewTarget)
+	{
+		NewTarget->SetLockOnMarkerVisible(true);
+	}
 }
 
 // 락온 시 캐릭터 이동 모드 적용/복구
