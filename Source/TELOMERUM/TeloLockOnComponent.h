@@ -95,6 +95,10 @@ private:
 	UPROPERTY(EditAnywhere, Category = "LockOn|Switch", meta = (ClampMin = "0.0"))
 	float SwitchCooldownTime = 0.15f;
 
+	/** 타겟 위치 오프셋 (월드 Z축 기준, 카메라 높이 조정용) */
+	UPROPERTY(EditAnywhere, Category = "LockOn|Camera")
+	float LookAtOffsetZ = -150.0f;
+
 	// ====== Runtime ======
 	/** 락온 상태 여부 */
 	UPROPERTY(Transient)

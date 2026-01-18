@@ -216,8 +216,7 @@ bool UTeloLockOnComponent::HasLineOfSightToTarget(ATeloEnemyCharacter* InTarget)
 
 	// 라인 트레이스 제외 설정
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(LockOnLOS), false, OwnerChar);
-	Params.AddIgnoredActor(InTarget); // 타겟은 무시
-	//FCollisionQueryParams Params(SCENE_QUERY_STAT(LockOnLOS), false, OwnerChar);
+	//Params.AddIgnoredActor(InTarget); // 타겟은 무시
 
 	// 라인 트레이스 실행
 	FHitResult Hit;
@@ -281,7 +280,7 @@ ATeloEnemyCharacter* UTeloLockOnComponent::FindBestTarget() const
 
 	// 각도/LOS/점수로 Best 선택
 	ATeloEnemyCharacter* BestTarget = nullptr;		// 최적 타겟
-	float BestScore = TNumericLimits<float>::Max(); // 최적 점수(낮을수록 좋음)
+	float BestScore = TNumericLimits<float>::Max(); // 최적 점수 (낮을수록 좋음)
 
 	for (AActor* Actor : OverlappedActors)
 	{
@@ -336,7 +335,8 @@ void UTeloLockOnComponent::UpdateControlRotationToTarget(float DeltaTime)
 	PC->GetPlayerViewPoint(ViewLoc, ViewRot);
 
 	// 타겟 위치를 바라보는 회전 계산
-	const FVector TargetLoc = CurTarget->GetLockOnPointLocation(); // 타겟 위치
+	FVector TargetLoc = CurTarget->GetLockOnPointLocation(); // 타겟 위치
+	TargetLoc.Z += LookAtOffsetZ; // 오프셋 적용 (음수면 아래를 봄)
 	FRotator Desired = UKismetMathLibrary::FindLookAtRotation(ViewLoc, TargetLoc); // 타겟을 바라보는 회전
 
 	// Pitch 제한(너무 위/아래로 꺾이는 거 방지)
@@ -350,6 +350,7 @@ void UTeloLockOnComponent::UpdateControlRotationToTarget(float DeltaTime)
 	PC->SetControlRotation(NewRot);
 }
 
+// 좌/우 타겟 전환
 bool UTeloLockOnComponent::SwitchTargetHorizontal(float DirectionSign)
 {
 	// 락온 중이 아니면 전환 불가
@@ -372,7 +373,7 @@ bool UTeloLockOnComponent::SwitchTargetHorizontal(float DirectionSign)
 	// 방향 정규화: + 오른쪽, - 왼쪽
 	const float Dir = (DirectionSign >= 0.0f) ? 1.0f : -1.0f;
 
-	// 카메라(플레이어 시점)
+	// 카메라 (플레이어 시점)
 	FVector ViewLoc;
 	FRotator ViewRot;
 	PC->GetPlayerViewPoint(ViewLoc, ViewRot);
@@ -410,7 +411,7 @@ bool UTeloLockOnComponent::SwitchTargetHorizontal(float DirectionSign)
 	ATeloEnemyCharacter* BestTarget = nullptr;
 	float BestScore = TNumericLimits<float>::Max();
 
-	// 좌/우 판정 여유값(너무 미세한 흔들림 방지)
+	// 좌/우 판정 여유값 (너무 미세한 흔들림 방지)
 	const float SideEpsilonPx = 5.0f;
 
 	for (AActor* Actor : OverlappedActors)
@@ -419,7 +420,7 @@ bool UTeloLockOnComponent::SwitchTargetHorizontal(float DirectionSign)
 		if (!Enemy || Enemy == CurTarget)
 			continue;
 
-		// 각도 필터(카메라 전방 기준) - 기존 로직 재사용
+		// 각도 필터 (카메라 전방 기준) - 기존 로직 재사용
 		const FVector LockPoint = Enemy->GetLockOnPointLocation();
 		const FVector ToTarget = LockPoint - ViewLoc;
 
@@ -432,7 +433,7 @@ bool UTeloLockOnComponent::SwitchTargetHorizontal(float DirectionSign)
 		if (Angle > MaxAngleRad)
 			continue;
 
-		// LOS 필터(옵션이 따로 없다면 그대로 사용)
+		// LOS 필터 (옵션이 따로 없다면 그대로 사용)
 		if (!HasLineOfSightToTarget(Enemy))
 			continue;
 
@@ -478,12 +479,13 @@ bool UTeloLockOnComponent::SwitchTargetHorizontal(float DirectionSign)
 	// 타겟 교체 + 마커 갱신 (기존 함수 활용)
 	SetMarker(BestTarget);
 
-	// LOS 누적 초기화(전환 직후 끊김 판정 방지)
+	// LOS 누적 초기화 (전환 직후 끊김 판정 방지)
 	LoseSightAccum = 0.0f;
 
 	return true;
 }
 
+// 마우스 Yaw 입력을 좌/우 타겟 전환에 사용
 bool UTeloLockOnComponent::ConsumeYawForTargetSwitch(float YawInput)
 {
 	if (!IsLockOn())
