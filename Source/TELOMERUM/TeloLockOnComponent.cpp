@@ -59,6 +59,12 @@ void UTeloLockOnComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 		return;
 	}
 
+	// 전환 쿨타임 감소
+	if (SwitchCooldownRemain > 0.0f)
+	{
+		SwitchCooldownRemain = FMath::Max(0.0f, SwitchCooldownRemain - DeltaTime);
+	}
+
 	// 거리 초과 시 해제
 	const float Dist = FVector::Dist(OwnerChar->GetActorLocation(), CurTarget->GetActorLocation());
 	if (Dist > BreakDistance)
@@ -211,6 +217,7 @@ bool UTeloLockOnComponent::HasLineOfSightToTarget(ATeloEnemyCharacter* InTarget)
 	// 라인 트레이스 제외 설정
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(LockOnLOS), false, OwnerChar);
 	Params.AddIgnoredActor(InTarget); // 타겟은 무시
+	//FCollisionQueryParams Params(SCENE_QUERY_STAT(LockOnLOS), false, OwnerChar);
 
 	// 라인 트레이스 실행
 	FHitResult Hit;
@@ -341,4 +348,177 @@ void UTeloLockOnComponent::UpdateControlRotationToTarget(float DeltaTime)
 
 	// 회전 적용
 	PC->SetControlRotation(NewRot);
+}
+
+bool UTeloLockOnComponent::SwitchTargetHorizontal(float DirectionSign)
+{
+	// 락온 중이 아니면 전환 불가
+	if (!IsLockOn())
+		return false;
+
+	ATeloEnemyCharacter* CurTarget = Target.Get();
+	if (!CurTarget)
+		return false;
+
+	ACharacter* OwnerChar = GetOwnerCharacter();
+	APlayerController* PC = GetOwnerPlayerController();
+	if (!OwnerChar || !PC)
+		return false;
+
+	UWorld* World = GetWorld();
+	if (!World)
+		return false;
+
+	// 방향 정규화: + 오른쪽, - 왼쪽
+	const float Dir = (DirectionSign >= 0.0f) ? 1.0f : -1.0f;
+
+	// 카메라(플레이어 시점)
+	FVector ViewLoc;
+	FRotator ViewRot;
+	PC->GetPlayerViewPoint(ViewLoc, ViewRot);
+
+	const FVector ViewForward = ViewRot.Vector();
+	const float MaxAngleRad = FMath::DegreesToRadians(MaxLockOnAngleDeg);
+
+	// 현재 타겟 스크린 좌표
+	FVector2D CurScreen;
+	if (!PC->ProjectWorldLocationToScreen(CurTarget->GetLockOnPointLocation(), CurScreen, true))
+		return false;
+
+	// 근처 Pawn(Enemy) 후보 수집: FindBestTarget()와 동일한 방식 재사용
+	TArray<AActor*> OverlappedActors;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(OwnerChar);
+
+	const bool bFoundAny = UKismetSystemLibrary::SphereOverlapActors(
+		World,
+		OwnerChar->GetActorLocation(),
+		SearchRadius,
+		ObjectTypes,
+		ATeloEnemyCharacter::StaticClass(),
+		ActorsToIgnore,
+		OverlappedActors
+	);
+
+	if (!bFoundAny)
+		return false;
+
+	// 스크린 기준 좌/우 후보 중에서 “가장 가까운” 타겟 선택
+	ATeloEnemyCharacter* BestTarget = nullptr;
+	float BestScore = TNumericLimits<float>::Max();
+
+	// 좌/우 판정 여유값(너무 미세한 흔들림 방지)
+	const float SideEpsilonPx = 5.0f;
+
+	for (AActor* Actor : OverlappedActors)
+	{
+		ATeloEnemyCharacter* Enemy = Cast<ATeloEnemyCharacter>(Actor);
+		if (!Enemy || Enemy == CurTarget)
+			continue;
+
+		// 각도 필터(카메라 전방 기준) - 기존 로직 재사용
+		const FVector LockPoint = Enemy->GetLockOnPointLocation();
+		const FVector ToTarget = LockPoint - ViewLoc;
+
+		const float Dist = ToTarget.Size();
+		if (Dist < KINDA_SMALL_NUMBER)
+			continue;
+
+		const FVector DirTo = ToTarget / Dist;
+		const float Angle = FMath::Acos(FMath::Clamp(FVector::DotProduct(ViewForward, DirTo), -1.0f, 1.0f));
+		if (Angle > MaxAngleRad)
+			continue;
+
+		// LOS 필터(옵션이 따로 없다면 그대로 사용)
+		if (!HasLineOfSightToTarget(Enemy))
+			continue;
+
+		// 스크린 좌표로 투영
+		FVector2D Screen;
+		if (!PC->ProjectWorldLocationToScreen(LockPoint, Screen, true))
+			continue;
+
+		// 좌/우 후보만 남기기
+		const float Dx = Screen.X - CurScreen.X;
+		if (Dir < 0.0f)
+		{
+			// 왼쪽
+			if (Dx >= -SideEpsilonPx)
+				continue;
+		}
+		else
+		{
+			// 오른쪽
+			if (Dx <= SideEpsilonPx)
+				continue;
+		}
+
+		// 점수: "현재 타겟과 스크린에서 얼마나 가까운가" 우선
+		// (X가 가까울수록 다음 타겟 전환이 자연스럽고, Y도 약간 반영)
+		const float Dy = Screen.Y - CurScreen.Y;
+
+		const float ScreenScore = FMath::Abs(Dx) + (FMath::Abs(Dy) * 0.35f);
+		const float DistScore = Dist * 0.001f; // 거리 약하게만 반영(튜닝 가능)
+
+		const float Score = ScreenScore + DistScore;
+
+		if (Score < BestScore)
+		{
+			BestScore = Score;
+			BestTarget = Enemy;
+		}
+	}
+
+	if (!BestTarget)
+		return false;
+
+	// 타겟 교체 + 마커 갱신 (기존 함수 활용)
+	SetMarker(BestTarget);
+
+	// LOS 누적 초기화(전환 직후 끊김 판정 방지)
+	LoseSightAccum = 0.0f;
+
+	return true;
+}
+
+bool UTeloLockOnComponent::ConsumeYawForTargetSwitch(float YawInput)
+{
+	if (!IsLockOn())
+		return false;
+
+	// 쿨타임 중이면 누적하지 않음(원하면 누적은 하되 트리거만 막도록 바꿔도 됨)
+	if (SwitchCooldownRemain > 0.0f)
+		return false;
+
+	// 너무 작은 흔들림은 무시 (드리프트 방지)
+	if (FMath::Abs(YawInput) < KINDA_SMALL_NUMBER)
+		return false;
+
+	// 방향이 바뀌면 누적을 리셋(왼쪽 갔다 오른쪽으로 살짝 흔들려서 취소되는 느낌 방지)
+	if (SwitchYawAccum != 0.0f && FMath::Sign(SwitchYawAccum) != FMath::Sign(YawInput))
+	{
+		SwitchYawAccum = 0.0f;
+	}
+
+	SwitchYawAccum += YawInput;
+
+	if (FMath::Abs(SwitchYawAccum) >= SwitchSnapThreshold)
+	{
+		const float DirSign = (SwitchYawAccum > 0.0f) ? 1.0f : -1.0f;
+		const bool bSwitched = SwitchTargetHorizontal(DirSign);
+
+		if (bSwitched)
+		{
+			// 전환 성공했으면 쿨타임
+			SwitchCooldownRemain = SwitchCooldownTime;
+		}
+
+		// 성공/실패와 관계없이 누적은 리셋(“한 번 스냅 = 한 번 시도”)
+		SwitchYawAccum = 0.0f;
+		return bSwitched; // 전환 성공 여부 반환
+	}
+	return false;
 }

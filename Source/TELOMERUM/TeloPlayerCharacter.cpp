@@ -182,13 +182,28 @@ void ATeloPlayerCharacter::LookInput(const FInputActionValue& Value)
 
 void ATeloPlayerCharacter::DoLook(float Yaw, float Pitch)
 {
-	if (GetController())
-	{
-		AddControllerYawInput(Yaw);
-		AddControllerPitchInput(Pitch);
-	}
-}
+	if (!GetController())
+		return;
 
+	// 락온 중 yaw 일부는 카메라 회전에 쓰고, 동시에 스냅 누적해서 전환
+	if (LockOnComponent && LockOnComponent->IsLockOn())
+	{
+		// 전환 판정 (강한 스냅이면 true)
+		const bool bSwitched = LockOnComponent->ConsumeYawForTargetSwitch(Yaw);
+
+		// bSwitched가 true면 완전 고정 (0.0f), false면 설정된 비율만큼 허용
+		const float AllowRatio = bSwitched ? 0.0f : LockOnYawAllowRatio;
+
+		AddControllerYawInput(Yaw * AllowRatio);
+		AddControllerPitchInput(Pitch);
+
+		return;
+	}
+
+	// 락온 중이 아니면 평소대로
+	AddControllerYawInput(Yaw);
+	AddControllerPitchInput(Pitch);
+}
 void ATeloPlayerCharacter::DoJumpStart()
 {
 	Jump();

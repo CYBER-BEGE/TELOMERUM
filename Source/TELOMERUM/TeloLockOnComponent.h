@@ -50,6 +50,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LockOn")
 	void SetMarker(ATeloEnemyCharacter* NewTarget);
 
+	/** 락온 중 마우스 Yaw 입력을 “좌/우 타겟 전환”에 사용 */
+	UFUNCTION(BlueprintCallable, Category = "LockOn")
+	bool ConsumeYawForTargetSwitch(float YawInput);
+
+	/** 좌/우 타겟 전환 (스크린 기준). +면 오른쪽, -면 왼쪽 */
+	UFUNCTION(BlueprintCallable, Category = "LockOn")
+	bool SwitchTargetHorizontal(float DirectionSign);
+
 private:
 	// ====== Tuning ======
 	/** 적 탐색 반경 */
@@ -66,7 +74,7 @@ private:
 
 	/** LOS가 끊겨도 바로 해제하지 않고 버티는 시간(초) */
 	UPROPERTY(EditAnywhere, Category = "LockOn|Maintain", meta = (ClampMin = "0.0"))
-	float LoseSightGraceTime = 0.2f;
+	float LoseSightGraceTime = 0.5f;
 
 	/** 컨트롤러 회전 보정 속도 */
 	UPROPERTY(EditAnywhere, Category = "LockOn|Camera", meta = (ClampMin = "0.0"))
@@ -78,6 +86,14 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "LockOn|Camera")
 	float MaxPitch = 35.0f;
+
+	/** 마우스 좌/우 전환 누적 임계치 (감도에 따라 튜닝) */
+	UPROPERTY(EditAnywhere, Category = "LockOn|Switch", meta = (ClampMin = "0.0"))
+	float SwitchSnapThreshold = 35.0f;
+
+	/** 전환 후 연속 전환 방지 쿨타임(초) */
+	UPROPERTY(EditAnywhere, Category = "LockOn|Switch", meta = (ClampMin = "0.0"))
+	float SwitchCooldownTime = 0.15f;
 
 	// ====== Runtime ======
 	/** 락온 상태 여부 */
@@ -93,6 +109,12 @@ private:
 	// 회전 모드 복구용 저장
 	bool bPrevUseControllerYaw = false;
 	bool bPrevOrientToMovement = true;
+
+	/** 마우스 yaw 누적(스냅 전환용) */
+	float SwitchYawAccum = 0.0f;
+
+	/** 전환 쿨타임 남은 시간 */
+	float SwitchCooldownRemain = 0.0f;
 
 private:
 	// 오너 캐릭터/컨트롤러 반환 헬퍼

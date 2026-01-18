@@ -108,8 +108,11 @@ private:
 	void DashCooldown();			// 대시 쿨타임 완료 함수
 
 	/* Lock On */
-
 	void DoLockOn();
+
+	/* 락온 시 카메라 Yaw 허용 범위 비율 (0.0 ~ 1.0) */
+	UPROPERTY(EditAnywhere, Category = "LockOn|Camera", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float LockOnYawAllowRatio = 0.25f;
 
 protected:
 	void Landed(const FHitResult& Hit) override;
