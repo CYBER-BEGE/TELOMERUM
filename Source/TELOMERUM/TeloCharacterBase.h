@@ -45,12 +45,26 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "State")
 	float JumpPowerScale = 1.0f;
 
+	/* Attack */
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	float AttackDistance = 100.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	float AttackRange = 50.0f;
+
 private:
 	/* Properties */
 	
 	/* Take Damage */
 	bool bIsDamageable = true;
 	FTimerHandle DamageTimerHandle;
+
+	/* Attack */
+	void TraceAttack(FName DamageSourceBone);
+
+	/* Attack - Debug */
+	void DrawAttackDebug(FVector TraceStart, FVector TraceEnd);
+	void DrawHitDebug(const FHitResult& Hit);
 
 public:
 	/* Interfaces */
@@ -64,4 +78,6 @@ public:
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	void DamageCooldown();
 
+	/* Attack */
+	virtual void HitActor(const FHitResult& HitResult);
 };
