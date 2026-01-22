@@ -100,6 +100,14 @@ private:
 	void DoDashEnd();
 	void DashCooldown();			// 대시 쿨타임 완료 함수
 
+	/* Attack */
+	FTimerHandle AttackTimerHandle;
+	// bool bIsAttacking = false;
+	bool bCanAttack = true;
+
+	void DoAttackStart();
+	void DoAttackEnd();
+
 protected:
 	void Landed(const FHitResult& Hit) override;
 
@@ -110,4 +118,7 @@ public:
 
 	//UFUNCTION(BlueprintPure, Category = "Animation State")
 	//bool IsSliding() const { return bIsSliding; }
+
+	/* Attack */
+	virtual void HitActor(const FHitResult& HitResult);
 };

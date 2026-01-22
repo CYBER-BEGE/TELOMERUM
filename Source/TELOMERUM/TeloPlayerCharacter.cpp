@@ -107,8 +107,8 @@ void ATeloPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		// Dash
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::DoDashStart);
 
-		//// Attack
-		//EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::DoAttackStart);
+		// Attack
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::DoAttackStart);
 
 		//// Block
 		//EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::DoBlockStart);
@@ -251,4 +251,31 @@ void ATeloPlayerCharacter::DoDashEnd()
 void ATeloPlayerCharacter::DashCooldown()
 {
 	bCanDash = true;
+}
+
+void ATeloPlayerCharacter::DoAttackStart()
+{
+	if (!bCanAttack) return;
+	bCanAttack = false;
+	
+	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttackStart"), *GetActorLabel());
+	TraceAttack("RHandSocket"); // 소켓 이름
+
+	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &ATeloPlayerCharacter::DoAttackEnd, 0.2f, false);
+}
+
+void ATeloPlayerCharacter::DoAttackEnd()
+{
+	bCanAttack = true;
+}
+
+void ATeloPlayerCharacter::HitActor(const FHitResult& HitResult)
+{
+	ITeloDamageable* Damageable = Cast<ITeloDamageable>(HitResult.GetActor());
+
+	if (Damageable)
+	{
+		const FVector Impulse = (HitResult.ImpactNormal * -KnockbackImpulse) + (FVector::UpVector * KnockupImpulse);
+		Damageable->ApplyDamage(AttackDamage, this, HitResult.ImpactPoint, Impulse);
+	}
 }

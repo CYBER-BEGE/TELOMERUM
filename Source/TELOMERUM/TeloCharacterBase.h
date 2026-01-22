@@ -29,7 +29,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
-	/* Properties */
+	/** Properties **/
 
 	/* HP */
 	UPROPERTY(EditAnywhere, Category = "State")
@@ -52,32 +52,41 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	float AttackRange = 50.0f;
 
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	float AttackDamage = 10.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	float KnockbackImpulse = 250.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	float KnockupImpulse = 300.0f;
+
 private:
-	/* Properties */
+	/** Properties **/
 	
 	/* Take Damage */
 	bool bIsDamageable = true;
 	FTimerHandle DamageTimerHandle;
 
-	/* Attack */
-	void TraceAttack(FName DamageSourceBone);
+	/** Functions **/
 
 	/* Attack - Debug */
 	void DrawAttackDebug(FVector TraceStart, FVector TraceEnd);
 	void DrawHitDebug(const FHitResult& Hit);
 
 public:
-	/* Interfaces */
+	/** Interfaces **/
 
 	/* Take Damage */
 	virtual void ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse);
 	
-	/* Functions */
+	/** Functions **/
 
 	/* Take Damage */
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	void DamageCooldown();
 
 	/* Attack */
+	void TraceAttack(FName DamageSourceBone);
 	virtual void HitActor(const FHitResult& HitResult);
 };

@@ -88,7 +88,7 @@ void ATeloCharacterBase::TraceAttack(FName DamageSourceBone)
 	// 공격 가능한 오브젝트 종류
 	FCollisionObjectQueryParams ObjectParams;
 	ObjectParams.AddObjectTypesToQuery(ECC_Pawn);
-	ObjectParams.AddObjectTypesToQuery(ECC_WorldDynamic); // 적 오브젝트 파괴 가능여부 논의 필요
+	ObjectParams.AddObjectTypesToQuery(ECC_WorldDynamic); // 적의 오브젝트 파괴 가능여부 논의 필요
 
 	// 공격 범위의 형태(Sphere)
 	FCollisionShape CollisionShape;
@@ -102,7 +102,7 @@ void ATeloCharacterBase::TraceAttack(FName DamageSourceBone)
 	{
 		for (const FHitResult& Hit : OutHits)
 		{
-			DrawHitDebug(Hit);
+			DrawHitDebug(Hit); // 히트 디버그
 			HitActor(Hit);
 		}
 	}
