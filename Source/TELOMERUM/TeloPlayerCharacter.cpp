@@ -34,7 +34,7 @@ ATeloPlayerCharacter::ATeloPlayerCharacter()
 	LockOnComponent = CreateDefaultSubobject<UTeloLockOnComponent>(TEXT("LockOnComponent"));
 
 	// 초기 상태 설정
-	MaxHealth = 100.0f;
+	MaxHP = 100.0f;
 	MoveSpeedScale = 1.5f;
 	JumpPowerScale = 2.0f;
 
