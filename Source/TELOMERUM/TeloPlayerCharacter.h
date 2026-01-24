@@ -30,6 +30,10 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
+	/* Player Controller */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	APlayerController* PlayerController;
+
 	/* Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
@@ -67,10 +71,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* LockOnAction;
 
-	/* Player Controller */
-	UPROPERTY()
-	APlayerController* PlayerController;
-
 	/* Movement Components */
 	void ResetMovementComps();
 
@@ -93,8 +93,6 @@ private:
 	void DoJumpEnd();
 
 	/* Crouch */
-	//bool bIsSliding = false;		// 웅크리고 있는지 여부
-
 	void DoCrouchStart();
 	void DoCrouchEnd();
 
@@ -113,6 +111,9 @@ private:
 	/* 락온 시 카메라 Yaw 허용 범위 비율 (0.0 ~ 1.0) */
 	UPROPERTY(EditAnywhere, Category = "LockOn|Camera", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float LockOnYawAllowRatio = 0.25f;
+
+	/* ture: 락온 시 특수한 동작, false : 통상 락온 모드 */
+	void ApplyLockOnMovementMode(bool bLockOn);
 
 protected:
 	void Landed(const FHitResult& Hit) override;
