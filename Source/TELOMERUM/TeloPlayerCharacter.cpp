@@ -255,17 +255,19 @@ void ATeloPlayerCharacter::DashCooldown()
 
 void ATeloPlayerCharacter::DoAttackStart()
 {
-	if (!bCanAttack) return;
+	if (!bCanAttack || bIsAttacking) return;
+	bIsAttacking = true;
 	bCanAttack = false;
 	
 	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttackStart"), *GetActorLabel());
-	TraceAttack("RHandSocket"); // 소켓 이름
+	//TraceAttack("RHandSocket"); // 소켓 이름
 
-	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &ATeloPlayerCharacter::DoAttackEnd, 0.2f, false);
+	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &ATeloPlayerCharacter::DoAttackEnd, AttackSpeed, false);
 }
 
 void ATeloPlayerCharacter::DoAttackEnd()
 {
+	bIsAttacking = false;
 	bCanAttack = true;
 }
 

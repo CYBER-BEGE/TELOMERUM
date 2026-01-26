@@ -101,9 +101,9 @@ private:
 	void DashCooldown();			// 대시 쿨타임 완료 함수
 
 	/* Attack */
-	FTimerHandle AttackTimerHandle;
-	// bool bIsAttacking = false;
-	bool bCanAttack = true;
+	FTimerHandle AttackTimerHandle;	// 공격 쿨타임 타이머 핸들
+	bool bIsAttacking = false;		// 공격 중인지 여부
+	bool bCanAttack = true;			// 공격 가능 여부
 
 	void DoAttackStart();
 	void DoAttackEnd();
@@ -118,6 +118,9 @@ public:
 
 	//UFUNCTION(BlueprintPure, Category = "Animation State")
 	//bool IsSliding() const { return bIsSliding; }
+
+	UFUNCTION(BlueprintPure, Category = "Animation State")
+	bool IsAttacking() const { return bIsAttacking; }
 
 	/* Attack */
 	virtual void HitActor(const FHitResult& HitResult);

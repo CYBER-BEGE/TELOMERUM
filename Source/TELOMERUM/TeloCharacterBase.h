@@ -47,6 +47,9 @@ protected:
 
 	/* Attack */
 	UPROPERTY(EditAnywhere, Category = "Attack")
+	float AttackSpeed = 1.5f;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
 	float AttackDistance = 100.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
