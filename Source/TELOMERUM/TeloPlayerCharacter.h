@@ -30,6 +30,10 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
+	/* Player Controller */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	APlayerController* PlayerController;
+
 	/* Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
@@ -37,6 +41,10 @@ private:
 	/* Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
+	/* Lock On Component */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	class UTeloLockOnComponent* LockOnComponent;
 
 	/* Input Action */
 	UPROPERTY(EditAnywhere, Category = "Input Action")
@@ -60,9 +68,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* BlockAction;
 
-	/* Player Controller */
-	UPROPERTY()
-	APlayerController* PlayerController;
+	UPROPERTY(EditAnywhere, Category = "Input Action")
+	class UInputAction* LockOnAction;
 
 	/* Movement Components */
 	void ResetMovementComps();
@@ -86,8 +93,6 @@ private:
 	void DoJumpEnd();
 
 	/* Crouch */
-	//bool bIsSliding = false;		// 웅크리고 있는지 여부
-
 	void DoCrouchStart();
 	void DoCrouchEnd();
 
@@ -99,6 +104,16 @@ private:
 	void DoDashStart();
 	void DoDashEnd();
 	void DashCooldown();			// 대시 쿨타임 완료 함수
+
+	/* Lock On */
+	void DoLockOn();
+
+	/* 락온 시 카메라 Yaw 허용 범위 비율 (0.0 ~ 1.0) */
+	UPROPERTY(EditAnywhere, Category = "LockOn|Camera", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float LockOnYawAllowRatio = 0.25f;
+
+	/* ture: 락온 시 특수한 동작, false : 통상 락온 모드 */
+	void ApplyLockOnMovementMode(bool bLockOn);
 
 	/* Attack */
 	FTimerHandle AttackTimerHandle;	// 공격 쿨타임 타이머 핸들
