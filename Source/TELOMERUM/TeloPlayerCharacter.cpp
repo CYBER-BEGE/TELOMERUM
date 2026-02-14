@@ -152,6 +152,8 @@ void ATeloPlayerCharacter::Landed(const FHitResult& Hit)
 
 void ATeloPlayerCharacter::MoveInput(const FInputActionValue& Value)
 {
+	if (bIsAttacking) return; // 공격 중일 시 이동 입력 무시
+
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
 	DoMove(MovementVector.X, MovementVector.Y);
@@ -206,6 +208,11 @@ void ATeloPlayerCharacter::DoLook(float Yaw, float Pitch)
 }
 void ATeloPlayerCharacter::DoJumpStart()
 {
+	if (bIsAttacking) // 공격 중 점프 시 공격 강제종료
+	{
+		DoAttackEnd();
+	}
+
 	Jump();
 }
 
@@ -245,6 +252,13 @@ void ATeloPlayerCharacter::DoDashStart()
 {
 	if (!bCanDash || bIsDashing) return; // 대시 불가능/대시 중일 시 종료
 	if (GetCharacterMovement()->GetCurrentAcceleration().IsNearlyZero()) return; // 가속이 없을 시 종료 (입력 없을 시)
+	
+	/*
+	if (bIsAttacking) // 공격 중 대시 사용시 공격 강제종료
+	{
+		DoAttackEnd();
+	}
+	*/
 
 	bIsDashing = true;
 	bCanDash = false;
@@ -327,7 +341,7 @@ void ATeloPlayerCharacter::DoAttackStart()
 	bCanAttack = false;
 	
 	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttackStart"), *GetActorLabel());
-	//TraceAttack("RHandSocket"); // 소켓 이름
+	TraceAttack("HandGrip_R"); // 오른손 소켓 이름
 
 	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &ATeloPlayerCharacter::DoAttackEnd, AttackSpeed, false);
 }
@@ -336,6 +350,11 @@ void ATeloPlayerCharacter::DoAttackEnd()
 {
 	bIsAttacking = false;
 	bCanAttack = true;
+	
+	if (GetWorld())
+	{
+		GetWorldTimerManager().ClearTimer(AttackTimerHandle);
+	}
 }
 
 void ATeloPlayerCharacter::HitActor(const FHitResult& HitResult)
