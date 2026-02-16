@@ -28,7 +28,7 @@ ATeloEnemyCharacter::ATeloEnemyCharacter()
 	LockOnMarkerWidget->SetHiddenInGame(true);					// 게임 중 숨기기
 
 	// 초기 상태 설정
-	MaxHealth = 100.0f;
+	MaxHP = 100.0f;
 }
 
 // Called when the game starts or when spawned

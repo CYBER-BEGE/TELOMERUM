@@ -115,6 +115,14 @@ private:
 	/* ture: 락온 시 특수한 동작, false : 통상 락온 모드 */
 	void ApplyLockOnMovementMode(bool bLockOn);
 
+	/* Attack */
+	FTimerHandle AttackTimerHandle;	// 공격 쿨타임 타이머 핸들
+	bool bIsAttacking = false;		// 공격 중인지 여부
+	bool bCanAttack = true;			// 공격 가능 여부
+
+	void DoAttackStart();
+	void DoAttackEnd();
+
 protected:
 	void Landed(const FHitResult& Hit) override;
 
@@ -122,4 +130,13 @@ public:
 	/* Animation State */
 	UFUNCTION(BlueprintPure, Category = "Animation State")
 	bool IsDashing() const { return bIsDashing; }
+
+	//UFUNCTION(BlueprintPure, Category = "Animation State")
+	//bool IsSliding() const { return bIsSliding; }
+
+	UFUNCTION(BlueprintPure, Category = "Animation State")
+	bool IsAttacking() const { return bIsAttacking; }
+
+	/* Attack */
+	virtual void HitActor(const FHitResult& HitResult);
 };
