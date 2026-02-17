@@ -76,7 +76,9 @@ private:
 
 	/* Move */
 	void MoveInput(const struct FInputActionValue& Value);
+	void MoveInputEnd(const struct FInputActionValue& Value);
 	void DoMove(float Right, float Forward);
+	FVector2D InputVector; // 입력 벡터 저장 (X: Forward, Y: Right)
 
 	/* Look */
 	void LookInput(const struct FInputActionValue& Value);
@@ -113,7 +115,7 @@ private:
 	float LockOnYawAllowRatio = 0.25f;
 
 	/* ture: 락온 시 특수한 동작, false : 통상 락온 모드 */
-	void ApplyLockOnMovementMode(bool bLockOn);
+	//void ApplyLockOnMovementMode(bool bLockOn);
 
 	/* Attack */
 	FTimerHandle AttackTimerHandle;	// 공격 쿨타임 타이머 핸들

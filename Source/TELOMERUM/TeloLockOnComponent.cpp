@@ -110,8 +110,8 @@ void UTeloLockOnComponent::ToggleLockOn()
 	bIsLockOn = true;
 	LoseSightAccum = 0.0f;
 
-	// 락온 시 이동 모드 적용
-	ApplyLockOnMovementMode(true);
+	// 락온 시 로코모션 적용
+	//ApplyLockOnMovementMode(true);
 
 	// 타겟에게 락온 마커 보이기
 	SetMarker(Best);
@@ -130,7 +130,8 @@ void UTeloLockOnComponent::ClearLockOn()
 	bIsLockOn = false;
 	LoseSightAccum = 0.0f;
 
-	ApplyLockOnMovementMode(false);
+	// 로코모션 해제
+	//ApplyLockOnMovementMode(false);
 }
 
 // 현재 타겟의 락온 포인트 월드 위치
@@ -169,33 +170,33 @@ void UTeloLockOnComponent::SetMarker(ATeloEnemyCharacter* NewTarget)
 	}
 }
 
-// 락온 시 캐릭터 이동 모드 적용/복구
-void UTeloLockOnComponent::ApplyLockOnMovementMode(bool bEnable)
-{
-	ACharacter* OwnerChar = GetOwnerCharacter();
-	if (!OwnerChar)
-		return;
-
-	UCharacterMovementComponent* MoveComp = OwnerChar->GetCharacterMovement();
-	if (!MoveComp)
-		return;
-
-	if (bEnable)
-	{
-		// 복구용 저장
-		bPrevUseControllerYaw = OwnerChar->bUseControllerRotationYaw;
-		bPrevOrientToMovement = MoveComp->bOrientRotationToMovement;
-
-		// 락온: 스트레이프 모드(컨트롤러 yaw를 캐릭터 yaw로 사용)
-		OwnerChar->bUseControllerRotationYaw = true;
-		MoveComp->bOrientRotationToMovement = false;
-	}
-	else
-	{
-		OwnerChar->bUseControllerRotationYaw = bPrevUseControllerYaw;
-		MoveComp->bOrientRotationToMovement = bPrevOrientToMovement;
-	}
-}
+// 락온 시 캐릭터 로코모션 적용/복구
+//void UTeloLockOnComponent::ApplyLockOnMovementMode(bool bEnable)
+//{
+//	ACharacter* OwnerChar = GetOwnerCharacter();
+//	if (!OwnerChar)
+//		return;
+//
+//	UCharacterMovementComponent* MoveComp = OwnerChar->GetCharacterMovement();
+//	if (!MoveComp)
+//		return;
+//
+//	if (bEnable)
+//	{
+//		// 복구용 저장
+//		bPrevUseControllerYaw = OwnerChar->bUseControllerRotationYaw;
+//		bPrevOrientToMovement = MoveComp->bOrientRotationToMovement;
+//
+//		// 락온: 스트레이프 모드(컨트롤러 yaw를 캐릭터 yaw로 사용)
+//		OwnerChar->bUseControllerRotationYaw = true;
+//		MoveComp->bOrientRotationToMovement = false;
+//	}
+//	else
+//	{
+//		OwnerChar->bUseControllerRotationYaw = bPrevUseControllerYaw;
+//		MoveComp->bOrientRotationToMovement = bPrevOrientToMovement;
+//	}
+//}
 
 // 타겟에 대한 시야 확보 여부 반환
 bool UTeloLockOnComponent::HasLineOfSightToTarget(ATeloEnemyCharacter* InTarget) const

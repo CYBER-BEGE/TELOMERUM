@@ -99,6 +99,7 @@ void ATeloPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	{
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATeloPlayerCharacter::MoveInput);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &ATeloPlayerCharacter::MoveInputEnd);
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ATeloPlayerCharacter::LookInput);
@@ -152,17 +153,22 @@ void ATeloPlayerCharacter::Landed(const FHitResult& Hit)
 
 void ATeloPlayerCharacter::MoveInput(const FInputActionValue& Value)
 {
-	if (bIsAttacking) return; // 공격 중일 시 이동 입력 무시
+	InputVector = Value.Get<FVector2D>();
 
-	FVector2D MovementVector = Value.Get<FVector2D>();
+	DoMove(InputVector.X, InputVector.Y);
+}
 
-	DoMove(MovementVector.X, MovementVector.Y);
+void ATeloPlayerCharacter::MoveInputEnd(const FInputActionValue& Value)
+{
+	InputVector = FVector2D::ZeroVector;
 }
 
 void ATeloPlayerCharacter::DoMove(float Right, float Forward)
 {
 	if (GetController())
 	{
+		if (bIsAttacking) return; // 공격 중일 시 이동 무시
+
 		// 카메라의 Yaw 회전에 따른 이동 방향 설정
 		const FRotator Rotation = GetController()->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -206,12 +212,10 @@ void ATeloPlayerCharacter::DoLook(float Yaw, float Pitch)
 	AddControllerYawInput(Yaw);
 	AddControllerPitchInput(Pitch);
 }
+
 void ATeloPlayerCharacter::DoJumpStart()
 {
-	if (bIsAttacking) // 공격 중 점프 시 공격 강제종료
-	{
-		DoAttackEnd();
-	}
+	DoAttackEnd(); // 점프 시 공격 강제종료
 
 	Jump();
 }
@@ -225,7 +229,7 @@ void ATeloPlayerCharacter::DoJumpEnd()
 void ATeloPlayerCharacter::DoCrouchStart()
 {
 	Crouch();
-	ApplyLockOnMovementMode(true);
+	//ApplyLockOnMovementMode(true); // 로코모션 해제
 
 	if (!GetCharacterMovement()->Velocity.IsNearlyZero() && !GetCharacterMovement()->IsFalling()) // 정지/공중이 아닐 시 슬라이딩
 	{
@@ -244,35 +248,50 @@ void ATeloPlayerCharacter::DoCrouchEnd()
 	UnCrouch();
 
 	ResetMovementComps(); // 본래 마찰력/감속력 복구
-	ApplyLockOnMovementMode(false);
+	//ApplyLockOnMovementMode(false); // 로코모션 적용
 }
 
 // 현재 움직임과 상관없이 입력 값으로 대시
 void ATeloPlayerCharacter::DoDashStart()
 {
 	if (!bCanDash || bIsDashing) return; // 대시 불가능/대시 중일 시 종료
-	if (GetCharacterMovement()->GetCurrentAcceleration().IsNearlyZero()) return; // 가속이 없을 시 종료 (입력 없을 시)
+	//if (InputVector.IsNearlyZero()) return; // 이동 입력이 없을 시 종료
+	//if (GetCharacterMovement()->GetCurrentAcceleration().IsNearlyZero()) return; // 가속이 없을 시 종료 (입력 없을 시)
 	
-	/*
-	if (bIsAttacking) // 공격 중 대시 사용시 공격 강제종료
-	{
-		DoAttackEnd();
-	}
-	*/
+	DoAttackEnd(); // 대시 시 공격 강제종료
 
 	bIsDashing = true;
 	bCanDash = false;
 
-	//FVector DashDir = GetActorForwardVector();
-	
-	FVector DashDir = GetCharacterMovement()->GetCurrentAcceleration().GetSafeNormal2D();
-	if (DashDir.IsNearlyZero())
+	const FRotator Rotation = GetController()->GetControlRotation();	// 카메라의 Yaw 회전에 따른 대시 방향 설정
+	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);					// Yaw 회전만 사용하여 방향 계산 (Pitch는 무시)
+
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);	// 카메라의 정면 방향
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);		// 카메라의 오른쪽 방향
+
+	FVector DashDir = (ForwardDirection * InputVector.Y + RightDirection * InputVector.X).GetSafeNormal2D(); // Right = InputVector.X, Forward = InputVector.Y
+
+	if (DashDir.IsNearlyZero()) // 입력이 없을 시
 	{
-		DashDir = GetActorForwardVector(); // 입력 방향으로 대시
+		if (LockOnComponent && LockOnComponent->IsLockOn() && LockOnComponent->GetTarget()) // 락온 중이고 타겟이 있을 시
+		{
+			FVector ToTarget = GetActorLocation() - LockOnComponent->GetTargetPointWorldLocation();
+			ToTarget.Z = 0.0f;
+			if (!ToTarget.IsNearlyZero())
+			{
+				const FRotator TargetYaw = ToTarget.Rotation();
+				SetActorRotation(FRotator(0.f, TargetYaw.Yaw, 0.f)); // 타겟 반대 방향으로 회전
+			}
+
+			DashDir = (GetActorLocation() - LockOnComponent->GetTargetPointWorldLocation()).GetSafeNormal2D(); // 타겟 반대 방향으로 대시
+		}
+		else
+		{
+			DashDir = GetActorForwardVector(); // 전방 대시
+		}
 	}
 
-	// 대시 중에는 이동방향 바라보기
-	ApplyLockOnMovementMode(true);
+	//ApplyLockOnMovementMode(true); // 대시 중 로코모션 해제
 
 	GetCharacterMovement()->Velocity = FVector::ZeroVector;		// 이동 정지
 	GetCharacterMovement()->GravityScale = 0.0f;				// 중력 0
@@ -297,7 +316,7 @@ void ATeloPlayerCharacter::DoDashEnd()
 		GetWorldTimerManager().SetTimer(DashTimerHandle, this, &ATeloPlayerCharacter::DashCooldown, 0.5f, false);
 	}
 
-	ApplyLockOnMovementMode(false);
+	//ApplyLockOnMovementMode(false);
 }
 
 void ATeloPlayerCharacter::DashCooldown()
@@ -313,32 +332,48 @@ void ATeloPlayerCharacter::DoLockOn()
 	}
 }
 
-void ATeloPlayerCharacter::ApplyLockOnMovementMode(bool bLockOn)
-{
-	// 락온이 아닐 땐 리턴
-	if (!LockOnComponent || !LockOnComponent->IsLockOn())
-		return;
-
-	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
-	if (!MoveComp) return;
-
-	if (bLockOn) // 락온 중 특수한 동작 시
-	{
-		bUseControllerRotationYaw = false;				// 캐릭터가 컨트롤러 회전에 따라 회전하지 않음
-		MoveComp->bOrientRotationToMovement = true;		// 캐릭터가 이동 방향에 따라 회전하도록 설정
-	}
-	else // 락온 중 특수한 동작을 하지 않을 시
-	{
-		bUseControllerRotationYaw = true;				// 캐릭터가 컨트롤러 회전에 따라 회전
-		MoveComp->bOrientRotationToMovement = false;	// 캐릭터가 이동 방향에 따라 회전하지 않음
-	}
-}
+// 락온 시 잠시 로코모션 해제
+//void ATeloPlayerCharacter::ApplyLockOnMovementMode(bool bLockOn)
+//{
+//	// 락온이 아닐 땐 리턴
+//	if (!LockOnComponent || !LockOnComponent->IsLockOn())
+//		return;
+//
+//	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
+//	if (!MoveComp) return;
+//
+//	if (bLockOn) // 락온 중 특수한 동작 시
+//	{
+//		bUseControllerRotationYaw = false;				// 캐릭터가 컨트롤러 회전에 따라 회전하지 않음
+//		MoveComp->bOrientRotationToMovement = true;		// 캐릭터가 이동 방향에 따라 회전하도록 설정
+//	}
+//	else // 락온 중 특수한 동작을 하지 않을 시
+//	{
+//		bUseControllerRotationYaw = true;				// 캐릭터가 컨트롤러 회전에 따라 회전
+//		MoveComp->bOrientRotationToMovement = false;	// 캐릭터가 이동 방향에 따라 회전하지 않음
+//	}
+//}
 
 void ATeloPlayerCharacter::DoAttackStart()
 {
 	if (!bCanAttack || bIsAttacking) return;
 	bIsAttacking = true;
 	bCanAttack = false;
+
+	if (LockOnComponent && LockOnComponent->IsLockOn())
+	{
+		if (LockOnComponent->GetTarget())
+		{
+			FVector ToTarget = LockOnComponent->GetTargetPointWorldLocation() - GetActorLocation();
+			ToTarget.Z = 0.0f;
+
+			if (!ToTarget.IsNearlyZero())
+			{
+				const FRotator TargetYaw = ToTarget.Rotation();
+				SetActorRotation(FRotator(0.f, TargetYaw.Yaw, 0.f));
+			}
+		}
+	}
 	
 	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttackStart"), *GetActorLabel());
 	TraceAttack("HandGrip_R"); // 오른손 소켓 이름
@@ -348,6 +383,8 @@ void ATeloPlayerCharacter::DoAttackStart()
 
 void ATeloPlayerCharacter::DoAttackEnd()
 {
+	if (!bIsAttacking) return; // 공격 중이 아닐 시 종료
+
 	bIsAttacking = false;
 	bCanAttack = true;
 	

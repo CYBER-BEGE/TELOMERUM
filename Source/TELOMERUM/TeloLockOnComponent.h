@@ -131,7 +131,7 @@ private:
 	bool HasLineOfSightToTarget(ATeloEnemyCharacter* InTarget) const;
 
 	// 락온 시 캐릭터 이동 모드 적용/복구
-	void ApplyLockOnMovementMode(bool bEnable);
+	//void ApplyLockOnMovementMode(bool bEnable);
 	// 컨트롤러 회전을 타겟 쪽으로 업데이트
 	void UpdateControlRotationToTarget(float DeltaTime);
 };

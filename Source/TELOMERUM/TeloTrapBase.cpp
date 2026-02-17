@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "TeloDamageable.h"
 #include "TeloTrapBase.h"
+#include "TeloDamageable.h"
 
 // Sets default values
 ATeloTrapBase::ATeloTrapBase()

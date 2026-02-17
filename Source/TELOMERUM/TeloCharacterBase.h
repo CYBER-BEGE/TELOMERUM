@@ -65,7 +65,7 @@ protected:
 	float KnockupImpulse = 300.0f;
 
 private:
-	/** Properties **/
+	/** Variables **/
 	
 	/* Take Damage */
 	bool bIsDamageable = true;
@@ -77,6 +77,9 @@ private:
 	void DrawAttackDebug(FVector TraceStart, FVector TraceEnd);
 	void DrawHitDebug(const FHitResult& Hit);
 
+	/* Take Damage */
+	void DamageCooldown();
+
 public:
 	/** Interfaces **/
 
@@ -87,9 +90,10 @@ public:
 
 	/* Take Damage */
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-	void DamageCooldown();
 
+protected:
 	/* Attack */
+	// 공격 시 소켓에서 정면으로 일정 거리까지 Sweep하여 공격 판정
 	void TraceAttack(FName DamageSourceBone);
 	virtual void HitActor(const FHitResult& HitResult);
 };
