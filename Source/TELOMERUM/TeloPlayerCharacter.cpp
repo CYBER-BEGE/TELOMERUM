@@ -339,6 +339,21 @@ void ATeloPlayerCharacter::DoAttackStart()
 	if (!bCanAttack || bIsAttacking) return;
 	bIsAttacking = true;
 	bCanAttack = false;
+
+	if (LockOnComponent && LockOnComponent->IsLockOn())
+	{
+		if (LockOnComponent->GetTarget())
+		{
+			FVector ToTarget = LockOnComponent->GetTargetPointWorldLocation() - GetActorLocation();
+			ToTarget.Z = 0.0f;
+
+			if (!ToTarget.IsNearlyZero())
+			{
+				const FRotator TargetYaw = ToTarget.Rotation();
+				SetActorRotation(FRotator(0.f, TargetYaw.Yaw, 0.f));
+			}
+		}
+	}
 	
 	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttackStart"), *GetActorLabel());
 	TraceAttack("HandGrip_R"); // 오른손 소켓 이름

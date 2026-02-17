@@ -25,7 +25,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 protected:
-	/* Properties */
+	/* Variables */
 
 	UPROPERTY(EditAnywhere, Category = "State")
 	float Damage = 50.0f;
