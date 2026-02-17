@@ -206,6 +206,7 @@ void ATeloPlayerCharacter::DoLook(float Yaw, float Pitch)
 	AddControllerYawInput(Yaw);
 	AddControllerPitchInput(Pitch);
 }
+
 void ATeloPlayerCharacter::DoJumpStart()
 {
 	if (bIsAttacking) // 공격 중 점프 시 공격 강제종료
@@ -225,7 +226,7 @@ void ATeloPlayerCharacter::DoJumpEnd()
 void ATeloPlayerCharacter::DoCrouchStart()
 {
 	Crouch();
-	ApplyLockOnMovementMode(true);
+	//ApplyLockOnMovementMode(true);
 
 	if (!GetCharacterMovement()->Velocity.IsNearlyZero() && !GetCharacterMovement()->IsFalling()) // 정지/공중이 아닐 시 슬라이딩
 	{
@@ -244,7 +245,7 @@ void ATeloPlayerCharacter::DoCrouchEnd()
 	UnCrouch();
 
 	ResetMovementComps(); // 본래 마찰력/감속력 복구
-	ApplyLockOnMovementMode(false);
+	//ApplyLockOnMovementMode(false);
 }
 
 // 현재 움직임과 상관없이 입력 값으로 대시
@@ -272,7 +273,7 @@ void ATeloPlayerCharacter::DoDashStart()
 	}
 
 	// 대시 중에는 이동방향 바라보기
-	ApplyLockOnMovementMode(true);
+	//ApplyLockOnMovementMode(true);
 
 	GetCharacterMovement()->Velocity = FVector::ZeroVector;		// 이동 정지
 	GetCharacterMovement()->GravityScale = 0.0f;				// 중력 0
@@ -297,7 +298,7 @@ void ATeloPlayerCharacter::DoDashEnd()
 		GetWorldTimerManager().SetTimer(DashTimerHandle, this, &ATeloPlayerCharacter::DashCooldown, 0.5f, false);
 	}
 
-	ApplyLockOnMovementMode(false);
+	//ApplyLockOnMovementMode(false);
 }
 
 void ATeloPlayerCharacter::DashCooldown()
@@ -313,26 +314,26 @@ void ATeloPlayerCharacter::DoLockOn()
 	}
 }
 
-void ATeloPlayerCharacter::ApplyLockOnMovementMode(bool bLockOn)
-{
-	// 락온이 아닐 땐 리턴
-	if (!LockOnComponent || !LockOnComponent->IsLockOn())
-		return;
-
-	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
-	if (!MoveComp) return;
-
-	if (bLockOn) // 락온 중 특수한 동작 시
-	{
-		bUseControllerRotationYaw = false;				// 캐릭터가 컨트롤러 회전에 따라 회전하지 않음
-		MoveComp->bOrientRotationToMovement = true;		// 캐릭터가 이동 방향에 따라 회전하도록 설정
-	}
-	else // 락온 중 특수한 동작을 하지 않을 시
-	{
-		bUseControllerRotationYaw = true;				// 캐릭터가 컨트롤러 회전에 따라 회전
-		MoveComp->bOrientRotationToMovement = false;	// 캐릭터가 이동 방향에 따라 회전하지 않음
-	}
-}
+//void ATeloPlayerCharacter::ApplyLockOnMovementMode(bool bLockOn)
+//{
+//	// 락온이 아닐 땐 리턴
+//	if (!LockOnComponent || !LockOnComponent->IsLockOn())
+//		return;
+//
+//	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
+//	if (!MoveComp) return;
+//
+//	if (bLockOn) // 락온 중 특수한 동작 시
+//	{
+//		bUseControllerRotationYaw = false;				// 캐릭터가 컨트롤러 회전에 따라 회전하지 않음
+//		MoveComp->bOrientRotationToMovement = true;		// 캐릭터가 이동 방향에 따라 회전하도록 설정
+//	}
+//	else // 락온 중 특수한 동작을 하지 않을 시
+//	{
+//		bUseControllerRotationYaw = true;				// 캐릭터가 컨트롤러 회전에 따라 회전
+//		MoveComp->bOrientRotationToMovement = false;	// 캐릭터가 이동 방향에 따라 회전하지 않음
+//	}
+//}
 
 void ATeloPlayerCharacter::DoAttackStart()
 {
