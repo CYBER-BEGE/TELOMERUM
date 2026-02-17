@@ -254,8 +254,8 @@ void ATeloPlayerCharacter::DoCrouchEnd()
 // 현재 움직임과 상관없이 입력 값으로 대시
 void ATeloPlayerCharacter::DoDashStart()
 {
-	if (!bCanDash || bIsDashing) return;	// 대시 불가능/대시 중일 시 종료
-	if (InputVector.IsNearlyZero()) return;	// 이동 입력이 없을 시 종료
+	if (!bCanDash || bIsDashing) return; // 대시 불가능/대시 중일 시 종료
+	//if (InputVector.IsNearlyZero()) return; // 이동 입력이 없을 시 종료
 	//if (GetCharacterMovement()->GetCurrentAcceleration().IsNearlyZero()) return; // 가속이 없을 시 종료 (입력 없을 시)
 	
 	DoAttackEnd(); // 대시 시 공격 강제종료
@@ -263,12 +263,32 @@ void ATeloPlayerCharacter::DoDashStart()
 	bIsDashing = true;
 	bCanDash = false;
 
-	//FVector DashDir = GetActorForwardVector();
-	
-	FVector DashDir = GetCharacterMovement()->GetCurrentAcceleration().GetSafeNormal2D();
-	if (DashDir.IsNearlyZero())
+	const FRotator Rotation = GetController()->GetControlRotation();	// 카메라의 Yaw 회전에 따른 대시 방향 설정
+	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);					// Yaw 회전만 사용하여 방향 계산 (Pitch는 무시)
+
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);	// 카메라의 정면 방향
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);		// 카메라의 오른쪽 방향
+
+	FVector DashDir = (ForwardDirection * InputVector.Y + RightDirection * InputVector.X).GetSafeNormal2D(); // Right = InputVector.X, Forward = InputVector.Y
+
+	if (DashDir.IsNearlyZero()) // 입력이 없을 시
 	{
-		DashDir = GetActorForwardVector(); // 입력 방향으로 대시
+		if (LockOnComponent && LockOnComponent->IsLockOn() && LockOnComponent->GetTarget()) // 락온 중이고 타겟이 있을 시
+		{
+			FVector ToTarget = GetActorLocation() - LockOnComponent->GetTargetPointWorldLocation();
+			ToTarget.Z = 0.0f;
+			if (!ToTarget.IsNearlyZero())
+			{
+				const FRotator TargetYaw = ToTarget.Rotation();
+				SetActorRotation(FRotator(0.f, TargetYaw.Yaw, 0.f)); // 타겟 반대 방향으로 회전
+			}
+
+			DashDir = (GetActorLocation() - LockOnComponent->GetTargetPointWorldLocation()).GetSafeNormal2D(); // 타겟 반대 방향으로 대시
+		}
+		else
+		{
+			DashDir = GetActorForwardVector(); // 전방 대시
+		}
 	}
 
 	//ApplyLockOnMovementMode(true); // 대시 중 로코모션 해제
