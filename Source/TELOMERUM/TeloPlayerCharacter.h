@@ -76,7 +76,9 @@ private:
 
 	/* Move */
 	void MoveInput(const struct FInputActionValue& Value);
+	void MoveInputEnd(const struct FInputActionValue& Value);
 	void DoMove(float Right, float Forward);
+	FVector2D InputVector; // 입력 벡터 저장 (X: Forward, Y: Right)
 
 	/* Look */
 	void LookInput(const struct FInputActionValue& Value);
