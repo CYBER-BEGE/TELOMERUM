@@ -136,7 +136,54 @@ void ATeloCharacterBase::DrawHitDebug(const FHitResult& Hit)
 	DrawDebugLine(GetWorld(), Hit.ImpactPoint, Hit.ImpactPoint + Hit.ImpactNormal * 50.0f, FColor::Cyan, false, 5.0f, 0, 2.0f);
 }
 
+void ATeloCharacterBase::DoAttack(AActor* Target)
+{
+	if (!bCanAttack || bIsAttacking) return;
+	bIsAttacking = true;
+	bCanAttack = false;
+
+	RotateToTarget(Target);
+
+	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttackStart"), *GetActorLabel());
+	TraceAttack("HandGrip_R"); // 공격 판정 소켓 이름
+
+	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &ATeloCharacterBase::DoAttackEnd, AttackSpeed, false);
+}
+
+void ATeloCharacterBase::DoAttackEnd()
+{
+	if (!bIsAttacking) return; // 공격 중이 아닐 시 종료
+
+	bIsAttacking = false;
+	bCanAttack = true;
+
+	if (GetWorld())
+	{
+		GetWorldTimerManager().ClearTimer(AttackTimerHandle);
+	}
+}
+
 void ATeloCharacterBase::HitActor(const FHitResult& HitResult)
 {
-	// virtual function
+	ITeloDamageable* Damageable = Cast<ITeloDamageable>(HitResult.GetActor());
+
+	if (Damageable)
+	{
+		const FVector Impulse = (HitResult.ImpactNormal * -KnockbackImpulse) + (FVector::UpVector * KnockupImpulse);
+		Damageable->ApplyDamage(AttackDamage, this, HitResult.ImpactPoint, Impulse);
+	}
+}
+
+void ATeloCharacterBase::RotateToTarget(const AActor* Target)
+{
+	if (!Target) return;
+
+	FVector ToTarget = Target->GetActorLocation() - GetActorLocation();
+	ToTarget.Z = 0.0f;
+
+	if (!ToTarget.IsNearlyZero())
+	{
+		const FRotator TargetYaw = ToTarget.Rotation();
+		SetActorRotation(FRotator(0.f, TargetYaw.Yaw, 0.f));
+	}
 }

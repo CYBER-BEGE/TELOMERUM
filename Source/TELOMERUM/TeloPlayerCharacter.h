@@ -114,19 +114,18 @@ private:
 	UPROPERTY(EditAnywhere, Category = "LockOn|Camera", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float LockOnYawAllowRatio = 0.25f;
 
-	/* ture: 락온 시 특수한 동작, false : 통상 락온 모드 */
+	/* true: 락온 시 특수한 동작, false : 통상 락온 모드 */
 	//void ApplyLockOnMovementMode(bool bLockOn);
 
 	/* Attack */
-	FTimerHandle AttackTimerHandle;	// 공격 쿨타임 타이머 핸들
-	bool bIsAttacking = false;		// 공격 중인지 여부
-	bool bCanAttack = true;			// 공격 가능 여부
-
-	void DoAttackStart();
-	void DoAttackEnd();
+	void AttackInput();
+	class ATeloEnemyCharacter* GetAttackTarget() const; // 락온 대상 가져오기
 
 protected:
 	void Landed(const FHitResult& Hit) override;
+
+	/* Attack */
+	void RotateToTarget(const AActor* Target) override; // 락온 타겟 방향으로 회전
 
 public:
 	/* Animation State */
@@ -138,7 +137,4 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Animation State")
 	bool IsAttacking() const { return bIsAttacking; }
-
-	/* Attack */
-	virtual void HitActor(const FHitResult& HitResult);
 };

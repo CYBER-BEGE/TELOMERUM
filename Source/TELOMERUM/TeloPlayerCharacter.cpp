@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "TeloLockOnComponent.h"
+#include "TeloEnemyCharacter.h"
 
 // Sets default values
 ATeloPlayerCharacter::ATeloPlayerCharacter()
@@ -116,7 +117,7 @@ void ATeloPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::DoDashStart);
 
 		// Attack
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::DoAttackStart);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::AttackInput);
 
 		//// Block
 		//EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::DoBlockStart);
@@ -354,53 +355,28 @@ void ATeloPlayerCharacter::DoLockOn()
 //	}
 //}
 
-void ATeloPlayerCharacter::DoAttackStart()
+void ATeloPlayerCharacter::AttackInput()
 {
-	if (!bCanAttack || bIsAttacking) return;
-	bIsAttacking = true;
-	bCanAttack = false;
+	DoAttack(GetAttackTarget());
+}
 
+ATeloEnemyCharacter* ATeloPlayerCharacter::GetAttackTarget() const
+{
+	if (LockOnComponent && LockOnComponent->IsLockOn())
+	{
+		return LockOnComponent->GetTarget();
+	}
+
+	return nullptr;
+}
+
+void ATeloPlayerCharacter::RotateToTarget(const AActor* Target)
+{
 	if (LockOnComponent && LockOnComponent->IsLockOn())
 	{
 		if (LockOnComponent->GetTarget())
 		{
-			FVector ToTarget = LockOnComponent->GetTargetPointWorldLocation() - GetActorLocation();
-			ToTarget.Z = 0.0f;
-
-			if (!ToTarget.IsNearlyZero())
-			{
-				const FRotator TargetYaw = ToTarget.Rotation();
-				SetActorRotation(FRotator(0.f, TargetYaw.Yaw, 0.f));
-			}
+			Super::RotateToTarget(Target);
 		}
-	}
-	
-	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttackStart"), *GetActorLabel());
-	TraceAttack("HandGrip_R"); // 오른손 소켓 이름
-
-	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &ATeloPlayerCharacter::DoAttackEnd, AttackSpeed, false);
-}
-
-void ATeloPlayerCharacter::DoAttackEnd()
-{
-	if (!bIsAttacking) return; // 공격 중이 아닐 시 종료
-
-	bIsAttacking = false;
-	bCanAttack = true;
-	
-	if (GetWorld())
-	{
-		GetWorldTimerManager().ClearTimer(AttackTimerHandle);
-	}
-}
-
-void ATeloPlayerCharacter::HitActor(const FHitResult& HitResult)
-{
-	ITeloDamageable* Damageable = Cast<ITeloDamageable>(HitResult.GetActor());
-
-	if (Damageable)
-	{
-		const FVector Impulse = (HitResult.ImpactNormal * -KnockbackImpulse) + (FVector::UpVector * KnockupImpulse);
-		Damageable->ApplyDamage(AttackDamage, this, HitResult.ImpactPoint, Impulse);
 	}
 }
