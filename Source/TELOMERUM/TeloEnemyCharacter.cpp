@@ -58,3 +58,11 @@ void ATeloEnemyCharacter::SetLockOnMarkerVisible(bool bVisible)
 	LockOnMarkerWidget->SetHiddenInGame(!bVisible);
 	LockOnMarkerWidget->SetVisibility(bVisible, true);
 }
+
+void ATeloEnemyCharacter::HitActor(const FHitResult& HitResult)
+{
+	if (HitResult.GetActor()->ActorHasTag(FName("Player")))
+	{
+		Super::HitActor(HitResult);
+	}
+}

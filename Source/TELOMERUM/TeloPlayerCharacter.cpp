@@ -357,17 +357,14 @@ void ATeloPlayerCharacter::DoLockOn()
 
 void ATeloPlayerCharacter::AttackInput()
 {
-	DoAttack(GetAttackTarget());
-}
+	AActor* Target = nullptr;
 
-ATeloEnemyCharacter* ATeloPlayerCharacter::GetAttackTarget() const
-{
 	if (LockOnComponent && LockOnComponent->IsLockOn())
 	{
-		return LockOnComponent->GetTarget();
-	}
-
-	return nullptr;
+		Target = LockOnComponent->GetTarget();
+	} 
+	
+	DoAttack(Target);
 }
 
 void ATeloPlayerCharacter::RotateToTarget(const AActor* Target)

@@ -43,4 +43,7 @@ public:
 	/* 락온 마커 보이기/숨기기 */
 	UFUNCTION(BlueprintCallable, Category = "LockOn")
 	void SetLockOnMarkerVisible(bool bVisible);
+
+protected:
+	void HitActor(const FHitResult& HitResult) override;
 };
