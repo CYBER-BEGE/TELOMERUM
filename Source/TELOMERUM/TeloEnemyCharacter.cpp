@@ -3,6 +3,7 @@
 
 #include "TeloEnemyCharacter.h"
 #include "Components/WidgetComponent.h"
+#include "TeloEnemyAIController.h"
 
 ATeloEnemyCharacter::ATeloEnemyCharacter()
 {
@@ -23,7 +24,7 @@ ATeloEnemyCharacter::ATeloEnemyCharacter()
 	LockOnMarkerWidget->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 충돌 비활성화
 	LockOnMarkerWidget->SetGenerateOverlapEvents(false);		// 오버랩 이벤트 비활성화
 
-	// 초기 비활성화 설정
+	// 초기 LockOn 비활성화 설정
 	LockOnMarkerWidget->SetVisibility(false, true);				// 기본적으로 비활성화
 	LockOnMarkerWidget->SetHiddenInGame(true);					// 게임 중 숨기기
 
