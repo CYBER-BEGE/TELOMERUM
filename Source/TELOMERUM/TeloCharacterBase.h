@@ -50,10 +50,10 @@ protected:
 	float AttackSpeed = 1.5f;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	float AttackDistance = 100.0f;
+	float AttackRange = 100.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	float AttackRange = 50.0f;
+	float AttackSize = 50.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	float AttackDamage = 10.0f;
@@ -78,6 +78,7 @@ private:
 	/** Functions **/
 
 	/* Take Damage */
+	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	void DamageCooldown();
 
 	/* Attack */
@@ -95,7 +96,7 @@ public:
 	/** Functions **/
 
 	/* Take Damage */
-	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	float GetCalculatedAttackDistance() const;
 
 protected:
 	/** Variables **/

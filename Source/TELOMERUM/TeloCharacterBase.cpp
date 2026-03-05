@@ -44,6 +44,18 @@ void ATeloCharacterBase::ApplyDamage(float Damage, AActor* DamageCauser, const F
 	GetWorldTimerManager().SetTimer(DamageTimerHandle, this, &ATeloCharacterBase::DamageCooldown, 0.2f, false);
 }
 
+float ATeloCharacterBase::GetCalculatedAttackDistance() const
+{
+	// 공격 시작점 (소켓 위치)
+	const FVector TraceStart = GetActorLocation();
+
+	// Forward 방향으로 공격 길이 적용
+	const FVector TraceEnd = TraceStart + (GetActorForwardVector() * AttackRange);
+
+	// Trace 길이 계산 후 반환
+	return FVector::Dist(TraceStart, TraceEnd);
+}
+
 float ATeloCharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	if (NowHP <= 0.0f) return 0.0f;
@@ -81,7 +93,7 @@ void ATeloCharacterBase::TraceAttack(FName DamageSourceBone)
 
 	// 소켓 시작점에서 정면 Sweep 
 	const FVector TraceStart = GetMesh()->GetSocketLocation(DamageSourceBone);
-	const FVector TraceEnd = TraceStart + (GetActorForwardVector() * AttackDistance);
+	const FVector TraceEnd = TraceStart + (GetActorForwardVector() * AttackRange);
 
 	DrawAttackDebug(TraceStart, TraceEnd); // 공격 디버그
 
@@ -92,7 +104,7 @@ void ATeloCharacterBase::TraceAttack(FName DamageSourceBone)
 
 	// 공격 범위의 형태(Sphere)
 	FCollisionShape CollisionShape;
-	CollisionShape.SetSphere(AttackRange);
+	CollisionShape.SetSphere(AttackSize);
 
 	// 공격자 자신의 공격 무시
 	FCollisionQueryParams QueryParams;
@@ -115,16 +127,16 @@ void ATeloCharacterBase::DrawAttackDebug(FVector TraceStart, FVector TraceEnd)
 	const FQuat CapsuleRotation = FRotationMatrix::MakeFromZ(TraceEnd - TraceStart).ToQuat();
 
 	// 시작점(파랑)
-	DrawDebugSphere(GetWorld(), TraceStart, AttackRange, 16, FColor::Green, false, 5.0f);
+	DrawDebugSphere(GetWorld(), TraceStart, AttackSize, 16, FColor::Green, false, 5.0f);
 
 	// 끝점(빨강)
-	DrawDebugSphere(GetWorld(), TraceEnd, AttackRange, 16, FColor::Red, false, 5.0f);
+	DrawDebugSphere(GetWorld(), TraceEnd, AttackSize, 16, FColor::Red, false, 5.0f);
 
 	// 공격방향(노랑)
 	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Yellow, false, 5.0f, 0, 2.0f);
 
 	// Sweep 경로(파랑)
-	DrawDebugCapsule(GetWorld(), CapsuleCenter, HalfHeight, AttackRange, CapsuleRotation, FColor::Blue, false, 5.0f);
+	DrawDebugCapsule(GetWorld(), CapsuleCenter, HalfHeight, AttackSize, CapsuleRotation, FColor::Blue, false, 5.0f);
 }
 
 void ATeloCharacterBase::DrawHitDebug(const FHitResult& Hit)

@@ -44,6 +44,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LockOn")
 	void SetLockOnMarkerVisible(bool bVisible);
 
+	void AttackRequest(AActor* Target);
+
 protected:
 	void HitActor(const FHitResult& HitResult) override;
 };

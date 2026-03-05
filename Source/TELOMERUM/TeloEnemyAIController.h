@@ -17,10 +17,30 @@ class TELOMERUM_API ATeloEnemyAIController : public AAIController
 public:
 	ATeloEnemyAIController();
 
+protected:
+	virtual void BeginPlay() override;
+
+public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
 private:
+	/** Variables **/
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyAI")
 	class UBehaviorTree* BehaviorTree;
 
-protected:
-	virtual void OnPossess(APawn* InPawn) override;
+	class UBlackboardComponent* BlackboardComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "EnemyAI")
+	class UAIPerceptionComponent* AIPerceptionComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "EnemyAI")
+	class UAISenseConfig_Sight* SightConfig;
+
+	/** Functions **/
+	//virtual void OnPossess(APawn* InPawn) override;
+	void DrawSightDebug();
+	
+	UFUNCTION()
+	void OnTargetperceived(AActor* Actor, FAIStimulus Stimulus);
 };
