@@ -96,13 +96,13 @@ void ATeloEnemyAIController::OnTargetperceived(AActor* Actor, FAIStimulus Stimul
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		BB->SetValueAsObject(TEXT("TargetActor"), Actor);
+		BB->SetValueAsObject(TEXT("VisibleActor"), Actor);
 		BB->SetValueAsVector(TEXT("LastKnownTargetLocation"), Actor->GetActorLocation());
-		UE_LOG(LogTemp, Warning, TEXT("%s 감지됨"), *GetNameSafe(Actor));
+		UE_LOG(LogTemp, Warning, TEXT("[%s] %s 가 보여요"), *GetNameSafe(GetPawn()), *GetNameSafe(Actor));
 	}
 	else
 	{
-		BB->ClearValue(TEXT("TargetActor"));
-		UE_LOG(LogTemp, Warning, TEXT("%s 놓침"), *GetNameSafe(Actor));
+		BB->ClearValue(TEXT("VisibleActor"));
+		UE_LOG(LogTemp, Warning, TEXT("[%s] %s 가 안보여요"), *GetNameSafe(GetPawn()), *GetNameSafe(Actor));
 	}
 }

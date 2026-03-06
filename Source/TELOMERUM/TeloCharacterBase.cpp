@@ -150,6 +150,7 @@ void ATeloCharacterBase::DrawHitDebug(const FHitResult& Hit)
 
 void ATeloCharacterBase::DoAttack(AActor* Target)
 {
+	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttack 진입"), *GetActorLabel());
 	if (!bCanAttack || bIsAttacking) return;
 	bIsAttacking = true;
 	bCanAttack = false;
