@@ -85,8 +85,17 @@ void ATeloEnemyAIController::DrawSightDebug()
 	FVector Forward = InPawn->GetActorForwardVector();
 
 	// 시야 범위 시각화
-	DrawDebugSphere(GetWorld(), Location, SightRadius, 32, FColor::Red, false, 0.1f, 0, 2);
-	DrawDebugCone(GetWorld(), Location, Forward, SightRadius, AngleRad, AngleRad, 32, FColor::Green, false, 0.1f, 0, 1);
+	DrawDebugCircle(GetWorld(), Location, SightRadius, 32, FColor::Red, false, 0.1f, 0, 2, FVector(1, 0, 0), FVector(0, 1, 0), false);
+	
+	float HalfAngleDeg = FMath::RadiansToDegrees(AngleRad);
+	FVector LeftDir = Forward.RotateAngleAxis(-HalfAngleDeg, FVector::UpVector);
+	FVector RightDir = Forward.RotateAngleAxis(HalfAngleDeg, FVector::UpVector);
+
+	// 왼쪽 경계선
+	DrawDebugLine(GetWorld(), Location,	Location + LeftDir * SightRadius, FColor::Green, false, 0.1f, 0, 2);
+
+	// 오른쪽 경계선
+	DrawDebugLine(GetWorld(), Location, Location + RightDir * SightRadius, FColor::Green, false, 0.1f, 0, 2);
 }
 
 void ATeloEnemyAIController::OnTargetperceived(AActor* Actor, FAIStimulus Stimulus)
