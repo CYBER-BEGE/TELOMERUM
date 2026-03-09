@@ -25,6 +25,15 @@ ATeloPlayerCharacter::ATeloPlayerCharacter()
 	CameraBoom->SetRelativeLocation(FVector(0.0f, 0.0f, 75.0f)); // 캐릭터 머리 위쪽에 위치
 	CameraBoom->bUsePawnControlRotation = true; // 컨트롤러 회전에 따라 회전
 
+	// 카메라 렉
+	CameraBoom->bEnableCameraLag = true;		// 카메라 렉 활성화
+	CameraBoom->CameraLagSpeed = 8.0f;			// 카메라가 목표 위치로 따라오는 속도
+	CameraBoom->CameraLagMaxDistance = 120.0f;	// 카메라가 목표 위치에서 최대 거리 제한 (0이면 무제한)
+
+	// 회전 렉
+	CameraBoom->bEnableCameraRotationLag = true;// 카메라 회전 렉 활성화
+	CameraBoom->CameraRotationLagSpeed = 15.0f; // 카메라가 목표 회전으로 따라오는 속도
+
 	// 팔로우 카메라 생성
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
