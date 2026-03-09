@@ -13,43 +13,22 @@ UTeloBTT_SearchPoint::UTeloBTT_SearchPoint()
 EBTNodeResult::Type UTeloBTT_SearchPoint::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	AAIController* AI = OwnerComp.GetAIOwner();
-	if (!AI)
-	{
-		return EBTNodeResult::Failed;
-	}
+	if (!AI) return EBTNodeResult::Failed;
 
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
-	if (!BB)
-	{
-		return EBTNodeResult::Failed;
-	}
+	if (!BB) return EBTNodeResult::Failed;
 
-	FVector Center = BB->GetValueAsVector(LastTargetLocationKey.SelectedKeyName);
-
+	FVector Center = BB->GetValueAsVector(TEXT("LastTargetLocation"));
+	
 	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(AI);
-
-	if (!NavSys)
-	{
-		return EBTNodeResult::Failed;
-	}
+	if (!NavSys) return EBTNodeResult::Failed;
 
 	FNavLocation RandomPoint;
 
-	bool bFound = NavSys->GetRandomReachablePointInRadius(
-		Center,
-		SearchRadius,
-		RandomPoint
-	);
+	bool bFound = NavSys->GetRandomReachablePointInRadius(Center, SearchRadius,	RandomPoint);
+	if (!bFound) return EBTNodeResult::Failed;
 
-	if (!bFound)
-	{
-		return EBTNodeResult::Failed;
-	}
-
-	BB->SetValueAsVector(
-		SearchLocationKey.SelectedKeyName,
-		RandomPoint.Location
-	);
+	BB->SetValueAsVector(TEXT("SearchLocation"), RandomPoint.Location);
 
 	return EBTNodeResult::Succeeded;
 }

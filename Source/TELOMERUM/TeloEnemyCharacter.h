@@ -35,6 +35,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* LockOnMarkerWidget;
 
+	// 순찰 경로 스플라인 액터. 레벨에서 직접 연결
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Patrol", meta = (AllowPrivateAccess = "true"))
+	class ATeloPatrolSpline* PatrolSpline = nullptr;
+
 public:
 	/* 현재 락온 포인트 월드 위치 */
 	UFUNCTION(BlueprintPure, Category = "LockOn")
@@ -45,6 +49,9 @@ public:
 	void SetLockOnMarkerVisible(bool bVisible);
 
 	void AttackRequest(AActor* Target);
+
+	// PatrolSpline에 대한 Getter
+	class ATeloPatrolSpline* GetPatrolSpline() const { return PatrolSpline; }
 
 protected:
 	void HitActor(const FHitResult& HitResult) override;
