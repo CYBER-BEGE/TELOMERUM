@@ -27,7 +27,7 @@ EBTNodeResult::Type UTeloBTT_AIAttack::ExecuteTask(UBehaviorTreeComponent& Owner
 	if (!TargetActor) return EBTNodeResult::Failed;
 
 	// 공격 로그 출력
-	UE_LOG(LogTemp, Warning, TEXT("%s Attack"), *Owner->GetName());
+	UE_LOG(LogTemp, Warning, TEXT("[%s] 컨트롤러에서 공격 요청"), *Owner->GetActorLabel());
 
 	ATeloEnemyCharacter* Enemy = Cast<ATeloEnemyCharacter>(Owner);
 	Enemy->AttackRequest(TargetActor);

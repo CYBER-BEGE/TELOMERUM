@@ -18,7 +18,7 @@ ATeloEnemyAIController::ATeloEnemyAIController()
 
 	SightConfig->SightRadius = 1500.0f;
 	SightConfig->LoseSightRadius = 1800.0f;
-	SightConfig->PeripheralVisionAngleDegrees = 120.0f;
+	SightConfig->PeripheralVisionAngleDegrees = 75.0f;
 	SightConfig->SetMaxAge(5.0f);
 
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
@@ -52,7 +52,7 @@ void ATeloEnemyAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	DrawSightDebug();
+	//DrawSightDebug();
 }
 
 /*
@@ -76,26 +76,45 @@ void ATeloEnemyAIController::OnPossess(APawn* InPawn)
 
 void ATeloEnemyAIController::DrawSightDebug()
 {
-	APawn* InPawn = GetPawn();
-	if (!InPawn || !SightConfig) return;
+    APawn* InPawn = GetPawn();
+    if (!InPawn || !SightConfig) return;
 
-	FVector Location = InPawn->GetActorLocation();
-	float SightRadius = SightConfig->SightRadius;
-	float AngleRad = FMath::DegreesToRadians(SightConfig->PeripheralVisionAngleDegrees / 2);
-	FVector Forward = InPawn->GetActorForwardVector();
+    UBlackboardComponent* BB = GetBlackboardComponent();
+    if (!BB) return;
 
-	// 시야 범위 시각화
-	DrawDebugCircle(GetWorld(), Location, SightRadius, 32, FColor::Red, false, 0.1f, 0, 2, FVector(1, 0, 0), FVector(0, 1, 0), false);
-	
-	float HalfAngleDeg = FMath::RadiansToDegrees(AngleRad);
-	FVector LeftDir = Forward.RotateAngleAxis(-HalfAngleDeg, FVector::UpVector);
-	FVector RightDir = Forward.RotateAngleAxis(HalfAngleDeg, FVector::UpVector);
+    // 현재 Focus Actor 확인
+    AActor* FocusActor = Cast<AActor>(BB->GetValueAsObject(TEXT("TargetActor")));
+    
+    FVector Location = InPawn->GetActorLocation();
+    FVector Forward;
 
-	// 왼쪽 경계선
-	DrawDebugLine(GetWorld(), Location,	Location + LeftDir * SightRadius, FColor::Green, false, 0.1f, 0, 2);
+    if (FocusActor)
+    {
+        // Focus Actor 위치를 향하도록 Forward 벡터 계산
+        Forward = (FocusActor->GetActorLocation() - Location).GetSafeNormal();
+    }
+    else
+    {
+        // Focus Actor가 없으면 Pawn의 Forward 사용
+        Forward = InPawn->GetActorForwardVector();
+    }
 
-	// 오른쪽 경계선
-	DrawDebugLine(GetWorld(), Location, Location + RightDir * SightRadius, FColor::Green, false, 0.1f, 0, 2);
+    float SightRadius = SightConfig->SightRadius;
+    float HalfAngleDeg = SightConfig->PeripheralVisionAngleDegrees / 2;
+
+    // 시야 원
+    DrawDebugCircle(GetWorld(), Location, SightRadius, 32, FColor::Red, false, 0.1f, 0, 2, FVector(1,0,0), FVector(0,1,0), false);
+
+    // 좌우 경계선 계산 (Focus 방향 기준)
+    FVector LeftDir = Forward.RotateAngleAxis(-HalfAngleDeg, FVector::UpVector);
+    FVector RightDir = Forward.RotateAngleAxis(HalfAngleDeg, FVector::UpVector);
+
+    // 좌/우 경계선 Draw
+    DrawDebugLine(GetWorld(), Location, Location + LeftDir * SightRadius, FColor::Green, false, 0.1f, 0, 2);
+    DrawDebugLine(GetWorld(), Location, Location + RightDir * SightRadius, FColor::Green, false, 0.1f, 0, 2);
+
+    // 선택적으로 Forward 방향 라인 (Focus 기준)
+    DrawDebugLine(GetWorld(), Location, Location + Forward * SightRadius, FColor::Blue, false, 0.1f, 0, 2);
 }
 
 void ATeloEnemyAIController::OnTargetperceived(AActor* Actor, FAIStimulus Stimulus)
@@ -105,13 +124,18 @@ void ATeloEnemyAIController::OnTargetperceived(AActor* Actor, FAIStimulus Stimul
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		BB->SetValueAsObject(TEXT("VisibleActor"), Actor);
-		BB->SetValueAsVector(TEXT("LastKnownTargetLocation"), Actor->GetActorLocation());
-		UE_LOG(LogTemp, Warning, TEXT("[%s] %s 가 보여요"), *GetNameSafe(GetPawn()), *GetNameSafe(Actor));
+		BB->SetValueAsObject(TEXT("TargetActor"), Actor);
+		SetFocus(Actor);
+
+		UE_LOG(LogTemp, Warning, TEXT("[%s] %s 가 보임"), *GetNameSafe(GetPawn()), *GetNameSafe(Actor));
 	}
 	else
 	{
-		BB->ClearValue(TEXT("VisibleActor"));
-		UE_LOG(LogTemp, Warning, TEXT("[%s] %s 가 안보여요"), *GetNameSafe(GetPawn()), *GetNameSafe(Actor));
+		BB->ClearValue(TEXT("TargetActor"));
+		ClearFocus(EAIFocusPriority::Gameplay);
+		
+		BB->SetValueAsVector(TEXT("LastTargetLocation"), Stimulus.StimulusLocation);
+
+		UE_LOG(LogTemp, Warning, TEXT("[%s] %s 를 놓침"), *GetNameSafe(GetPawn()), *GetNameSafe(Actor));
 	}
 }

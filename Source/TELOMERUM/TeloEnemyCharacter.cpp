@@ -4,11 +4,15 @@
 #include "TeloEnemyCharacter.h"
 #include "Components/WidgetComponent.h"
 #include "TeloEnemyAIController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ATeloEnemyCharacter::ATeloEnemyCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	bUseControllerRotationYaw = true;
+	GetCharacterMovement() -> bOrientRotationToMovement = false;
 
 	// LockOnPoint 컴포넌트 생성 및 루트에 부착
 	LockOnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("LockOnPoint"));

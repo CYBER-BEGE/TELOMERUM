@@ -19,9 +19,22 @@ public:
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 
 private:
-	UPROPERTY(EditAnywhere, Category = "LookAround")
-	float YawOffset = 0.f;
+
+	float StartYaw = 0.f;
+	float TargetYaw = 0.f;
+
+	int32 Phase = 0;
+	
+	float NormalizeYaw(float Yaw) const;
+	bool IsYawReached(float CurrentYaw, float InTargetYaw) const;
+
+	UPROPERTY(EditAnywhere)
+	float RotationSpeed = 90.f;
+
+	UPROPERTY(EditAnywhere)
+	float LookAngle = 60.f;
 
 };
