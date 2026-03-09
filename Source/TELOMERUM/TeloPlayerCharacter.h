@@ -95,6 +95,8 @@ private:
 	void DoJumpEnd();
 
 	/* Crouch */
+	bool bCanCrouch = true; // 앉기 가능 여부
+
 	void DoCrouchStart();
 	void DoCrouchEnd();
 
@@ -132,7 +134,8 @@ private:
 	void DoAttackEnd();
 
 protected:
-	void Landed(const FHitResult& Hit) override;
+	virtual void Landed(const FHitResult& Hit) override;
+	virtual bool CanJumpInternal_Implementation() const override;
 
 public:
 	/* Animation State */

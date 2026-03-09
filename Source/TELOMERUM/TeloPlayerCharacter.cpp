@@ -150,6 +150,13 @@ void ATeloPlayerCharacter::Landed(const FHitResult& Hit)
 	{
 		GetWorldTimerManager().SetTimer(DashTimerHandle, this, &ATeloPlayerCharacter::DashCooldown, 0.5f, false);
 	}
+
+	bCanCrouch = true; // 점프/착지가 끝나면 앉기 가능
+}
+
+bool ATeloPlayerCharacter::CanJumpInternal_Implementation() const
+{
+	return JumpIsAllowedInternal(); // 앉기 시에도 점프 가능하도록 변경
 }
 
 void ATeloPlayerCharacter::MoveInput(const FInputActionValue& Value)
@@ -216,7 +223,9 @@ void ATeloPlayerCharacter::DoLook(float Yaw, float Pitch)
 
 void ATeloPlayerCharacter::DoJumpStart()
 {
-	DoAttackEnd(); // 점프 시 공격 강제종료
+	bCanCrouch = false; // 점프 중에는 앉기 불가능
+	DoAttackEnd();		// 점프 시 공격 강제종료
+	DoCrouchEnd();		// 점프 시 앉기 강제종료
 
 	Jump();
 }
@@ -226,9 +235,11 @@ void ATeloPlayerCharacter::DoJumpEnd()
 	StopJumping();
 }
 
-// 입력 값이 없어도 움직이고 있다면 슬라이딩
+// 앉기 키 입력 시 방향키 입력이 없어도 캐릭터가 움직이고 있다면 슬라이딩
 void ATeloPlayerCharacter::DoCrouchStart()
 {
+	if (!bCanCrouch) return; // 앉기 불가능 시 종료
+
 	Crouch();
 	//ApplyLockOnMovementMode(true); // 로코모션 해제
 
