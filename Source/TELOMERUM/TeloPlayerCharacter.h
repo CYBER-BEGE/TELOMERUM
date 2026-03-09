@@ -98,6 +98,12 @@ private:
 	void DoCrouchStart();
 	void DoCrouchEnd();
 
+	FVector CameraBoomDefaultRelativeLocation; // 카메라 붐의 기본 상대 위치
+
+	// 앉을 때 카메라 붐의 Z 위치 오프셋
+	UPROPERTY(EditAnywhere, Category = "Camera") 
+	float CrouchCameraZOffset = 48.0f;
+
 	/* Dash */
 	FTimerHandle DashTimerHandle;	// 대시 쿨타임 타이머 핸들
 	bool bIsDashing = false;		// 대시 중인지 여부

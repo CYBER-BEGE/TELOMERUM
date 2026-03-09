@@ -62,6 +62,7 @@ void ATeloPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	PlayerController = Cast<APlayerController>(GetController());
+	CameraBoomDefaultRelativeLocation = CameraBoom->GetRelativeLocation(); // 카메라 붐의 기본 상대 위치 저장
 
 	// 컴포넌트 값 확인
 	if (MoveAction == NULL)
@@ -231,6 +232,14 @@ void ATeloPlayerCharacter::DoCrouchStart()
 	Crouch();
 	//ApplyLockOnMovementMode(true); // 로코모션 해제
 
+	// 카메라 붐의 Z 위치를 앉기 시 내려가는 만큼 올림
+	if (CameraBoom)
+	{
+		FVector NewLocation = CameraBoomDefaultRelativeLocation;
+		NewLocation.Z += CrouchCameraZOffset;
+		CameraBoom->SetRelativeLocation(NewLocation);
+	}
+
 	if (!GetCharacterMovement()->Velocity.IsNearlyZero() && !GetCharacterMovement()->IsFalling()) // 정지/공중이 아닐 시 슬라이딩
 	{
 		FVector SlideDir = GetCharacterMovement()->Velocity.GetSafeNormal2D(); // XY벡터에서 방향만 추출
@@ -246,6 +255,12 @@ void ATeloPlayerCharacter::DoCrouchStart()
 void ATeloPlayerCharacter::DoCrouchEnd()
 {
 	UnCrouch();
+
+	// 카메라 붐의 Z 위치를 기본 위치로 복구
+	if (CameraBoom)
+	{
+		CameraBoom->SetRelativeLocation(CameraBoomDefaultRelativeLocation);
+	}
 
 	ResetMovementComps(); // 본래 마찰력/감속력 복구
 	//ApplyLockOnMovementMode(false); // 로코모션 적용
