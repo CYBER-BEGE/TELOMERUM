@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
-#include "TeloEnemyAIController.generated.h"
+#include "TeloAIController.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TELOMERUM_API ATeloEnemyAIController : public AAIController
+class TELOMERUM_API ATeloAIController : public AAIController
 {
 	GENERATED_BODY()
 
 public:
-	ATeloEnemyAIController();
+	ATeloAIController();
 
 protected:
 	virtual void BeginPlay() override;

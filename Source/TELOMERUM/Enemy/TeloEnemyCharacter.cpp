@@ -3,7 +3,7 @@
 
 #include "TeloEnemyCharacter.h"
 #include "Components/WidgetComponent.h"
-#include "TeloEnemyAIController.h"
+#include "TeloAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 ATeloEnemyCharacter::ATeloEnemyCharacter()

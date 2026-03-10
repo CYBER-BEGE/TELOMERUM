@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "TeloDamageable.h"
+#include "Interfaces/TeloDamageable.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"

@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "TeloEnemyAIController.h"
+#include "TeloAIController.h"
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 
-ATeloEnemyAIController::ATeloEnemyAIController()
+ATeloAIController::ATeloAIController()
 {
 	PrimaryActorTick.bCanEverTick = true; // Tick 활성화
 
@@ -27,13 +27,13 @@ ATeloEnemyAIController::ATeloEnemyAIController()
 
 	AIPerceptionComponent->ConfigureSense(*SightConfig);
 	AIPerceptionComponent->SetDominantSense(SightConfig->GetSenseImplementation());
-	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ATeloEnemyAIController::OnTargetperceived);
+	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ATeloAIController::OnTargetperceived);
 
 	BehaviorTree = nullptr;
 	BlackboardComponent = nullptr;
 }
 
-void ATeloEnemyAIController::BeginPlay()
+void ATeloAIController::BeginPlay()
 {
 	Super::BeginPlay();
 	
@@ -47,8 +47,12 @@ void ATeloEnemyAIController::BeginPlay()
 			BB->SetValueAsVector(TEXT("SpawnLocation"), GetPawn()->GetActorLocation());
 		}
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ATeloAIController] BehaviorTree is NULL")); // 컴포넌트 값 확인
+	}
 }
-void ATeloEnemyAIController::Tick(float DeltaTime)
+void ATeloAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
@@ -56,7 +60,7 @@ void ATeloEnemyAIController::Tick(float DeltaTime)
 }
 
 /*
-void ATeloEnemyAIController::OnPossess(APawn* InPawn)
+void ATeloAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
@@ -74,7 +78,7 @@ void ATeloEnemyAIController::OnPossess(APawn* InPawn)
 	}
 }*/
 
-void ATeloEnemyAIController::DrawSightDebug()
+void ATeloAIController::DrawSightDebug()
 {
     APawn* InPawn = GetPawn();
     if (!InPawn || !SightConfig) return;
@@ -117,7 +121,7 @@ void ATeloEnemyAIController::DrawSightDebug()
     DrawDebugLine(GetWorld(), Location, Location + Forward * SightRadius, FColor::Blue, false, 0.1f, 0, 2);
 }
 
-void ATeloEnemyAIController::OnTargetperceived(AActor* Actor, FAIStimulus Stimulus)
+void ATeloAIController::OnTargetperceived(AActor* Actor, FAIStimulus Stimulus)
 {
 	UBlackboardComponent* BB = GetBlackboardComponent();
 	if (!BB || !Actor) return;
