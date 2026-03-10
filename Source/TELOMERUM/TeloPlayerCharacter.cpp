@@ -26,6 +26,15 @@ ATeloPlayerCharacter::ATeloPlayerCharacter()
 	CameraBoom->SetRelativeLocation(FVector(0.0f, 0.0f, 75.0f)); // 캐릭터 머리 위쪽에 위치
 	CameraBoom->bUsePawnControlRotation = true; // 컨트롤러 회전에 따라 회전
 
+	// 카메라 렉
+	CameraBoom->bEnableCameraLag = true;		// 카메라 렉 활성화
+	CameraBoom->CameraLagSpeed = 8.0f;			// 카메라가 목표 위치로 따라오는 속도
+	CameraBoom->CameraLagMaxDistance = 120.0f;	// 카메라가 목표 위치에서 최대 거리 제한 (0이면 무제한)
+
+	// 회전 렉
+	CameraBoom->bEnableCameraRotationLag = true;// 카메라 회전 렉 활성화
+	CameraBoom->CameraRotationLagSpeed = 15.0f; // 카메라가 목표 회전으로 따라오는 속도
+
 	// 팔로우 카메라 생성
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -63,6 +72,7 @@ void ATeloPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	PlayerController = Cast<APlayerController>(GetController());
+	CameraBoomDefaultRelativeLocation = CameraBoom->GetRelativeLocation(); // 카메라 붐의 기본 상대 위치 저장
 
 	// 컴포넌트 값 확인
 	if (MoveAction == NULL)
@@ -150,6 +160,13 @@ void ATeloPlayerCharacter::Landed(const FHitResult& Hit)
 	{
 		GetWorldTimerManager().SetTimer(DashTimerHandle, this, &ATeloPlayerCharacter::DashCooldown, 0.5f, false);
 	}
+
+	bCanCrouch = true; // 점프/착지가 끝나면 앉기 가능
+}
+
+bool ATeloPlayerCharacter::CanJumpInternal_Implementation() const
+{
+	return JumpIsAllowedInternal(); // 앉기 시에도 점프 가능하도록 변경
 }
 
 void ATeloPlayerCharacter::MoveInput(const FInputActionValue& Value)
@@ -216,7 +233,9 @@ void ATeloPlayerCharacter::DoLook(float Yaw, float Pitch)
 
 void ATeloPlayerCharacter::DoJumpStart()
 {
-	DoAttackEnd(); // 점프 시 공격 강제종료
+	bCanCrouch = false; // 점프 중에는 앉기 불가능
+	DoAttackEnd();		// 점프 시 공격 강제종료
+	DoCrouchEnd();		// 점프 시 앉기 강제종료
 
 	Jump();
 }
@@ -226,11 +245,21 @@ void ATeloPlayerCharacter::DoJumpEnd()
 	StopJumping();
 }
 
-// 입력 값이 없어도 움직이고 있다면 슬라이딩
+// 앉기 키 입력 시 방향키 입력이 없어도 캐릭터가 움직이고 있다면 슬라이딩
 void ATeloPlayerCharacter::DoCrouchStart()
 {
+	if (!bCanCrouch) return; // 앉기 불가능 시 종료
+
 	Crouch();
 	//ApplyLockOnMovementMode(true); // 로코모션 해제
+
+	// 카메라 붐의 Z 위치를 앉기 시 내려가는 만큼 올림
+	if (CameraBoom)
+	{
+		FVector NewLocation = CameraBoomDefaultRelativeLocation;
+		NewLocation.Z += CrouchCameraZOffset;
+		CameraBoom->SetRelativeLocation(NewLocation);
+	}
 
 	if (!GetCharacterMovement()->Velocity.IsNearlyZero() && !GetCharacterMovement()->IsFalling()) // 정지/공중이 아닐 시 슬라이딩
 	{
@@ -247,6 +276,12 @@ void ATeloPlayerCharacter::DoCrouchStart()
 void ATeloPlayerCharacter::DoCrouchEnd()
 {
 	UnCrouch();
+
+	// 카메라 붐의 Z 위치를 기본 위치로 복구
+	if (CameraBoom)
+	{
+		CameraBoom->SetRelativeLocation(CameraBoomDefaultRelativeLocation);
+	}
 
 	ResetMovementComps(); // 본래 마찰력/감속력 복구
 	//ApplyLockOnMovementMode(false); // 로코모션 적용

@@ -95,8 +95,16 @@ private:
 	void DoJumpEnd();
 
 	/* Crouch */
+	bool bCanCrouch = true; // 앉기 가능 여부
+
 	void DoCrouchStart();
 	void DoCrouchEnd();
+
+	FVector CameraBoomDefaultRelativeLocation; // 카메라 붐의 기본 상대 위치
+
+	// 앉을 때 카메라 붐의 Z 위치 오프셋
+	UPROPERTY(EditAnywhere, Category = "Camera") 
+	float CrouchCameraZOffset = 48.0f;
 
 	/* Dash */
 	FTimerHandle DashTimerHandle;	// 대시 쿨타임 타이머 핸들
@@ -122,7 +130,8 @@ private:
 	class ATeloEnemyCharacter* GetAttackTarget() const; // 락온 대상 가져오기
 
 protected:
-	void Landed(const FHitResult& Hit) override;
+	virtual void Landed(const FHitResult& Hit) override;
+	virtual bool CanJumpInternal_Implementation() const override;
 
 	/* Attack */
 	void RotateToTarget(const AActor* Target) override; // 락온 타겟 방향으로 회전
