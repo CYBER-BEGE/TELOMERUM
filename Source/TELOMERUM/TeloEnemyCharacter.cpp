@@ -34,6 +34,9 @@ ATeloEnemyCharacter::ATeloEnemyCharacter()
 
 	// 초기 상태 설정
 	MaxHP = 100.0f;
+
+	MoveSpeedScale = 0.75f;
+	GetCharacterMovement()->MaxWalkSpeed *= MoveSpeedScale;		// 이동 속도
 }
 
 // Called when the game starts or when spawned
