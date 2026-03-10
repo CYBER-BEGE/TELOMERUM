@@ -2,7 +2,7 @@
 
 
 #include "TeloTrapBase.h"
-#include "TeloDamageable.h"
+#include "Interfaces/TeloDamageable.h"
 
 // Sets default values
 ATeloTrapBase::ATeloTrapBase()
