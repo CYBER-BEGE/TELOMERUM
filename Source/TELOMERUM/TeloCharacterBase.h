@@ -50,10 +50,10 @@ protected:
 	float AttackSpeed = 1.5f;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	float AttackDistance = 100.0f;
+	float AttackRange = 100.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	float AttackRange = 50.0f;
+	float AttackSize = 50.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	float AttackDamage = 10.0f;
@@ -66,19 +66,26 @@ protected:
 
 private:
 	/** Variables **/
-	
+
 	/* Take Damage */
 	bool bIsDamageable = true;
 	FTimerHandle DamageTimerHandle;
 
+	/* Attack */
+	FTimerHandle AttackTimerHandle;	// 공격 쿨타임 타이머 핸들
+	bool bCanAttack = true;			// 공격 가능 여부
+
 	/** Functions **/
 
-	/* Attack - Debug */
+	/* Take Damage */
+	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	void DamageCooldown();
+
+	/* Attack */
+	void TraceAttack(FName DamageSourceBone); // 공격 시 소켓에서 정면으로 일정 거리까지 Sweep하여 공격 판정
+
 	void DrawAttackDebug(FVector TraceStart, FVector TraceEnd);
 	void DrawHitDebug(const FHitResult& Hit);
-
-	/* Take Damage */
-	void DamageCooldown();
 
 public:
 	/** Interfaces **/
@@ -89,11 +96,19 @@ public:
 	/** Functions **/
 
 	/* Take Damage */
-	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	float GetCalculatedAttackDistance() const;
 
 protected:
+	/** Variables **/
+
 	/* Attack */
-	// 공격 시 소켓에서 정면으로 일정 거리까지 Sweep하여 공격 판정
-	void TraceAttack(FName DamageSourceBone);
+	bool bIsAttacking = false; // 공격 중인지 여부
+
+	/** Functions **/
+
+	/* Attack */
+	void DoAttack(AActor* Target);
+	void DoAttackEnd();
 	virtual void HitActor(const FHitResult& HitResult);
+	virtual void RotateToTarget(const AActor* Target); // 타겟 방향으로 회전
 };

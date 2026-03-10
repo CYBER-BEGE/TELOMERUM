@@ -3,11 +3,16 @@
 
 #include "TeloEnemyCharacter.h"
 #include "Components/WidgetComponent.h"
+#include "TeloEnemyAIController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ATeloEnemyCharacter::ATeloEnemyCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	bUseControllerRotationYaw = true;
+	GetCharacterMovement() -> bOrientRotationToMovement = false;
 
 	// LockOnPoint 컴포넌트 생성 및 루트에 부착
 	LockOnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("LockOnPoint"));
@@ -23,19 +28,21 @@ ATeloEnemyCharacter::ATeloEnemyCharacter()
 	LockOnMarkerWidget->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 충돌 비활성화
 	LockOnMarkerWidget->SetGenerateOverlapEvents(false);		// 오버랩 이벤트 비활성화
 
-	// 초기 비활성화 설정
+	// 초기 LockOn 비활성화 설정
 	LockOnMarkerWidget->SetVisibility(false, true);				// 기본적으로 비활성화
 	LockOnMarkerWidget->SetHiddenInGame(true);					// 게임 중 숨기기
 
 	// 초기 상태 설정
 	MaxHP = 100.0f;
+
+	MoveSpeedScale = 0.75f;
+	GetCharacterMovement()->MaxWalkSpeed *= MoveSpeedScale;		// 이동 속도
 }
 
 // Called when the game starts or when spawned
 void ATeloEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -57,4 +64,24 @@ void ATeloEnemyCharacter::SetLockOnMarkerVisible(bool bVisible)
 
 	LockOnMarkerWidget->SetHiddenInGame(!bVisible);
 	LockOnMarkerWidget->SetVisibility(bVisible, true);
+}
+
+void ATeloEnemyCharacter::AttackRequest(AActor* Target)
+{	
+	DoAttack(Target);
+}
+
+void ATeloEnemyCharacter::HitActor(const FHitResult& HitResult)
+{
+	/*
+	if (HitResult.GetActor()->ActorHasTag(FName("Player")))
+	{
+		Super::HitActor(HitResult);
+	}*/
+
+	
+	if (HitResult.GetActor())
+	{
+		Super::HitActor(HitResult);
+	}
 }
