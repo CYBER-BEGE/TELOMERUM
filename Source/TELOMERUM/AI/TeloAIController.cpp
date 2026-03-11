@@ -6,6 +6,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "NavigationSystem.h"
 
 ATeloAIController::ATeloAIController()
 {
@@ -138,9 +139,19 @@ void ATeloAIController::OnTargetperceived(AActor* Actor, FAIStimulus Stimulus)
 		BB->ClearValue(TEXT("TargetActor"));
 		ClearFocus(EAIFocusPriority::Gameplay);
 		
-		BB->SetValueAsVector(TEXT("LastTargetLocation"), Stimulus.StimulusLocation);
-		DrawDebugSphere(GetWorld(), Stimulus.StimulusLocation, 50.0f, 12, FColor::Yellow, false, 2.0f);
+		UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
+		FNavLocation ProjectedLocation;
 
+		if (NavSys && NavSys->ProjectPointToNavigation(Stimulus.StimulusLocation, ProjectedLocation, FVector(200.0f, 200.0f, 300.0f)))
+		{
+			BB->SetValueAsVector(TEXT("LastTargetLocation"), ProjectedLocation.Location);
+		}
+		else 
+		{
+			BB->ClearValue(TEXT("LastTargetLocation"));
+			UE_LOG(LogTemp, Warning, TEXT("LastTargetLocation 보정 실패"));
+		}
+		
 		UE_LOG(LogTemp, Warning, TEXT("[%s] %s 를 놓침"), *GetNameSafe(GetPawn()), *GetNameSafe(Actor));
 	}
 }
