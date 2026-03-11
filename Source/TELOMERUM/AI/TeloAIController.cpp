@@ -139,6 +139,7 @@ void ATeloAIController::OnTargetperceived(AActor* Actor, FAIStimulus Stimulus)
 		ClearFocus(EAIFocusPriority::Gameplay);
 		
 		BB->SetValueAsVector(TEXT("LastTargetLocation"), Stimulus.StimulusLocation);
+		DrawDebugSphere(GetWorld(), Stimulus.StimulusLocation, 50.0f, 12, FColor::Yellow, false, 2.0f);
 
 		UE_LOG(LogTemp, Warning, TEXT("[%s] %s 를 놓침"), *GetNameSafe(GetPawn()), *GetNameSafe(Actor));
 	}
