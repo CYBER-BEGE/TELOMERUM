@@ -91,6 +91,8 @@ void ATeloPlayerCharacter::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] BlockAction is NULL"));
 	if (LockOnAction == NULL)
 		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] LockOnAction is NULL"));
+	if (InteractAction == NULL)
+		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] InteractAction is NULL"));
 }
 
 // Called every frame
