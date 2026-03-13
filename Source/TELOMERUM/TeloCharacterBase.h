@@ -99,7 +99,7 @@ public:
 	/** Functions **/
 
 	/* Take Damage */
-	float GetCalculatedAttackDistance() const;
+	float GetAttackDistance() const;
 
 protected:
 	/** Variables **/

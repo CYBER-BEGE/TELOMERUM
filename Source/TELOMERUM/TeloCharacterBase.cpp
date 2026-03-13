@@ -44,13 +44,12 @@ void ATeloCharacterBase::ApplyDamage(float Damage, AActor* DamageCauser, const F
 	GetWorldTimerManager().SetTimer(DamageTimerHandle, this, &ATeloCharacterBase::DamageCooldown, 0.2f, false);
 }
 
-float ATeloCharacterBase::GetCalculatedAttackDistance() const
+float ATeloCharacterBase::GetAttackDistance() const
 {
-	// 공격 시작점 (소켓 위치)
-	const FVector TraceStart = GetActorLocation();
+	if (AttackSocketName.IsNone()) return 0.0f;
 
-	// Forward 방향으로 공격 길이 적용
-	const FVector TraceEnd = TraceStart + (GetActorForwardVector() * AttackRange);
+	const FVector TraceStart = GetMesh()->GetSocketLocation(AttackSocketName); // 공격 시작점 (소켓 위치)
+	const FVector TraceEnd = TraceStart + (GetActorForwardVector() * AttackRange); // 정면으로 공격범위 적용
 
 	// Trace 길이 계산 후 반환
 	return FVector::Dist(TraceStart, TraceEnd);

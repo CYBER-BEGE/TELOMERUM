@@ -46,7 +46,7 @@ bool UTeloBTD_CheckAttackRange::CalculateRawConditionValue(UBehaviorTreeComponen
 		return false;
 	}
 
-	float AttackRange = Enemy->GetCalculatedAttackDistance(); // 이미 계산된 실제 공격 범위
+	float AttackRange = Enemy->GetAttackDistance(); // 이미 계산된 실제 공격 범위
 	float Distance = FVector::Dist(Pawn->GetActorLocation(), Target->GetActorLocation());
 
 	UE_LOG(LogTemp, Warning, TEXT("Check Attack Range 리턴값: %s"), (Distance <= AttackRange) ? TEXT("TRUE") : TEXT("FALSE"));
