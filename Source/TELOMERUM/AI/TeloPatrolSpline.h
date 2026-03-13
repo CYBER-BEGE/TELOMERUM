@@ -22,9 +22,16 @@ private:
 
 public:
 	/** Functions **/
-	int32 GetTotalPoints() const;
+	/* 총 노드 개수 */
+	int32 GetTotalNodes() const;
+
+	/* 순환 순찰 */
 	int32 GetNextIndexLoop(int32 CurrentIndex) const;
+
+	/* 왕복 순찰 - 끝 노드에 도달하면 방향 전환 */
 	int32 GetNextIndexPingPong(int32 CurrentIndex, bool& Direction) const; // Direction이 true면 정방향, false면 역방향
-	FVector GetPatrolPointLocation(int32 Index) const;
+	
+	/* 인덱스에 해당하는 노드 위치 반환 */
+	FVector GetPatrolNodeLocation(int32 Index) const;
 
 };

@@ -9,7 +9,7 @@
 
 UTeloBTT_AIAttack::UTeloBTT_AIAttack()
 {
-	NodeName = TEXT("AIAttack");
+	NodeName = TEXT("AI Attack");
 }
 
 EBTNodeResult::Type UTeloBTT_AIAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComponent, uint8* NodeMemory)
@@ -26,11 +26,10 @@ EBTNodeResult::Type UTeloBTT_AIAttack::ExecuteTask(UBehaviorTreeComponent& Owner
 	AActor* TargetActor = Cast<AActor>(BlackBoard->GetValueAsObject(TEXT("TargetActor")));
 	if (!TargetActor) return EBTNodeResult::Failed;
 
-	// 공격 로그 출력
-	UE_LOG(LogTemp, Warning, TEXT("[%s] 컨트롤러에서 공격 요청"), *Owner->GetActorLabel());
-
 	ATeloCharacterBase* OwnerCharacter = Cast<ATeloCharacterBase>(Owner);
-	OwnerCharacter->AttackRequest(TargetActor);
+	OwnerCharacter->AttackRequest(TargetActor); // 공격 요청
+
+	UE_LOG(LogTemp, Warning, TEXT("[%s] AIAttack: 컨트롤러에서 공격 요청"), *Owner->GetActorLabel());
 
 	return EBTNodeResult::Succeeded;
 }
