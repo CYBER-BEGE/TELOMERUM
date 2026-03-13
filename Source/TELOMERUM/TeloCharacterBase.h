@@ -47,6 +47,9 @@ protected:
 
 	/* Attack */
 	UPROPERTY(EditAnywhere, Category = "Attack")
+	FName AttackSocketName; // 공격 판정 소켓 이름 - 반드시 BP에서 지정
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
 	float AttackSpeed = 1.5f;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
@@ -95,8 +98,10 @@ public:
 	
 	/** Functions **/
 
-	/* Take Damage */
-	float GetCalculatedAttackDistance() const;
+	/* Attack */
+	FName GetAttackSocketName() const { return AttackSocketName; }
+	float GetAttackDistance() const;
+	void AttackRequest(AActor* Target);
 
 protected:
 	/** Variables **/

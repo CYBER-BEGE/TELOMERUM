@@ -9,24 +9,25 @@
 
 UTeloBTT_SetPatrolSpline::UTeloBTT_SetPatrolSpline()
 {
-	NodeName = TEXT("Set PatrolSpline");
+	NodeName = TEXT("Set PatrolSpline Key");
 }
 
-EBTNodeResult::Type UTeloBTT_SetPatrolSpline::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UTeloBTT_SetPatrolSpline::ExecuteTask(UBehaviorTreeComponent& OwnerComponent, uint8* NodeMemory)
 {
-	AAIController* AI = OwnerComp.GetAIOwner();
-	if (!AI) return EBTNodeResult::Failed;
+	AAIController* AIController = OwnerComponent.GetAIOwner();
+	if (!AIController) return EBTNodeResult::Failed;
 
-	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
-	if (!BB) return EBTNodeResult::Failed;
+	UBlackboardComponent* BlackBoard = OwnerComponent.GetBlackboardComponent();
+	if (!BlackBoard) return EBTNodeResult::Failed;
 
-	ATeloEnemyCharacter* EnemyCharacter = Cast<ATeloEnemyCharacter>(AI->GetPawn());
+	ATeloEnemyCharacter* EnemyCharacter = Cast<ATeloEnemyCharacter>(AIController->GetPawn());
 	if (!EnemyCharacter) return EBTNodeResult::Failed;
 
 	ATeloPatrolSpline* PatrolSpline = EnemyCharacter->GetPatrolSpline();
 	if (!PatrolSpline) return EBTNodeResult::Failed;
 
-	BB ->SetValueAsObject(TEXT("PatrolSpline"), PatrolSpline);
+	// PatrolSpline 블랙보드에 저장
+	BlackBoard->SetValueAsObject(TEXT("PatrolSpline"), PatrolSpline);
 
 	return EBTNodeResult::Succeeded;
 }

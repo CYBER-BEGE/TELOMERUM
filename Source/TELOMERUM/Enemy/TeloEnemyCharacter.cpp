@@ -66,11 +66,6 @@ void ATeloEnemyCharacter::SetLockOnMarkerVisible(bool bVisible)
 	LockOnMarkerWidget->SetVisibility(bVisible, true);
 }
 
-void ATeloEnemyCharacter::AttackRequest(AActor* Target)
-{	
-	DoAttack(Target);
-}
-
 void ATeloEnemyCharacter::HitActor(const FHitResult& HitResult)
 {
 	/*

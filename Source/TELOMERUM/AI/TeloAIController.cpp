@@ -10,26 +10,32 @@
 
 ATeloAIController::ATeloAIController()
 {
-	PrimaryActorTick.bCanEverTick = true; // Tick 활성화
+	PrimaryActorTick.bCanEverTick = true;
 
+	// Perception Component 설정
 	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComponent"));
 	SetPerceptionComponent(*AIPerceptionComponent);
 
+	// Perception - Sight 설정
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
-
 	SightConfig->SightRadius = 1500.0f;
 	SightConfig->LoseSightRadius = 1800.0f;
 	SightConfig->PeripheralVisionAngleDegrees = 75.0f;
 	SightConfig->SetMaxAge(5.0f);
 
+	// Sight 감지 대상 설정
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
 
+	// Perception Component에 Sight 적용
 	AIPerceptionComponent->ConfigureSense(*SightConfig);
 	AIPerceptionComponent->SetDominantSense(SightConfig->GetSenseImplementation());
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ATeloAIController::OnTargetperceived);
 
+	ProjectionExtent = FVector(200.0f, 200.0f, 300.0f); // LastTargetLocation 보정 범위 지정
+
+	// BT, BB 초기화
 	BehaviorTree = nullptr;
 	BlackboardComponent = nullptr;
 }
@@ -42,114 +48,47 @@ void ATeloAIController::BeginPlay()
 	{
 		RunBehaviorTree(BehaviorTree);
 
-		UBlackboardComponent* BB = GetBlackboardComponent();
-		if (BB && GetPawn())
+		// SpawnLocation 저장
+		UBlackboardComponent* BlackBoard = GetBlackboardComponent();
+		if (BlackBoard && GetPawn())
 		{
-			BB->SetValueAsVector(TEXT("SpawnLocation"), GetPawn()->GetActorLocation());
+			BlackBoard->SetValueAsVector(TEXT("SpawnLocation"), GetPawn()->GetActorLocation());
 		}
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[ATeloAIController] BehaviorTree is NULL")); // 컴포넌트 값 확인
-	}
-}
-void ATeloAIController::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	//DrawSightDebug();
-}
-
-/*
-void ATeloAIController::OnPossess(APawn* InPawn)
-{
-	Super::OnPossess(InPawn);
-
-	UE_LOG(LogTemp, Warning, TEXT("AI Possessed"));
-
-	if (BehaviorTree)
-	{
-		RunBehaviorTree(BehaviorTree);
-
-		UBlackboardComponent* BB = GetBlackboardComponent();
-		if (BB)
-		{
-			BB->SetValueAsVector(TEXT("SpawnLocation"), InPawn->GetActorLocation());
-		}
-	}
-}*/
-
-void ATeloAIController::DrawSightDebug()
-{
-    APawn* InPawn = GetPawn();
-    if (!InPawn || !SightConfig) return;
-
-    UBlackboardComponent* BB = GetBlackboardComponent();
-    if (!BB) return;
-
-    // 현재 Focus Actor 확인
-    AActor* FocusActor = Cast<AActor>(BB->GetValueAsObject(TEXT("TargetActor")));
-    
-    FVector Location = InPawn->GetActorLocation();
-    FVector Forward;
-
-    if (FocusActor)
-    {
-        // Focus Actor 위치를 향하도록 Forward 벡터 계산
-        Forward = (FocusActor->GetActorLocation() - Location).GetSafeNormal();
-    }
-    else
-    {
-        // Focus Actor가 없으면 Pawn의 Forward 사용
-        Forward = InPawn->GetActorForwardVector();
-    }
-
-    float SightRadius = SightConfig->SightRadius;
-    float HalfAngleDeg = SightConfig->PeripheralVisionAngleDegrees / 2;
-
-    // 시야 원
-    DrawDebugCircle(GetWorld(), Location, SightRadius, 32, FColor::Red, false, 0.1f, 0, 2, FVector(1,0,0), FVector(0,1,0), false);
-
-    // 좌우 경계선 계산 (Focus 방향 기준)
-    FVector LeftDir = Forward.RotateAngleAxis(-HalfAngleDeg, FVector::UpVector);
-    FVector RightDir = Forward.RotateAngleAxis(HalfAngleDeg, FVector::UpVector);
-
-    // 좌/우 경계선 Draw
-    DrawDebugLine(GetWorld(), Location, Location + LeftDir * SightRadius, FColor::Green, false, 0.1f, 0, 2);
-    DrawDebugLine(GetWorld(), Location, Location + RightDir * SightRadius, FColor::Green, false, 0.1f, 0, 2);
-
-    // 선택적으로 Forward 방향 라인 (Focus 기준)
-    DrawDebugLine(GetWorld(), Location, Location + Forward * SightRadius, FColor::Blue, false, 0.1f, 0, 2);
+	else UE_LOG(LogTemp, Error, TEXT("ATeloAIController: BehaviorTree is NULL")); // 블루프린트의 BT 등록 확인
 }
 
 void ATeloAIController::OnTargetperceived(AActor* Actor, FAIStimulus Stimulus)
 {
-	UBlackboardComponent* BB = GetBlackboardComponent();
-	if (!BB || !Actor) return;
+	UBlackboardComponent* BlackBoard = GetBlackboardComponent();
+	if (!BlackBoard || !Actor) return;
 
-	if (Stimulus.WasSuccessfullySensed())
+	if (Stimulus.WasSuccessfullySensed()) // 타겟 감지 성공
 	{
-		BB->SetValueAsObject(TEXT("TargetActor"), Actor);
+		// Set Target
+		BlackBoard->SetValueAsObject(TEXT("TargetActor"), Actor);
 		SetFocus(Actor);
 
-		UE_LOG(LogTemp, Warning, TEXT("[%s] %s 가 보임"), *GetNameSafe(GetPawn()), *GetNameSafe(Actor));
+		UE_LOG(LogTemp, Warning, TEXT("[%s] %s 가 보임"), *GetPawn()->GetActorNameOrLabel(), *Actor->GetActorNameOrLabel());
 	}
-	else
+	else // 타겟 놓침(감지 실패)
 	{
-		BB->ClearValue(TEXT("TargetActor"));
+		// Clear Target
+		BlackBoard->ClearValue(TEXT("TargetActor"));
 		ClearFocus(EAIFocusPriority::Gameplay);
 		
-		UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
+		// LastTargetLocation 보정
+		UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
 		FNavLocation ProjectedLocation;
 
-		if (NavSys && NavSys->ProjectPointToNavigation(Stimulus.StimulusLocation, ProjectedLocation, FVector(200.0f, 200.0f, 300.0f)))
+		if (NavSystem && NavSystem->ProjectPointToNavigation(Stimulus.StimulusLocation, ProjectedLocation, ProjectionExtent))
 		{
-			BB->SetValueAsVector(TEXT("LastTargetLocation"), ProjectedLocation.Location);
+			BlackBoard->SetValueAsVector(TEXT("LastTargetLocation"), ProjectedLocation.Location); // 보정 성공, LastTargetLocation 저장
 		}
 		else 
 		{
-			BB->ClearValue(TEXT("LastTargetLocation"));
-			UE_LOG(LogTemp, Warning, TEXT("LastTargetLocation 보정 실패"));
+			BlackBoard->ClearValue(TEXT("LastTargetLocation"));
+			UE_LOG(LogTemp, Warning, TEXT("LastTargetLocation 보정 실패")); // 보정 실패, LastTargetLocation 초기화
 		}
 		
 		UE_LOG(LogTemp, Warning, TEXT("[%s] %s 를 놓침"), *GetNameSafe(GetPawn()), *GetNameSafe(Actor));
