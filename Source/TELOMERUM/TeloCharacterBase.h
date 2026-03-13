@@ -98,10 +98,9 @@ public:
 	
 	/** Functions **/
 
-	/* Take Damage */
-	float GetAttackDistance() const;
-
 	/* Attack */
+	FName GetAttackSocketName() const { return AttackSocketName; }
+	float GetAttackDistance() const;
 	void AttackRequest(AActor* Target);
 
 protected:

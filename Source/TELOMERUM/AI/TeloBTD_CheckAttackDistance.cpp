@@ -27,9 +27,11 @@ bool UTeloBTD_CheckAttackDistance::CalculateRawConditionValue(UBehaviorTreeCompo
 		UE_LOG(LogTemp, Warning, TEXT("[%s] CheckAttackDistance: TargetActor 없음"), *Owner->GetActorLabel());
 		return false;
 	}
+	
+	FVector AttackSocketLocation = OwnerCharacter->GetMesh()->GetSocketLocation(OwnerCharacter->GetAttackSocketName()); // 공격 소켓 위치
 
 	float AttackDistance = OwnerCharacter->GetAttackDistance(); // 실제 공격 범위
-	float Distance = FVector::Dist(Owner->GetActorLocation(), TargetActor->GetActorLocation()); // 공격 대상과의 거리
+	float Distance = FVector::Dist(AttackSocketLocation, TargetActor->GetActorLocation());
 
 	UE_LOG(LogTemp, Warning, TEXT("[%s] CheckAttackDistance: %s"), *Owner->GetActorLabel(), (Distance <= AttackDistance) ? TEXT("TRUE") : TEXT("FALSE"));
 	return Distance <= AttackDistance;
