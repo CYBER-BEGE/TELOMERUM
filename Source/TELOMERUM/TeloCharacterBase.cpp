@@ -150,15 +150,16 @@ void ATeloCharacterBase::DrawHitDebug(const FHitResult& Hit)
 
 void ATeloCharacterBase::DoAttack(AActor* Target)
 {
-	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttack 진입"), *GetActorLabel());
-	if (!bCanAttack || bIsAttacking) return;
+	if (!bCanAttack || bIsAttacking || AttackSocketName.IsNone()) return;
+
 	bIsAttacking = true;
 	bCanAttack = false;
 
 	RotateToTarget(Target);
 
 	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttackStart"), *GetActorLabel());
-	TraceAttack("HandGrip_R"); // 공격 판정 소켓 이름
+
+	TraceAttack(AttackSocketName);
 
 	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &ATeloCharacterBase::DoAttackEnd, AttackSpeed, false);
 }
