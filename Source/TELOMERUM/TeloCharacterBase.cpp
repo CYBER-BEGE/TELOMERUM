@@ -55,6 +55,11 @@ float ATeloCharacterBase::GetAttackDistance() const
 	return FVector::Dist(TraceStart, TraceEnd);
 }
 
+void ATeloCharacterBase::AttackRequest(AActor* Target)
+{
+	DoAttack(Target);
+}
+
 float ATeloCharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	if (NowHP <= 0.0f) return 0.0f;
@@ -156,7 +161,7 @@ void ATeloCharacterBase::DoAttack(AActor* Target)
 
 	RotateToTarget(Target);
 
-	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttackStart"), *GetActorLabel());
+	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttack"), *GetActorLabel());
 
 	TraceAttack(AttackSocketName);
 

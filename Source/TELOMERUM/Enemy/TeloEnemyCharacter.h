@@ -48,8 +48,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LockOn")
 	void SetLockOnMarkerVisible(bool bVisible);
 
-	void AttackRequest(AActor* Target);
-
 	// PatrolSpline에 대한 Getter
 	class ATeloPatrolSpline* GetPatrolSpline() const { return PatrolSpline; }
 

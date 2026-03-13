@@ -101,6 +101,9 @@ public:
 	/* Take Damage */
 	float GetAttackDistance() const;
 
+	/* Attack */
+	void AttackRequest(AActor* Target);
+
 protected:
 	/** Variables **/
 

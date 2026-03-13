@@ -4,7 +4,7 @@
 #include "TeloBTT_AIAttack.h"
 #include "AIController.h"
 #include "GameFramework/Actor.h"
-#include "TeloEnemyCharacter.h"
+#include "TeloCharacterBase.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 UTeloBTT_AIAttack::UTeloBTT_AIAttack()
@@ -20,17 +20,17 @@ EBTNodeResult::Type UTeloBTT_AIAttack::ExecuteTask(UBehaviorTreeComponent& Owner
 	APawn* Owner = AIController->GetPawn();
 	if (!Owner) return EBTNodeResult::Failed;
 
-	UBlackboardComponent* BB = OwnerComponent.GetBlackboardComponent();
-	if (!BB) return EBTNodeResult::Failed;
+	UBlackboardComponent* BlackBoard = OwnerComponent.GetBlackboardComponent();
+	if (!BlackBoard) return EBTNodeResult::Failed;
 
-	AActor* TargetActor = Cast<AActor>(BB->GetValueAsObject(TEXT("TargetActor")));
+	AActor* TargetActor = Cast<AActor>(BlackBoard->GetValueAsObject(TEXT("TargetActor")));
 	if (!TargetActor) return EBTNodeResult::Failed;
 
 	// 공격 로그 출력
 	UE_LOG(LogTemp, Warning, TEXT("[%s] 컨트롤러에서 공격 요청"), *Owner->GetActorLabel());
 
-	ATeloEnemyCharacter* Enemy = Cast<ATeloEnemyCharacter>(Owner);
-	Enemy->AttackRequest(TargetActor);
+	ATeloCharacterBase* OwnerCharacter = Cast<ATeloCharacterBase>(Owner);
+	OwnerCharacter->AttackRequest(TargetActor);
 
 	return EBTNodeResult::Succeeded;
 }
