@@ -1,14 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "TeloPlayerCharacter.h"
+#include "Player/TeloPlayerCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "TeloLockOnComponent.h"
-#include "TeloEnemyCharacter.h"
+#include "Player/TeloLockOnComponent.h"
+#include "Player/TeloInteractComponent.h"
+#include "Enemy/TeloEnemyCharacter.h"
 
 // Sets default values
 ATeloPlayerCharacter::ATeloPlayerCharacter()
@@ -42,6 +43,9 @@ ATeloPlayerCharacter::ATeloPlayerCharacter()
 
 	// Lock On 컴포넌트 생성
 	LockOnComponent = CreateDefaultSubobject<UTeloLockOnComponent>(TEXT("LockOnComponent"));
+
+	// Interact 컴포넌트 생성
+	InteractComponent = CreateDefaultSubobject<UTeloInteractComponent>(TEXT("InteractComponent"));
 
 	// 초기 상태 설정
 	MaxHP = 100.0f;

@@ -46,6 +46,11 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class UTeloLockOnComponent* LockOnComponent;
 
+	/* Interact Component */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	class UTeloInteractComponent* InteractComponent;
+
+private:
 	/* Input Action */
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* MoveAction;
@@ -74,6 +79,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* InteractAction;
 
+private:
 	/* Movement Components */
 	void ResetMovementComps();
 
