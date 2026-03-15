@@ -77,6 +77,7 @@ private:
 	/* Attack */
 	FTimerHandle AttackTimerHandle;	// 공격 쿨타임 타이머 핸들
 	bool bCanAttack = true;			// 공격 가능 여부
+	bool bIsAttacking = false;		// 공격 중인지 여부
 
 	/** Functions **/
 
@@ -103,11 +104,11 @@ public:
 	float GetAttackDistance() const;
 	void AttackRequest(AActor* Target);
 
+	UFUNCTION(BlueprintPure, Category = "Animation State")
+	bool IsAttacking() const { return bIsAttacking; }
+
 protected:
 	/** Variables **/
-
-	/* Attack */
-	bool bIsAttacking = false; // 공격 중인지 여부
 
 	/** Functions **/
 
