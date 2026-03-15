@@ -103,6 +103,9 @@ public:
 	float GetAttackDistance() const;
 	void AttackRequest(AActor* Target);
 
+	UFUNCTION(BlueprintPure, Category = "Animation State")
+	bool IsAttacking() const { return bIsAttacking; }
+
 protected:
 	/** Variables **/
 
