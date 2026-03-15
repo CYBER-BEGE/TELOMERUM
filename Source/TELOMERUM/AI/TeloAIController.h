@@ -20,27 +20,27 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 private:
 	/** Variables **/
-	UPROPERTY(EditDefaultsOnly, Category = "EnemyAI")
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	class UBehaviorTree* BehaviorTree;
 
 	class UBlackboardComponent* BlackboardComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "EnemyAI")
+	UPROPERTY(VisibleAnywhere, Category = "AI")
 	class UAIPerceptionComponent* AIPerceptionComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "EnemyAI")
+	UPROPERTY(VisibleAnywhere, Category = "AI")
 	class UAISenseConfig_Sight* SightConfig;
+
+	// LastTargetLocation 보정 범위
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	FVector ProjectionExtent;
 
 	/** Functions **/
 	//virtual void OnPossess(APawn* InPawn) override;
-	void DrawSightDebug();
 	
+	/* 타겟 감지 시 호출됨 */
 	UFUNCTION()
 	void OnTargetperceived(AActor* Actor, FAIStimulus Stimulus);
 };

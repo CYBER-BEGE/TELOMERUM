@@ -35,6 +35,10 @@ ATeloEnemyCharacter::ATeloEnemyCharacter()
 	// 초기 상태 설정
 	MaxHP = 100.0f;
 
+	// 이동 가속도 설정
+	GetCharacterMovement()->bRequestedMoveUseAcceleration = true;
+	GetCharacterMovement()->GetNavMovementProperties()->bUseAccelerationForPaths = true;
+
 	MoveSpeedScale = 0.75f;
 	GetCharacterMovement()->MaxWalkSpeed *= MoveSpeedScale;		// 이동 속도
 }
@@ -64,11 +68,6 @@ void ATeloEnemyCharacter::SetLockOnMarkerVisible(bool bVisible)
 
 	LockOnMarkerWidget->SetHiddenInGame(!bVisible);
 	LockOnMarkerWidget->SetVisibility(bVisible, true);
-}
-
-void ATeloEnemyCharacter::AttackRequest(AActor* Target)
-{	
-	DoAttack(Target);
 }
 
 void ATeloEnemyCharacter::HitActor(const FHitResult& HitResult)

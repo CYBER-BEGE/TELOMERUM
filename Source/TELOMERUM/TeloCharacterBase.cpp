@@ -44,16 +44,20 @@ void ATeloCharacterBase::ApplyDamage(float Damage, AActor* DamageCauser, const F
 	GetWorldTimerManager().SetTimer(DamageTimerHandle, this, &ATeloCharacterBase::DamageCooldown, 0.2f, false);
 }
 
-float ATeloCharacterBase::GetCalculatedAttackDistance() const
+float ATeloCharacterBase::GetAttackDistance() const
 {
-	// 공격 시작점 (소켓 위치)
-	const FVector TraceStart = GetActorLocation();
+	if (AttackSocketName.IsNone()) return 0.0f;
 
-	// Forward 방향으로 공격 길이 적용
-	const FVector TraceEnd = TraceStart + (GetActorForwardVector() * AttackRange);
+	const FVector TraceStart = GetMesh()->GetSocketLocation(AttackSocketName); // 공격 시작점 (소켓 위치)
+	const FVector TraceEnd = TraceStart + (GetActorForwardVector() * AttackRange); // 정면으로 공격범위 적용
 
 	// Trace 길이 계산 후 반환
 	return FVector::Dist(TraceStart, TraceEnd);
+}
+
+void ATeloCharacterBase::AttackRequest(AActor* Target)
+{
+	DoAttack(Target);
 }
 
 float ATeloCharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -150,15 +154,16 @@ void ATeloCharacterBase::DrawHitDebug(const FHitResult& Hit)
 
 void ATeloCharacterBase::DoAttack(AActor* Target)
 {
-	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttack 진입"), *GetActorLabel());
-	if (!bCanAttack || bIsAttacking) return;
+	if (!bCanAttack || bIsAttacking || AttackSocketName.IsNone()) return;
+
 	bIsAttacking = true;
 	bCanAttack = false;
 
 	RotateToTarget(Target);
 
-	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttackStart"), *GetActorLabel());
-	TraceAttack("HandGrip_R"); // 공격 판정 소켓 이름
+	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttack"), *GetActorLabel());
+
+	TraceAttack(AttackSocketName);
 
 	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &ATeloCharacterBase::DoAttackEnd, AttackSpeed, false);
 }

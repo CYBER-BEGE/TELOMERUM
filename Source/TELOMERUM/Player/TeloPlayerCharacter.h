@@ -146,7 +146,4 @@ public:
 
 	//UFUNCTION(BlueprintPure, Category = "Animation State")
 	//bool IsSliding() const { return bIsSliding; }
-
-	UFUNCTION(BlueprintPure, Category = "Animation State")
-	bool IsAttacking() const { return bIsAttacking; }
 };

@@ -47,6 +47,9 @@ protected:
 
 	/* Attack */
 	UPROPERTY(EditAnywhere, Category = "Attack")
+	FName AttackSocketName; // 공격 판정 소켓 이름 - 반드시 BP에서 지정
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
 	float AttackSpeed = 1.5f;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
@@ -74,6 +77,7 @@ private:
 	/* Attack */
 	FTimerHandle AttackTimerHandle;	// 공격 쿨타임 타이머 핸들
 	bool bCanAttack = true;			// 공격 가능 여부
+	bool bIsAttacking = false;		// 공격 중인지 여부
 
 	/** Functions **/
 
@@ -95,14 +99,16 @@ public:
 	
 	/** Functions **/
 
-	/* Take Damage */
-	float GetCalculatedAttackDistance() const;
+	/* Attack */
+	FName GetAttackSocketName() const { return AttackSocketName; }
+	float GetAttackDistance() const;
+	void AttackRequest(AActor* Target);
+
+	UFUNCTION(BlueprintPure, Category = "Animation State")
+	bool IsAttacking() const { return bIsAttacking; }
 
 protected:
 	/** Variables **/
-
-	/* Attack */
-	bool bIsAttacking = false; // 공격 중인지 여부
 
 	/** Functions **/
 

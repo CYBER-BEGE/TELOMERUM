@@ -4,17 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTDecorator.h"
-#include "TeloBTD_CheckAttackRange.generated.h"
+#include "TeloBTD_CheckAttackDistance.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TELOMERUM_API UTeloBTD_CheckAttackRange : public UBTDecorator
+class TELOMERUM_API UTeloBTD_CheckAttackDistance : public UBTDecorator
 {
 	GENERATED_BODY()
 	
 protected:
-	// Sequence 실행 여부 결정
 	virtual bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComponent, uint8* NodeMemory) const override;
 };

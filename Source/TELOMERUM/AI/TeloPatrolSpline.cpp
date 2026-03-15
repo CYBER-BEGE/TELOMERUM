@@ -14,7 +14,7 @@ ATeloPatrolSpline::ATeloPatrolSpline()
 	SetRootComponent(SplineComponent);
 }
 
-int32 ATeloPatrolSpline::GetTotalPoints() const
+int32 ATeloPatrolSpline::GetTotalNodes() const
 {
 	if (!SplineComponent) return 0;
 	return SplineComponent->GetNumberOfSplinePoints();
@@ -22,24 +22,22 @@ int32 ATeloPatrolSpline::GetTotalPoints() const
 
 int32 ATeloPatrolSpline::GetNextIndexLoop(int32 CurrentIndex) const
 {
-	const int32 Total = GetTotalPoints();
+	const int32 Total = GetTotalNodes();
 	if (Total <= 0) return INDEX_NONE;
-
 	if (Total == 1) return 0;
 
 	const int32 SafeCurrentIndex = FMath::Clamp(CurrentIndex, 0, Total - 1); // 유효 범위로 인덱스 제한
-	return (SafeCurrentIndex + 1) % Total;
+	return (SafeCurrentIndex + 1) % Total; // 다음 인덱스로 계속 +1 (마지막 노드 다음은 첫 번째 노드로 돌아감)
 }
 
 int32 ATeloPatrolSpline::GetNextIndexPingPong(int32 CurrentIndex, bool& Direction) const
 {
-	const int32 Total = GetTotalPoints();
+	const int32 Total = GetTotalNodes();
 	if (Total <= 0)
 	{
 		Direction = false;
 		return INDEX_NONE;
 	}
-
 	if (Total == 1) 
 	{
 		Direction = true;
@@ -65,7 +63,7 @@ int32 ATeloPatrolSpline::GetNextIndexPingPong(int32 CurrentIndex, bool& Directio
 	return NextIndex;
 }
 
-FVector ATeloPatrolSpline::GetPatrolPointLocation(int32 Index) const
+FVector ATeloPatrolSpline::GetPatrolNodeLocation(int32 Index) const
 {
 	if (!SplineComponent) return GetActorLocation();
 

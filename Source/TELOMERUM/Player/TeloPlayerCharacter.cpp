@@ -187,7 +187,7 @@ void ATeloPlayerCharacter::DoMove(float Right, float Forward)
 {
 	if (GetController())
 	{
-		if (bIsAttacking) return; // 공격 중일 시 이동 무시
+		if (IsAttacking()) return; // 공격 중일 시 이동 무시
 
 		// 카메라의 Yaw 회전에 따른 이동 방향 설정
 		const FRotator Rotation = GetController()->GetControlRotation();
