@@ -18,7 +18,7 @@ void ATeloCharacterBase::BeginPlay()
 	Super::BeginPlay();
 	
 	if (AttackSocketName.IsNone())
-		UE_LOG(LogTemp, Warning, TEXT("[ATeloCharacterBase] AttackSocketName is NULL"));
+		UE_LOG(LogTemp, Warning, TEXT("[%s] AttackSocketName is NULL"), *GetActorLabel());
 }
 
 // Called every frame

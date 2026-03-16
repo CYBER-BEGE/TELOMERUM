@@ -30,9 +30,9 @@ void UTeloInteractComponent::BeginPlay()
 	}
 
 	InteractSphere = NewObject<USphereComponent>(OwnerCharacter, TEXT("InteractSphere"));
+
 	if (!InteractSphere)
 		return;
-
 	InteractSphere->SetupAttachment(OwnerCharacter->GetRootComponent());
 	InteractSphere->RegisterComponent();
 
@@ -43,16 +43,16 @@ void UTeloInteractComponent::BeginPlay()
 	InteractSphere->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
 	InteractSphere->SetGenerateOverlapEvents(true);
 
+	// Overlap 이벤트 바인딩
 	InteractSphere->OnComponentBeginOverlap.AddDynamic(this, &UTeloInteractComponent::OnInteractSphereBeginOverlap);
+	InteractSphere->OnComponentEndOverlap.AddDynamic(this, &UTeloInteractComponent::OnInteractSphereEndOverlap);
 }
-
 
 // Called every frame
 void UTeloInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
 }
 
 ACharacter* UTeloInteractComponent::GetOwnerCharacter() const
@@ -81,6 +81,29 @@ void UTeloInteractComponent::OnInteractSphereBeginOverlap(
 		if (Interactable->CanInteract(OwnerCharacter))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("[%s] 상호작용 가능한 아이템이 감지되었습니다."), *OtherActor->GetActorLabel());
+		}
+	}
+}
+
+void UTeloInteractComponent::OnInteractSphereEndOverlap(
+	UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex
+)
+{
+	ACharacter* OwnerCharacter = GetOwnerCharacter();
+	if (!OwnerCharacter)
+		return;
+
+	if (OtherActor == nullptr || OtherActor == OwnerCharacter)
+		return;
+
+	if (ITeloInteractable* Interactable = Cast<ITeloInteractable>(OtherActor))
+	{
+		if (Interactable->CanInteract(OwnerCharacter))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[%s] 상호작용 가능한 아이템 범위에서 벗어났습니다."), *OtherActor->GetActorLabel());
 		}
 	}
 }

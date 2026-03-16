@@ -29,7 +29,7 @@ private:
 	class USphereComponent* InteractSphere;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interact", meta = (AllowPrivateAccess = "true"))
-	float InteractRadius = 130.0f;
+	float InteractRadius = 150.0f;
 
 	UFUNCTION()
 	void OnInteractSphereBeginOverlap(
@@ -39,6 +39,14 @@ private:
 		int32 OtherBodyIndex,
 		bool bFromSweep,
 		const FHitResult& SweepResult
+	);
+
+	UFUNCTION()
+	void OnInteractSphereEndOverlap(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex
 	);
 
 	class ACharacter* GetOwnerCharacter() const;
