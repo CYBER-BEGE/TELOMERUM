@@ -25,4 +25,8 @@ public:
 	/* 상호작용 가능한 상태인지 */
 	UFUNCTION(BlueprintCallable, Category = "Interactable")
 	virtual bool CanInteract(AActor* Interactor) const = 0;
+
+	/* 상호작용 실행 */
+	UFUNCTION(BlueprintCallable, Category = "Interactable")
+	virtual void Interact(AActor* Interactor) = 0;
 };

@@ -138,6 +138,9 @@ private:
 	void AttackInput();
 	class ATeloEnemyCharacter* GetAttackTarget() const; // 락온 대상 가져오기
 
+	/* Interact */
+	void InteractInput();
+
 protected:
 	virtual void Landed(const FHitResult& Hit) override;
 	virtual bool CanJumpInternal_Implementation() const override;

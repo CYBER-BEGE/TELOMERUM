@@ -141,6 +141,9 @@ void ATeloPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 		// Lock On
 		EnhancedInputComponent->BindAction(LockOnAction, ETriggerEvent::Completed, this, &ATeloPlayerCharacter::DoLockOn);
+
+		// Interact
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::InteractInput);
 	}
 	else
 	{
@@ -416,5 +419,13 @@ void ATeloPlayerCharacter::RotateToTarget(const AActor* Target)
 		{
 			Super::RotateToTarget(Target);
 		}
+	}
+}
+
+void ATeloPlayerCharacter::InteractInput()
+{
+	if (InteractComponent)
+	{
+		InteractComponent->TryInteract();
 	}
 }

@@ -35,4 +35,7 @@ public:
 	/* 상호작용 가능한 상태인지 */
 	virtual bool CanInteract(AActor* Interactor) const override;
 
+	/* 상호작용 실행 */
+	virtual void Interact(AActor* Interactor) override;
+
 };

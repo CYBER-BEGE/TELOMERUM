@@ -25,12 +25,20 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+	/* 플레이어가 아이템과 접촉하는 상호작용 콜리전 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interact", meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* InteractSphere;
 
+	/* 상호작용 반경 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interact", meta = (AllowPrivateAccess = "true"))
 	float InteractRadius = 150.0f;
 
+	/* 현재 상호작용 중인 액터 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interact", meta = (AllowPrivateAccess = "true"))
+	AActor* CurrentInteractActor = nullptr;
+
+private:
+	/* 상호작용 콜리전이 액터와 겹치기 시작할 때 호출 */
 	UFUNCTION()
 	void OnInteractSphereBeginOverlap(
 		UPrimitiveComponent* OverlappedComponent,
@@ -41,6 +49,7 @@ private:
 		const FHitResult& SweepResult
 	);
 
+	/* 상호작용 콜리전이 액터와 겹치기 끝날 때 호출 */
 	UFUNCTION()
 	void OnInteractSphereEndOverlap(
 		UPrimitiveComponent* OverlappedComponent,
@@ -49,5 +58,14 @@ private:
 		int32 OtherBodyIndex
 	);
 
+	/* 현재 컴포넌트가 붙어있는 캐릭터 */
 	class ACharacter* GetOwnerCharacter() const;
+
+public:
+	/* 현재 상호작용 중인 액터 반환 */
+	AActor* GetCurrentInteractActor() const { return CurrentInteractActor; }
+
+	/* 상호작용 시도 */
+	void TryInteract();
+
 };

@@ -36,3 +36,11 @@ bool ATeloItemBase::CanInteract(AActor* Interactor) const
 
 	return true;
 }
+
+void ATeloItemBase::Interact(AActor* Interactor)
+{
+	if (!CanInteract(Interactor))
+		return;
+
+	UE_LOG(LogTemp, Warning, TEXT("[%s] 아이템과 상호작용했습니다."), *GetActorLabel());
+}
