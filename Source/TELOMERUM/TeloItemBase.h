@@ -31,6 +31,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	bool bCanInteract = true;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item")
+	bool bIsPickedUp = false;
+
 public:
 	/* 상호작용 가능한 상태인지 */
 	virtual bool CanInteract(AActor* Interactor) const override;

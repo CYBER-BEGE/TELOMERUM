@@ -31,6 +31,9 @@ bool ATeloItemBase::CanInteract(AActor* Interactor) const
 	if (!bCanInteract) // 상호작용이 불가능한 상태라면
 		return false;
 
+	if (bIsPickedUp) // 이미 습득된 아이템이라면
+		return false;
+
 	if (Interactor == nullptr) // 상호작용하는 액터가 유효하지 않다면
 		return false;
 
@@ -42,5 +45,9 @@ void ATeloItemBase::Interact(AActor* Interactor)
 	if (!CanInteract(Interactor))
 		return;
 
-	UE_LOG(LogTemp, Warning, TEXT("[%s] 아이템과 상호작용했습니다."), *GetActorLabel());
+	bIsPickedUp = true;
+
+	UE_LOG(LogTemp, Warning, TEXT("[%s] 아이템을 습득했습니다."), *GetActorLabel());
+
+	Destroy();
 }

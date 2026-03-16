@@ -103,7 +103,10 @@ void UTeloInteractComponent::OnInteractSphereEndOverlap(
 		{
 			UE_LOG(LogTemp, Warning, TEXT("[%s] 상호작용 가능한 아이템 범위에서 벗어났습니다."), *OtherActor->GetActorLabel());
 
-			CurrentInteractActor = nullptr;
+			if (OtherActor == CurrentInteractActor)
+			{
+				CurrentInteractActor = nullptr;
+			}
 		}
 	}
 }
