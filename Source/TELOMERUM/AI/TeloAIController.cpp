@@ -6,6 +6,8 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AISenseConfig_Damage.h"
+#include "Perception/AISenseConfig_Hearing.h"
 #include "NavigationSystem.h"
 
 ATeloAIController::ATeloAIController()
@@ -23,6 +25,14 @@ ATeloAIController::ATeloAIController()
 	SightConfig->PeripheralVisionAngleDegrees = 75.0f;
 	SightConfig->SetMaxAge(5.0f);
 
+	// Perception - Damage 설정
+	DamageConfig = CreateDefaultSubobject<UAISenseConfig_Damage>(TEXT("DamageConfig"));
+	DamageConfig->SetMaxAge(5.0f);
+
+	// Perception - Hearing 설정
+	HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("HearingConfig"));
+	HearingConfig->SetMaxAge(5.0f);
+
 	// Sight 감지 대상 설정
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
@@ -32,6 +42,12 @@ ATeloAIController::ATeloAIController()
 	AIPerceptionComponent->ConfigureSense(*SightConfig);
 	AIPerceptionComponent->SetDominantSense(SightConfig->GetSenseImplementation());
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ATeloAIController::OnTargetperceived);
+
+	// Perception Component에 Damage 적용
+	AIPerceptionComponent->ConfigureSense(*DamageConfig);
+
+	// Perception Component에 Hearing 적용
+	AIPerceptionComponent->ConfigureSense(*HearingConfig);
 
 	ProjectionExtent = FVector(200.0f, 200.0f, 300.0f); // LastTargetLocation 보정 범위 지정
 

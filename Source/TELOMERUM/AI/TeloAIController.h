@@ -33,6 +33,16 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	class UAISenseConfig_Sight* SightConfig;
 
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	class UAISenseConfig_Damage* DamageConfig;
+
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	class UAISenseConfig_Hearing* HearingConfig;
+
+	float LastDamagedTime;
+
+	float LastHeardTime;
+
 	// LastTargetLocation 보정 범위
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	FVector ProjectionExtent;
