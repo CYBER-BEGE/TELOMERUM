@@ -42,8 +42,8 @@ void UTeloInteractComponent::BeginPlay()
 	InteractSphere->SetGenerateOverlapEvents(true);
 
 	// Overlap 이벤트 바인딩
-	InteractSphere->OnComponentBeginOverlap.AddDynamic(this, &UTeloInteractComponent::OnInteractSphereBeginOverlap);
-	InteractSphere->OnComponentEndOverlap.AddDynamic(this, &UTeloInteractComponent::OnInteractSphereEndOverlap);
+	InteractSphere->OnComponentBeginOverlap.AddDynamic(this, &UTeloInteractComponent::OnInteractBeginOverlap);
+	InteractSphere->OnComponentEndOverlap.AddDynamic(this, &UTeloInteractComponent::OnInteractEndOverlap);
 
 	CreateInteractWidget();
 	HideInteractWidget();
@@ -109,7 +109,71 @@ void UTeloInteractComponent::HideInteractWidget()
 	}
 }
 
-void UTeloInteractComponent::OnInteractSphereBeginOverlap(
+bool UTeloInteractComponent::IsValidInteractActor(AActor* Actor) const
+{
+	ACharacter* OwnerCharacter = GetOwnerCharacter();
+	if (!OwnerCharacter) // 소유 캐릭터가 유효하지 않으면
+		return false;
+
+	if (!IsValid(Actor)) // 액터가 유효하지 않거나 이미 파괴된 경우
+		return false;
+
+	if (Actor == OwnerCharacter) // 상호작용 대상이 자기 자신이라면
+		return false;
+
+	if (ITeloInteractable* Interactable = Cast<ITeloInteractable>(Actor)) // 액터가 상호작용 인터페이스를 구현하고 있다면
+	{
+		return Interactable->CanInteract(OwnerCharacter); // 상호작용이 가능한 경우에만 유효한 상호작용 대상
+	}
+
+	return false;
+}
+
+void UTeloInteractComponent::RefreshCurrentInteractActor()
+{
+	ACharacter* OwnerCharacter = GetOwnerCharacter();
+	if (!OwnerCharacter)
+		return;
+
+	// 죽었거나, 파괴됐거나, 상호작용 불가능해진 후보 제거
+	InteractCandidateList.RemoveAll([this](AActor* Actor)
+		{
+			return !IsValidInteractActor(Actor);
+		});
+
+	AActor* NewCurrentActor = nullptr;
+	float BestDistSq = TNumericLimits<float>::Max();
+
+	for (AActor* Candidate : InteractCandidateList)
+	{
+		if (!IsValidInteractActor(Candidate))
+			continue;
+
+		const float DistSq = FVector::DistSquared(
+			OwnerCharacter->GetActorLocation(),
+			Candidate->GetActorLocation()
+		);
+
+		if (DistSq < BestDistSq)
+		{
+			BestDistSq = DistSq;
+			NewCurrentActor = Candidate;
+		}
+	}
+
+	CurrentInteractActor = NewCurrentActor;
+
+	if (CurrentInteractActor)
+	{
+		ShowInteractWidget(CurrentInteractActor);
+	}
+	else
+	{
+		HideInteractWidget();
+	}
+}
+
+void UTeloInteractComponent::OnInteractBeginOverlap(
 	UPrimitiveComponent* OverlappedComponent,
 	AActor* OtherActor,
 	UPrimitiveComponent* OtherComp,
@@ -118,52 +182,40 @@ void UTeloInteractComponent::OnInteractSphereBeginOverlap(
 	const FHitResult& SweepResult
 )
 {
-	ACharacter* OwnerCharacter = GetOwnerCharacter();
-	if (!OwnerCharacter)
+	// 유효한 상호작용 대상이 범위에 들어왔는지 검사
+	if (!IsValidInteractActor(OtherActor))
 		return;
 
-	if (OtherActor == nullptr || OtherActor == OwnerCharacter)
-		return;
+	InteractCandidateList.AddUnique(OtherActor); // 후보 목록에 추가 (중복 방지)
+	RefreshCurrentInteractActor();
 
-	if (ITeloInteractable* Interactable = Cast<ITeloInteractable>(OtherActor))
-	{
-		if (Interactable->CanInteract(OwnerCharacter))
-		{
-			CurrentInteractActor = OtherActor;
-			ShowInteractWidget(OtherActor);
-
-			UE_LOG(LogTemp, Warning, TEXT("[%s] 상호작용 가능한 아이템이 감지되었습니다."), *OtherActor->GetActorLabel());
-		}
-	}
+	//if (CurrentInteractActor)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("[%s] 현재 가장 가까운 상호작용 대상으로 선택되었습니다."), *CurrentInteractActor->GetActorLabel());
+	//}
 }
 
-void UTeloInteractComponent::OnInteractSphereEndOverlap(
+void UTeloInteractComponent::OnInteractEndOverlap(
 	UPrimitiveComponent* OverlappedComponent,
 	AActor* OtherActor,
 	UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex
 )
 {
-	ACharacter* OwnerCharacter = GetOwnerCharacter();
-	if (!OwnerCharacter)
+	if (OtherActor == nullptr)
 		return;
 
-	if (OtherActor == nullptr || OtherActor == OwnerCharacter)
-		return;
+	InteractCandidateList.Remove(OtherActor);
+	RefreshCurrentInteractActor();
 
-	if (ITeloInteractable* Interactable = Cast<ITeloInteractable>(OtherActor))
-	{
-		if (Interactable->CanInteract(OwnerCharacter))
-		{
-			if (OtherActor == CurrentInteractActor)
-			{
-				CurrentInteractActor = nullptr;
-				HideInteractWidget();
-
-				UE_LOG(LogTemp, Warning, TEXT("[%s] 상호작용 가능한 아이템 범위에서 벗어났습니다."), *OtherActor->GetActorLabel());
-			}
-		}
-	}
+	//if (CurrentInteractActor)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("[%s] 현재 가장 가까운 상호작용 대상으로 다시 선택되었습니다."), *CurrentInteractActor->GetActorLabel());
+	//}
+	//else
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("[UTeloInteractComponent] 현재 상호작용 가능한 액터가 없습니다."));
+	//}
 }
 
 void UTeloInteractComponent::TryInteract()
@@ -172,9 +224,11 @@ void UTeloInteractComponent::TryInteract()
 	if (!OwnerCharacter)
 		return;
 
+	RefreshCurrentInteractActor();
+
 	if (CurrentInteractActor == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[UTeloInteractComponent] 현재 상호작용 가능한 액터가 없습니다."));
+		//UE_LOG(LogTemp, Warning, TEXT("[UTeloInteractComponent] 현재 상호작용 가능한 액터가 없습니다."));
 		return;
 	}
 
@@ -183,8 +237,9 @@ void UTeloInteractComponent::TryInteract()
 		if (Interactable->CanInteract(OwnerCharacter))
 		{
 			Interactable->Interact(OwnerCharacter);
-			CurrentInteractActor = nullptr;
-			HideInteractWidget();
+
+			// 상호작용 후 파괴되거나 상태가 바뀔 수 있으니 다시 계산
+			RefreshCurrentInteractActor();
 		}
 	}
 }

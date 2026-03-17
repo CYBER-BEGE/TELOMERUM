@@ -37,6 +37,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interact", meta = (AllowPrivateAccess = "true"))
 	AActor* CurrentInteractActor = nullptr;
 
+	/* 현재 범위 안에 들어와 있는 상호작용 후보들 */
+	UPROPERTY()
+	TArray<AActor*> InteractCandidateList;
+
 	/* 상호작용 UI 위젯 클래스 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interact|UI", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class UTeloInteractWidget> InteractWidgetClass;
@@ -48,7 +52,7 @@ private:
 private:
 	/* 상호작용 콜리전이 액터와 겹치기 시작할 때 호출 */
 	UFUNCTION()
-	void OnInteractSphereBeginOverlap(
+	void OnInteractBeginOverlap(
 		UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
@@ -59,7 +63,7 @@ private:
 
 	/* 상호작용 콜리전이 액터와 겹치기 끝날 때 호출 */
 	UFUNCTION()
-	void OnInteractSphereEndOverlap(
+	void OnInteractEndOverlap(
 		UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
@@ -73,6 +77,12 @@ private:
 	void CreateInteractWidget();
 	void ShowInteractWidget(AActor* InteractActor);
 	void HideInteractWidget();
+
+	/* 상호작용 가능한 유효한 액터인지 검사 */
+	bool IsValidInteractActor(AActor* Actor) const;
+
+	/* 후보 목록을 정리하고 가장 가까운 액터를 현재 대상으로 갱신 */
+	void RefreshCurrentInteractActor();
 
 public:
 	/* 현재 상호작용 중인 액터 반환 */
