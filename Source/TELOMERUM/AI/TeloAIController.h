@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "Perception/AISense.h"
 #include "TeloAIController.generated.h"
 
 /**
@@ -38,10 +39,6 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	class UAISenseConfig_Hearing* HearingConfig;
 
-	float LastDamagedTime;
-
-	float LastHeardTime;
-
 	// LastTargetLocation 보정 범위
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	FVector ProjectionExtent;
@@ -49,7 +46,10 @@ private:
 	/** Functions **/
 	//virtual void OnPossess(APawn* InPawn) override;
 	
-	/* 타겟 감지 시 호출됨 */
+	/* Perceive */
 	UFUNCTION()
 	void OnTargetperceived(AActor* Actor, FAIStimulus Stimulus);
+	void UpdateTargetActor(AActor* Actor, const FVector& LastStimulusLocation);
+	bool IsSensing(AActor* Actor, FAISenseID SenseID) const;
+	
 };

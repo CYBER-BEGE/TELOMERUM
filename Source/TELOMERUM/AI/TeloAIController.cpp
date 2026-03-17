@@ -4,10 +4,12 @@
 #include "TeloAIController.h"
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
+
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Damage.h"
 #include "Perception/AISenseConfig_Hearing.h"
+
 #include "NavigationSystem.h"
 
 ATeloAIController::ATeloAIController()
@@ -32,7 +34,7 @@ ATeloAIController::ATeloAIController()
 
 	// Perception - Damage 설정
 	DamageConfig = CreateDefaultSubobject<UAISenseConfig_Damage>(TEXT("DamageConfig"));
-	DamageConfig->SetMaxAge(8.0f);
+	DamageConfig->SetMaxAge(10.0f);
 
 	// Perception - Hearing 설정
 	HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("HearingConfig"));
@@ -70,6 +72,7 @@ void ATeloAIController::BeginPlay()
 		if (BlackBoard && GetPawn())
 		{
 			BlackBoard->SetValueAsVector(TEXT("SpawnLocation"), GetPawn()->GetActorLocation());
+			BlackBoard->SetValueAsBool(TEXT("bDamaged"), false);
 		}
 	}
 	else UE_LOG(LogTemp, Error, TEXT("ATeloAIController: BehaviorTree is NULL")); // 블루프린트의 BT 등록 확인
@@ -77,64 +80,88 @@ void ATeloAIController::BeginPlay()
 
 void ATeloAIController::OnTargetperceived(AActor* Actor, FAIStimulus Stimulus)
 {
-	if (!Actor)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OnTargetperceived: Actor is nullptr"));
-		return;
-	}
-
-	const FAISenseID SenseID = Stimulus.Type;
-	FString SenseName = TEXT("Unknown");
-
-	if (SenseID == UAISense::GetSenseID(UAISense_Sight::StaticClass()))
-	{
-		SenseName = TEXT("Sight");
-	}
-	else if (SenseID == UAISense::GetSenseID(UAISense_Hearing::StaticClass()))
-	{
-		SenseName = TEXT("Hearing");
-	}
-	else if (SenseID == UAISense::GetSenseID(UAISense_Damage::StaticClass()))
-	{
-		SenseName = TEXT("Damage");
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("[Perception] Actor: %s | Sense: %s | Sensed: %s"),
-		*Actor->GetName(),
-		*SenseName,
-		Stimulus.WasSuccessfullySensed() ? TEXT("true") : TEXT("false"));
-
 	UBlackboardComponent* BlackBoard = GetBlackboardComponent();
 	if (!BlackBoard || !Actor) return;
 
-	if (Stimulus.WasSuccessfullySensed()) // 타겟 감지 성공
+	const FAISenseID SenseID = Stimulus.Type;
+	FString SenseTypeName = TEXT("Unknown");
+
+	/* 시야 감지 */
+	if (SenseID == UAISense::GetSenseID(UAISense_Sight::StaticClass()))
 	{
-		// Set Target
+		SenseTypeName = "Sight";
+	}
+
+	/* 데미지 감지 */
+	if (SenseID == UAISense::GetSenseID(UAISense_Damage::StaticClass()))
+	{
+		SenseTypeName = "Damage";
+	}
+
+	/* 청각 감지 */
+	if (SenseID == UAISense::GetSenseID(UAISense_Hearing::StaticClass()))
+	{
+		SenseTypeName = "Hearing";
+	}
+
+	UE_LOG(LogTemp, Display, TEXT("[%s] AIController Perception %s / 타겟: %s / 감지 타입: %s"),
+		*GetPawn()->GetActorNameOrLabel(),
+		Stimulus.WasSuccessfullySensed() ? TEXT("성공") : TEXT("실패"),
+		*Actor->GetActorNameOrLabel(),
+		*SenseTypeName);
+
+	UpdateTargetActor(Actor, Stimulus.StimulusLocation);
+}
+
+void ATeloAIController::UpdateTargetActor(AActor* Actor, const FVector& LastStimulusLocation)
+{
+	UBlackboardComponent* BlackBoard = GetBlackboardComponent();
+	if (!BlackBoard || !Actor) return;
+
+	const FAISenseID SightID = UAISense::GetSenseID(UAISense_Sight::StaticClass());
+	const FAISenseID DamageID = UAISense::GetSenseID(UAISense_Damage::StaticClass());
+	const FAISenseID HearingID = UAISense::GetSenseID(UAISense_Hearing::StaticClass());
+
+	const bool bSeen = IsSensing(Actor, SightID);
+	const bool bDamaged = IsSensing(Actor, DamageID);
+	const bool bHeard = IsSensing(Actor, HearingID);
+
+	if(bSeen || bDamaged || bHeard)
+	{
 		BlackBoard->SetValueAsObject(TEXT("TargetActor"), Actor);
-		SetFocus(Actor);
-
-		UE_LOG(LogTemp, Warning, TEXT("[%s] %s 가 보임"), *GetPawn()->GetActorNameOrLabel(), *Actor->GetActorNameOrLabel());
+		//SetFocus(Actor);
+		return;
 	}
-	else // 타겟 놓침(감지 실패)
+	
+	BlackBoard->ClearValue(TEXT("TargetActor"));
+	//ClearFocus(EAIFocusPriority::Gameplay);
+
+	// LastTargetLocation 보정
+	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+	FNavLocation ProjectedLocation;
+
+	if (NavSystem && NavSystem->ProjectPointToNavigation(LastStimulusLocation, ProjectedLocation, ProjectionExtent))
 	{
-		// Clear Target
-		BlackBoard->ClearValue(TEXT("TargetActor"));
-		ClearFocus(EAIFocusPriority::Gameplay);
-		
-		// LastTargetLocation 보정
-		UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
-		FNavLocation ProjectedLocation;
-
-		if (NavSystem && NavSystem->ProjectPointToNavigation(Stimulus.StimulusLocation, ProjectedLocation, ProjectionExtent))
-		{
-			BlackBoard->SetValueAsVector(TEXT("LastTargetLocation"), ProjectedLocation.Location); // 보정 성공, LastTargetLocation 저장
-		}
-		else 
-		{
-			BlackBoard->ClearValue(TEXT("LastTargetLocation"));
-			UE_LOG(LogTemp, Warning, TEXT("LastTargetLocation 보정 실패")); // 보정 실패, LastTargetLocation 초기화
-		}
-		
-		UE_LOG(LogTemp, Warning, TEXT("[%s] %s 를 놓침"), *GetNameSafe(GetPawn()), *GetNameSafe(Actor));
+		BlackBoard->SetValueAsVector(TEXT("LastTargetLocation"), ProjectedLocation.Location);
 	}
+	else
+	{
+		BlackBoard->ClearValue(TEXT("LastTargetLocation"));
+		UE_LOG(LogTemp, Warning, TEXT("[%s] LastTargetLocation 보정 실패"), *GetPawn()->GetActorNameOrLabel());
+	}
+}
+
+bool ATeloAIController::IsSensing(AActor* Actor, FAISenseID SenseID) const
+{
+	if (!AIPerceptionComponent || !Actor) return false;
+
+	FActorPerceptionBlueprintInfo PerceptionInfo;
+	AIPerceptionComponent->GetActorsPerception(Actor, PerceptionInfo);
+
+	for (const FAIStimulus& Stimulus : PerceptionInfo.LastSensedStimuli)
+	{
+		if (Stimulus.Type == SenseID && Stimulus.WasSuccessfullySensed()) return true;
+	}
+
+	return false;
 }
