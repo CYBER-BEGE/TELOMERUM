@@ -27,7 +27,8 @@ public class TELOMERUM : ModuleRules
 			"TELOMERUM/Player",
             "TELOMERUM/Enemy",
             "TELOMERUM/AI",
-            "TELOMERUM/Interfaces"
+            "TELOMERUM/Interfaces",
+            "TELOMERUM/UI"
         });
 
         // Uncomment if you are using Slate UI
