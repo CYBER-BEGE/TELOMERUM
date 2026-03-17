@@ -27,7 +27,7 @@ ATeloAIController::ATeloAIController()
 	SightConfig->PeripheralVisionAngleDegrees = 75.0f;
 	SightConfig->SetMaxAge(5.0f);
 
-	// Sight 감지 대상 설정
+	// Sight 감지 대상 설정 - 추후 변경필요
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
@@ -38,7 +38,13 @@ ATeloAIController::ATeloAIController()
 
 	// Perception - Hearing 설정
 	HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("HearingConfig"));
+	HearingConfig->HearingRange = 800.0f;
 	HearingConfig->SetMaxAge(8.0f);
+
+	// Hearing 감지 대상 설정 - 추후 변경필요
+	HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
+	HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;
+	HearingConfig->DetectionByAffiliation.bDetectFriendlies = true;
 
 	// Perception Component에 Sight 적용
 	AIPerceptionComponent->ConfigureSense(*SightConfig);
