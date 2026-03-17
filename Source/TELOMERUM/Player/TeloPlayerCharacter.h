@@ -46,6 +46,11 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class UTeloLockOnComponent* LockOnComponent;
 
+	/* Interact Component */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	class UTeloInteractComponent* InteractComponent;
+
+private:
 	/* Input Action */
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* MoveAction;
@@ -71,6 +76,10 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* LockOnAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input Action")
+	class UInputAction* InteractAction;
+
+private:
 	/* Movement Components */
 	void ResetMovementComps();
 
@@ -128,6 +137,9 @@ private:
 	/* Attack */
 	void AttackInput();
 	class ATeloEnemyCharacter* GetAttackTarget() const; // 락온 대상 가져오기
+
+	/* Interact */
+	void InteractInput();
 
 protected:
 	virtual void Landed(const FHitResult& Hit) override;
