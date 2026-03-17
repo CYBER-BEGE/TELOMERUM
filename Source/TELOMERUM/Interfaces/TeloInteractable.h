@@ -29,4 +29,8 @@ public:
 	/* 상호작용 실행 */
 	UFUNCTION(BlueprintCallable, Category = "Interactable")
 	virtual void Interact(AActor* Interactor) = 0;
+
+	/* UI에 표시할 상호작용 문구 */
+	UFUNCTION(BlueprintCallable, Category = "Interactable")
+	virtual FText GetInteractText() const = 0;
 };

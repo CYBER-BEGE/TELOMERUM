@@ -51,3 +51,8 @@ void ATeloItemBase::Interact(AActor* Interactor)
 
 	Destroy();
 }
+
+FText ATeloItemBase::GetInteractText() const
+{
+	return InteractText;
+}

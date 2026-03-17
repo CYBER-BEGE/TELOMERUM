@@ -34,6 +34,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item")
 	bool bIsPickedUp = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
+	FText InteractText = FText::FromString(TEXT("E : 습득"));
+
 public:
 	/* 상호작용 가능한 상태인지 */
 	virtual bool CanInteract(AActor* Interactor) const override;
@@ -41,4 +44,6 @@ public:
 	/* 상호작용 실행 */
 	virtual void Interact(AActor* Interactor) override;
 
+	/* UI에 표시할 상호작용 문구 */
+	virtual FText GetInteractText() const override;
 };

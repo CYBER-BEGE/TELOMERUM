@@ -37,6 +37,14 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interact", meta = (AllowPrivateAccess = "true"))
 	AActor* CurrentInteractActor = nullptr;
 
+	/* 상호작용 UI 위젯 클래스 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interact|UI", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UTeloInteractWidget> InteractWidgetClass;
+
+	/* 상호작용 UI 위젯 인스턴스 */
+	UPROPERTY()
+	class UTeloInteractWidget* InteractWidgetInstance = nullptr;
+
 private:
 	/* 상호작용 콜리전이 액터와 겹치기 시작할 때 호출 */
 	UFUNCTION()
@@ -60,6 +68,11 @@ private:
 
 	/* 현재 컴포넌트가 붙어있는 캐릭터 */
 	class ACharacter* GetOwnerCharacter() const;
+	class APlayerController* GetOwnerPlayerController() const;
+
+	void CreateInteractWidget();
+	void ShowInteractWidget(AActor* InteractActor);
+	void HideInteractWidget();
 
 public:
 	/* 현재 상호작용 중인 액터 반환 */
@@ -67,5 +80,4 @@ public:
 
 	/* 상호작용 시도 */
 	void TryInteract();
-
 };

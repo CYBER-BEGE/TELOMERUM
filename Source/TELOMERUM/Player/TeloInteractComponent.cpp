@@ -4,7 +4,9 @@
 #include "Player/TeloInteractComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/PlayerController.h"
 #include "Interfaces/TeloInteractable.h"
+#include "UI/TeloInteractWidget.h"
 
 // Sets default values for this component's properties
 UTeloInteractComponent::UTeloInteractComponent()
@@ -42,6 +44,9 @@ void UTeloInteractComponent::BeginPlay()
 	// Overlap 이벤트 바인딩
 	InteractSphere->OnComponentBeginOverlap.AddDynamic(this, &UTeloInteractComponent::OnInteractSphereBeginOverlap);
 	InteractSphere->OnComponentEndOverlap.AddDynamic(this, &UTeloInteractComponent::OnInteractSphereEndOverlap);
+
+	CreateInteractWidget();
+	HideInteractWidget();
 }
 
 // Called every frame
@@ -54,6 +59,54 @@ void UTeloInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 ACharacter* UTeloInteractComponent::GetOwnerCharacter() const
 {
 	return Cast<ACharacter>(GetOwner());
+}
+
+APlayerController* UTeloInteractComponent::GetOwnerPlayerController() const
+{
+	ACharacter* OwnerCharacter = GetOwnerCharacter();
+	return OwnerCharacter ? Cast<APlayerController>(OwnerCharacter->GetController()) : nullptr;
+}
+
+void UTeloInteractComponent::CreateInteractWidget()
+{
+	if (!InteractWidgetClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[UTeloInteractComponent] InteractWidgetClass이 설정되지 않았습니다."));
+		return;
+	}
+
+	if (InteractWidgetInstance)
+		return;
+
+	APlayerController* OwnerPC = GetOwnerPlayerController();
+	if (!OwnerPC)
+		return;
+
+	InteractWidgetInstance = CreateWidget<UTeloInteractWidget>(OwnerPC, InteractWidgetClass);
+	if (InteractWidgetInstance)
+	{
+		InteractWidgetInstance->AddToViewport();
+	}
+}
+
+void UTeloInteractComponent::ShowInteractWidget(AActor* InteractActor)
+{
+	if (!InteractWidgetInstance || !InteractActor)
+		return;
+
+	if (ITeloInteractable* Interactable = Cast<ITeloInteractable>(InteractActor))
+	{
+		InteractWidgetInstance->SetInteractText(Interactable->GetInteractText());
+		InteractWidgetInstance->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void UTeloInteractComponent::HideInteractWidget()
+{
+	if (InteractWidgetInstance)
+	{
+		InteractWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 void UTeloInteractComponent::OnInteractSphereBeginOverlap(
@@ -77,6 +130,7 @@ void UTeloInteractComponent::OnInteractSphereBeginOverlap(
 		if (Interactable->CanInteract(OwnerCharacter))
 		{
 			CurrentInteractActor = OtherActor;
+			ShowInteractWidget(OtherActor);
 
 			UE_LOG(LogTemp, Warning, TEXT("[%s] 상호작용 가능한 아이템이 감지되었습니다."), *OtherActor->GetActorLabel());
 		}
@@ -101,11 +155,12 @@ void UTeloInteractComponent::OnInteractSphereEndOverlap(
 	{
 		if (Interactable->CanInteract(OwnerCharacter))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("[%s] 상호작용 가능한 아이템 범위에서 벗어났습니다."), *OtherActor->GetActorLabel());
-
 			if (OtherActor == CurrentInteractActor)
 			{
 				CurrentInteractActor = nullptr;
+				HideInteractWidget();
+
+				UE_LOG(LogTemp, Warning, TEXT("[%s] 상호작용 가능한 아이템 범위에서 벗어났습니다."), *OtherActor->GetActorLabel());
 			}
 		}
 	}
@@ -128,6 +183,8 @@ void UTeloInteractComponent::TryInteract()
 		if (Interactable->CanInteract(OwnerCharacter))
 		{
 			Interactable->Interact(OwnerCharacter);
+			CurrentInteractActor = nullptr;
+			HideInteractWidget();
 		}
 	}
 }
