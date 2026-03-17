@@ -1,0 +1,36 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "UObject/Interface.h"
+#include "TeloInteractable.generated.h"
+
+// This class does not need to be modified.
+UINTERFACE(MinimalAPI, NotBlueprintable)
+class UTeloInteractable : public UInterface
+{
+	GENERATED_BODY()
+};
+
+/**
+ * 
+ */
+class TELOMERUM_API ITeloInteractable
+{
+	GENERATED_BODY()
+
+	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
+public:
+	/* 상호작용 가능한 상태인지 */
+	UFUNCTION(BlueprintCallable, Category = "Interactable")
+	virtual bool CanInteract(AActor* Interactor) const = 0;
+
+	/* 상호작용 실행 */
+	UFUNCTION(BlueprintCallable, Category = "Interactable")
+	virtual void Interact(AActor* Interactor) = 0;
+
+	/* UI에 표시할 상호작용 문구 */
+	UFUNCTION(BlueprintCallable, Category = "Interactable")
+	virtual FText GetInteractText() const = 0;
+};

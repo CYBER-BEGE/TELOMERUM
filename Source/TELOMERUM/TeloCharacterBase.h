@@ -46,8 +46,10 @@ protected:
 	float JumpPowerScale = 1.0f;
 
 	/* Attack */
+
+	// 공격 판정 소켓 이름 - 반드시 BP에서 지정
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	FName AttackSocketName; // 공격 판정 소켓 이름 - 반드시 BP에서 지정
+	FName AttackSocketName;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	float AttackSpeed = 1.5f;
