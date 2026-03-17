@@ -27,7 +27,6 @@ private:
 
 	class UBlackboardComponent* BlackboardComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "AI")
 	class UAIPerceptionComponent* AIPerceptionComponent;
 
 	UPROPERTY(VisibleAnywhere, Category = "AI")

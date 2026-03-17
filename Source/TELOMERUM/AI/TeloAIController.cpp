@@ -25,29 +25,30 @@ ATeloAIController::ATeloAIController()
 	SightConfig->PeripheralVisionAngleDegrees = 75.0f;
 	SightConfig->SetMaxAge(5.0f);
 
-	// Perception - Damage 설정
-	DamageConfig = CreateDefaultSubobject<UAISenseConfig_Damage>(TEXT("DamageConfig"));
-	DamageConfig->SetMaxAge(5.0f);
-
-	// Perception - Hearing 설정
-	HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("HearingConfig"));
-	HearingConfig->SetMaxAge(5.0f);
-
 	// Sight 감지 대상 설정
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
 
+	// Perception - Damage 설정
+	DamageConfig = CreateDefaultSubobject<UAISenseConfig_Damage>(TEXT("DamageConfig"));
+	DamageConfig->SetMaxAge(8.0f);
+
+	// Perception - Hearing 설정
+	HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("HearingConfig"));
+	HearingConfig->SetMaxAge(8.0f);
+
 	// Perception Component에 Sight 적용
 	AIPerceptionComponent->ConfigureSense(*SightConfig);
-	AIPerceptionComponent->SetDominantSense(SightConfig->GetSenseImplementation());
-	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ATeloAIController::OnTargetperceived);
 
 	// Perception Component에 Damage 적용
 	AIPerceptionComponent->ConfigureSense(*DamageConfig);
+	AIPerceptionComponent->SetDominantSense(DamageConfig->GetSenseImplementation());
 
 	// Perception Component에 Hearing 적용
 	AIPerceptionComponent->ConfigureSense(*HearingConfig);
+
+	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ATeloAIController::OnTargetperceived);
 
 	ProjectionExtent = FVector(200.0f, 200.0f, 300.0f); // LastTargetLocation 보정 범위 지정
 
@@ -76,6 +77,33 @@ void ATeloAIController::BeginPlay()
 
 void ATeloAIController::OnTargetperceived(AActor* Actor, FAIStimulus Stimulus)
 {
+	if (!Actor)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnTargetperceived: Actor is nullptr"));
+		return;
+	}
+
+	const FAISenseID SenseID = Stimulus.Type;
+	FString SenseName = TEXT("Unknown");
+
+	if (SenseID == UAISense::GetSenseID(UAISense_Sight::StaticClass()))
+	{
+		SenseName = TEXT("Sight");
+	}
+	else if (SenseID == UAISense::GetSenseID(UAISense_Hearing::StaticClass()))
+	{
+		SenseName = TEXT("Hearing");
+	}
+	else if (SenseID == UAISense::GetSenseID(UAISense_Damage::StaticClass()))
+	{
+		SenseName = TEXT("Damage");
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("[Perception] Actor: %s | Sense: %s | Sensed: %s"),
+		*Actor->GetName(),
+		*SenseName,
+		Stimulus.WasSuccessfullySensed() ? TEXT("true") : TEXT("false"));
+
 	UBlackboardComponent* BlackBoard = GetBlackboardComponent();
 	if (!BlackBoard || !Actor) return;
 
