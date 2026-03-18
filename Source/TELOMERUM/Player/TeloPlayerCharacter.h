@@ -79,6 +79,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* InteractAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input Action")
+	class UInputAction* InventoryAction;
+
 private:
 	/* Movement Components */
 	void ResetMovementComps();
