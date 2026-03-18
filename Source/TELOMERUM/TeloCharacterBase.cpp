@@ -181,6 +181,8 @@ void ATeloCharacterBase::DoAttackEnd()
 	{
 		GetWorldTimerManager().ClearTimer(AttackTimerHandle);
 	}
+
+	OnAttackEnd.Broadcast();
 }
 
 void ATeloCharacterBase::HitActor(const FHitResult& HitResult)

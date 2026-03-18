@@ -10,6 +10,8 @@
 UTeloBTT_AIAttack::UTeloBTT_AIAttack()
 {
 	NodeName = TEXT("AI Attack");
+
+	bCreateNodeInstance = true; // 인스턴스별 상태 저장 = true
 }
 
 EBTNodeResult::Type UTeloBTT_AIAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComponent, uint8* NodeMemory)
@@ -27,9 +29,52 @@ EBTNodeResult::Type UTeloBTT_AIAttack::ExecuteTask(UBehaviorTreeComponent& Owner
 	if (!TargetActor) return EBTNodeResult::Failed;
 
 	ATeloCharacterBase* OwnerCharacter = Cast<ATeloCharacterBase>(Owner);
+	if (!OwnerCharacter) return EBTNodeResult::Failed;
+
+	CachedOwnerComponent = &OwnerComponent;
+	CachedOwnerCharacter = OwnerCharacter;
+
+	ClearDelegate();
+	OwnerCharacter->OnAttackEnd.AddUObject(this, &UTeloBTT_AIAttack::HandleAttackEnd);
+
 	OwnerCharacter->AttackRequest(TargetActor); // 공격 요청
 
 	UE_LOG(LogTemp, Warning, TEXT("[%s] AIAttack: 컨트롤러에서 공격 요청"), *Owner->GetActorLabel());
 
-	return EBTNodeResult::Succeeded;
+	return EBTNodeResult::InProgress;
+}
+
+EBTNodeResult::Type UTeloBTT_AIAttack::AbortTask(UBehaviorTreeComponent& OwnerComponent, uint8* NodeMemory)
+{
+	ClearDelegate();
+	CachedOwnerComponent = nullptr;
+	CachedOwnerCharacter = nullptr;
+
+	return EBTNodeResult::Aborted;
+}
+
+void UTeloBTT_AIAttack::ClearDelegate() const
+{
+	if (CachedOwnerCharacter)
+	{
+		CachedOwnerCharacter->OnAttackEnd.RemoveAll(this);
+	}
+}
+
+void UTeloBTT_AIAttack::HandleAttackEnd()
+{
+	if (!CachedOwnerComponent)
+	{
+		ClearDelegate();
+		CachedOwnerCharacter = nullptr;
+		return;
+	}
+
+	ClearDelegate();
+	FinishLatentTask(*CachedOwnerComponent, EBTNodeResult::Succeeded);
+
+	UE_LOG(LogTemp, Warning, TEXT("[%s] AIAttack: 공격 종료"), *CachedOwnerCharacter->GetActorLabel());
+
+	CachedOwnerComponent = nullptr;
+	CachedOwnerCharacter = nullptr;
 }
