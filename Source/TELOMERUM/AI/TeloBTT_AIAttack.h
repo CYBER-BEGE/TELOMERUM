@@ -17,6 +17,23 @@ class TELOMERUM_API UTeloBTT_AIAttack : public UBTTaskNode
 public:
 	UTeloBTT_AIAttack();
 	
-public:
+protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComponent, uint8* NodeMemory) override;
+	virtual EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& OwnerComponent, uint8* NodeMemory) override;
+
+private:
+	/** Variables **/
+
+	UPROPERTY()
+	UBehaviorTreeComponent* CachedOwnerComponent = nullptr;
+
+	UPROPERTY()
+	class ATeloCharacterBase* CachedOwnerCharacter = nullptr;
+
+
+	/** Functions **/	
+	
+	void ClearDelegate() const;
+	void HandleAttackEnd();
+
 };

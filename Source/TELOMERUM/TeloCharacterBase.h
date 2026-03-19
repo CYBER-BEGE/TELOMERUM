@@ -8,6 +8,8 @@
 #include "GameFramework/Character.h"
 #include "TeloCharacterBase.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnAttackEnd);
+
 UCLASS()
 class TELOMERUM_API ATeloCharacterBase : public ACharacter, public ITeloDamageable
 {
@@ -105,6 +107,7 @@ public:
 	FName GetAttackSocketName() const { return AttackSocketName; }
 	float GetAttackDistance() const;
 	void AttackRequest(AActor* Target);
+	FOnAttackEnd OnAttackEnd;
 
 	UFUNCTION(BlueprintPure, Category = "Animation State")
 	bool IsAttacking() const { return bIsAttacking; }
