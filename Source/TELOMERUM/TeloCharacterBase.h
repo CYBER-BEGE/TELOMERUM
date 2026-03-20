@@ -66,10 +66,14 @@ protected:
 	float AttackDamage = 10.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
+	class UAnimMontage* AttackMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
 	float KnockbackImpulse = 250.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	float KnockupImpulse = 300.0f;
+
 
 private:
 	/** Variables **/
@@ -109,8 +113,11 @@ public:
 	void AttackRequest(AActor* Target);
 	FOnAttackEnd OnAttackEnd;
 
+	
 	UFUNCTION(BlueprintPure, Category = "Animation State")
 	bool IsAttacking() const { return bIsAttacking; }
+	/* └> AnimNotify 사용하면서 변경점: 외부 미사용 시 protected로 옮기고 UFUNCTION 제거 */
+
 
 protected:
 	/** Variables **/

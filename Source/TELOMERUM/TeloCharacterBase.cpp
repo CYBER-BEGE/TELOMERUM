@@ -3,6 +3,8 @@
 
 #include "TeloCharacterBase.h"
 #include "Engine/DamageEvents.h"
+#include "Animation/AnimMontage.h"
+#include "Animation/AnimInstance.h"
 
 // Sets default values
 ATeloCharacterBase::ATeloCharacterBase()
@@ -19,6 +21,9 @@ void ATeloCharacterBase::BeginPlay()
 	
 	if (AttackSocketName.IsNone())
 		UE_LOG(LogTemp, Warning, TEXT("[%s] AttackSocketName is NULL"), *GetActorLabel());
+
+	if (!AttackMontage)
+		UE_LOG(LogTemp, Warning, TEXT("[%s] AttackMontage is NULL"), *GetActorLabel());
 }
 
 // Called every frame
@@ -157,15 +162,18 @@ void ATeloCharacterBase::DrawHitDebug(const FHitResult& Hit)
 void ATeloCharacterBase::DoAttack(AActor* Target)
 {
 	if (!bCanAttack || bIsAttacking || AttackSocketName.IsNone()) return;
+	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttack"), *GetActorLabel());
 
 	bIsAttacking = true;
 	bCanAttack = false;
 
 	RotateToTarget(Target);
-
-	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttack"), *GetActorLabel());
-
 	TraceAttack(AttackSocketName);
+
+	if(AttackMontage && GetMesh() && GetMesh()->GetAnimInstance())
+	{
+		GetMesh()->GetAnimInstance()->Montage_Play(AttackMontage);
+	}
 
 	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &ATeloCharacterBase::DoAttackEnd, AttackSpeed, false);
 }
