@@ -33,6 +33,7 @@ void UTeloUISubsystem::OpenInventory()
 
 	InventoryWidgetInstance->SetVisibility(ESlateVisibility::Visible); // 위젯 표시
 	ApplyUIInputMode(); // UI 입력 모드 적용
+	InventoryWidgetInstance->SetKeyboardFocus(); // 위젯에 키보드 포커스 설정
 }
 
 void UTeloUISubsystem::CloseInventory()

@@ -13,5 +13,9 @@ UCLASS()
 class TELOMERUM_API UTeloInventoryWidget : public UUserWidget
 {
 	GENERATED_BODY()
+
+public:
+	virtual bool Initialize() override;
+	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 	
 };
