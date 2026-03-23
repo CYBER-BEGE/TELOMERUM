@@ -21,17 +21,15 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	/** 입력 매핑 컨텍스트 */
+	/* 입력 매핑 컨텍스트 설정 */
+	virtual void SetupInputComponent() override;
+
+private:
+	/* 입력 매핑 컨텍스트 */
 	UPROPERTY(EditAnywhere, Category = "Input Mappings")
 	TArray<class UInputMappingContext*> DefaultMappingContexts;
 
-	/** 입력 매핑 컨텍스트 설정 */
-	virtual void SetupInputComponent() override;
-
-//private:
-//	UPROPERTY(EditAnywhere, Category = "UI")
-//	TSubclassOf<class UUserWidget> HUDClass;
-//
-//	UPROPERTY()
-//	UUserWidget* HUD;
+	/* 인벤토리 위젯 클래스 */
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UTeloInventoryWidget> InventoryWidgetClass;
 };

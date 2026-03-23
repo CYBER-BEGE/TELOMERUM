@@ -3,6 +3,8 @@
 
 #include "TeloPlayerController.h"
 #include "EnhancedInputSubsystems.h"
+#include "UI/TeloUISubsystem.h"
+#include "UI/TeloInventoryWidget.h"
 
 ATeloPlayerController::ATeloPlayerController()
 {
@@ -18,12 +20,19 @@ void ATeloPlayerController::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerController] DefaultMappingContexts is NULL"));
 	}
 
-	///* HUD 위젯 생성 및 추가 */
-	//HUD = CreateWidget(this, HUDClass);
-	//if (HUD != nullptr)
-	//{
-	//	HUD->AddToViewport();
-	//}
+	if (!InventoryWidgetClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerController] InventoryWidgetClass is NULL"));
+	}
+
+	// 인벤토리 위젯 클래스 설정
+	if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
+	{
+		if (UTeloUISubsystem* UISubsystem = LocalPlayer->GetSubsystem<UTeloUISubsystem>())
+		{
+			UISubsystem->SetInventoryWidgetClass(InventoryWidgetClass);
+		}
+	}
 }
 
 void ATeloPlayerController::SetupInputComponent()

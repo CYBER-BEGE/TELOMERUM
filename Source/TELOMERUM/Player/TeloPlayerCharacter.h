@@ -144,6 +144,9 @@ private:
 	/* Interact */
 	void InteractInput();
 
+	/* Inventory */
+	void InventoryInput();
+
 protected:
 	virtual void Landed(const FHitResult& Hit) override;
 	virtual bool CanJumpInternal_Implementation() const override;
