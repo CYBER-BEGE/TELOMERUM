@@ -53,6 +53,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	FName AttackSocketName;
 
+	// 공격 애니메이션 몽타주 - 반드시 BP에서 지정
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	class UAnimMontage* AttackMontage;
+
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	float AttackSpeed = 1.5f;
 
@@ -64,9 +68,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	float AttackDamage = 10.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	class UAnimMontage* AttackMontage;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	float KnockbackImpulse = 250.0f;
@@ -94,7 +95,7 @@ private:
 	void DamageCooldown();
 
 	/* Attack */
-	void TraceAttack(FName DamageSourceBone); // 공격 시 소켓에서 정면으로 일정 거리까지 Sweep하여 공격 판정
+	//void TraceAttack(FName DamageSourceBone); // 공격 시 소켓에서 정면으로 일정 거리까지 Sweep하여 공격 판정
 
 	void DrawAttackDebug(FVector TraceStart, FVector TraceEnd);
 	void DrawHitDebug(const FHitResult& Hit);
@@ -113,6 +114,8 @@ public:
 	void AttackRequest(AActor* Target);
 	FOnAttackEnd OnAttackEnd;
 
+	void DoAttackEnd(); // 임시
+	void TraceAttack(FName DamageSourceBone); // 임시
 	
 	UFUNCTION(BlueprintPure, Category = "Animation State")
 	bool IsAttacking() const { return bIsAttacking; }
@@ -126,7 +129,7 @@ protected:
 
 	/* Attack */
 	void DoAttack(AActor* Target);
-	void DoAttackEnd();
+	//void DoAttackEnd();
 	virtual void HitActor(const FHitResult& HitResult);
 	virtual void RotateToTarget(const AActor* Target); // 타겟 방향으로 회전
 };

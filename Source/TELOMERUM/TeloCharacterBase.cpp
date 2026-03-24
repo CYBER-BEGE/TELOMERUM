@@ -161,21 +161,29 @@ void ATeloCharacterBase::DrawHitDebug(const FHitResult& Hit)
 
 void ATeloCharacterBase::DoAttack(AActor* Target)
 {
-	if (!bCanAttack || bIsAttacking || AttackSocketName.IsNone()) return;
-	UE_LOG(LogTemp, Warning, TEXT("[%s] DoAttack"), *GetActorLabel());
-
-	bIsAttacking = true;
-	bCanAttack = false;
-
-	RotateToTarget(Target);
-	TraceAttack(AttackSocketName);
-
-	if(AttackMontage && GetMesh() && GetMesh()->GetAnimInstance())
+	if (!bCanAttack || bIsAttacking) return;
+	if (AttackSocketName.IsNone() || !AttackMontage || !GetMesh()) return;
+	
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (!AnimInstance) 
 	{
-		GetMesh()->GetAnimInstance()->Montage_Play(AttackMontage);
+		UE_LOG(LogTemp, Error, TEXT("[%s] NO AnimInstance"), *GetActorLabel())
 	}
 
-	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &ATeloCharacterBase::DoAttackEnd, AttackSpeed, false);
+	UE_LOG(LogTemp, Warning, TEXT("[%s] Attack Start"), *GetActorLabel());
+
+	bCanAttack = false;
+	bIsAttacking = true;
+
+	RotateToTarget(Target);
+	//TraceAttack(AttackSocketName);
+
+	if(AttackMontage && AnimInstance)
+	{
+		AnimInstance->Montage_Play(AttackMontage);
+	}
+
+	//GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &ATeloCharacterBase::DoAttackEnd, AttackSpeed, false);
 }
 
 void ATeloCharacterBase::DoAttackEnd()
