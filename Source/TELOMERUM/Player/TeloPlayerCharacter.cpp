@@ -12,6 +12,7 @@
 #include "Enemy/TeloEnemyCharacter.h"
 #include "UI/TeloUISubsystem.h"
 #include "Engine/LocalPlayer.h"
+#include "Player/TeloInventoryComponent.h"
 
 // Sets default values
 ATeloPlayerCharacter::ATeloPlayerCharacter()
@@ -48,6 +49,9 @@ ATeloPlayerCharacter::ATeloPlayerCharacter()
 
 	// Interact 컴포넌트 생성
 	InteractComponent = CreateDefaultSubobject<UTeloInteractComponent>(TEXT("InteractComponent"));
+
+	// Inventory 컴포넌트 생성
+	InventoryComponent = CreateDefaultSubobject<UTeloInventoryComponent>(TEXT("InventoryComponent"));
 
 	// 초기 상태 설정
 	MaxHP = 100.0f;

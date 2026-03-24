@@ -29,12 +29,21 @@ protected:
 	UStaticMeshComponent* Mesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-	bool bCanInteract = true;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item")
-	bool bIsPickedUp = false;
+	FName ItemID = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
+	FText ItemName = FText::GetEmpty();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (ClampMin = "1"))
+	int32 ItemCount = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Property")
+	bool bCanInteract = true;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item|Property")
+	bool bIsPickedUp = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Property")
 	FText InteractText = FText::FromString(TEXT("E : 습득"));
 
 public:

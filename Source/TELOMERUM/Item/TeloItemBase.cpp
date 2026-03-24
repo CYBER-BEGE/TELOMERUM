@@ -2,6 +2,8 @@
 
 
 #include "Item/TeloItemBase.h"
+#include "Player/TeloPlayerCharacter.h"
+#include "Player/TeloInventoryComponent.h"
 
 // Sets default values
 ATeloItemBase::ATeloItemBase()
@@ -17,6 +19,14 @@ void ATeloItemBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (ItemID.IsNone())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[%s] ItemID is NULL"), *GetActorLabel());
+	}
+	if (ItemName.IsEmpty())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[%s] ItemName is empty"), *GetActorLabel());
+	}
 }
 
 // Called every frame
@@ -43,11 +53,40 @@ bool ATeloItemBase::CanInteract(AActor* Interactor) const
 void ATeloItemBase::Interact(AActor* Interactor)
 {
 	if (!CanInteract(Interactor))
+	{
 		return;
+	}
 
-	bIsPickedUp = true;
+	ATeloPlayerCharacter* PlayerCharacter = Cast<ATeloPlayerCharacter>(Interactor);
+	if (!PlayerCharacter)
+	{
+		return;
+	}
 
-	UE_LOG(LogTemp, Warning, TEXT("[%s] 아이템을 습득했습니다."), *GetActorLabel());
+	UTeloInventoryComponent* InventoryComponent = PlayerCharacter->GetInventoryComponent();
+	if (!InventoryComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[%s] InventoryComponent is NULL"), *GetActorLabel());
+		return;
+	}
+
+	FTeloInventoryItem NewItem;
+	NewItem.ItemID = ItemID;
+	NewItem.ItemName = ItemName;
+	NewItem.Count = ItemCount;
+
+	if (!InventoryComponent->AddItem(NewItem)) // 인벤토리에 아이템 추가 실패
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[%s] Failed to add item to inventory"), *GetActorLabel());
+		return;
+	}
+
+	bIsPickedUp = true; // 아이템이 습득된 상태로 변경
+
+	UE_LOG(LogTemp, Warning, TEXT("[%s] 아이템을 습득했습니다. ItemID: %s / Count: %d"),
+		*GetActorLabel(),
+		*ItemID.ToString(),
+		ItemCount);
 
 	Destroy();
 }

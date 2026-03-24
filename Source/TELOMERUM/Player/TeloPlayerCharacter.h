@@ -50,6 +50,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class UTeloInteractComponent* InteractComponent;
 
+	/* Inventory Component */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	class UTeloInventoryComponent* InventoryComponent;
+
 private:
 	/* Input Action */
 	UPROPERTY(EditAnywhere, Category = "Input Action")
@@ -95,12 +99,6 @@ private:
 	/* Look */
 	void LookInput(const struct FInputActionValue& Value);
 	void DoLook(float Yaw, float Pitch);
-
-	// Returns CameraBoom subobject
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-
-	// Returns FollowCamera subobject
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 	/* Jump */
 	void DoJumpStart();
@@ -161,4 +159,14 @@ public:
 
 	//UFUNCTION(BlueprintPure, Category = "Animation State")
 	//bool IsSliding() const { return bIsSliding; }
+
+public:
+	// Returns CameraBoom subobject
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+
+	// Returns FollowCamera subobject
+	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	// Returns InventoryComponent
+	FORCEINLINE class UTeloInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
 };
