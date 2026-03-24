@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "TeloItemBase.h"
+#include "Item/TeloItemBase.h"
 
 // Sets default values
 ATeloItemBase::ATeloItemBase()
