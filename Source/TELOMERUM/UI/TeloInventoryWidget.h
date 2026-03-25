@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/ScrollBox.h"
+#include "Components/WrapBox.h"
 #include "TeloInventoryWidget.generated.h"
 
 /**
@@ -29,9 +29,9 @@ public:
 	void SelectItem(const struct FTeloInventoryItem& ItemData);
 
 protected:
-	/* 인벤토리 아이템 목록을 표시하는 스크롤 박스 */
+	/* 인벤토리 아이템 목록을 표시하는 균등 그리드 패널 */
 	UPROPERTY(meta = (BindWidget))
-	class UScrollBox* ItemListScrollBox;
+	class UWrapBox* ItemWrapBox;
 
 	/* 인벤토리 아이템을 표시하는 위젯 클래스 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))

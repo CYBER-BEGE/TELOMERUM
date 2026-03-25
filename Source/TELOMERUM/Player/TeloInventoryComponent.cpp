@@ -2,6 +2,7 @@
 
 
 #include "Player/TeloInventoryComponent.h"
+#include "Engine/Texture2D.h"
 
 // Sets default values for this component's properties
 UTeloInventoryComponent::UTeloInventoryComponent()

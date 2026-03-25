@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Player/TeloInventoryComponent.h"
+#include "Components/Image.h"
 #include "TeloInventoryEntryWidget.generated.h"
 
 /**
@@ -27,8 +28,11 @@ public:
 	FOnInventoryEntryClicked OnInventoryEntryClicked;
 
 protected:
+	//UPROPERTY(meta = (BindWidget))
+	//class UTextBlock* ItemNameText;
+
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* ItemNameText;
+	class UImage* ItemIconImage;
 
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* ItemCountText;

@@ -74,6 +74,7 @@ void ATeloItemBase::Interact(AActor* Interactor)
 	NewItem.ItemID = ItemID;
 	NewItem.ItemName = ItemName;
 	NewItem.Description = ItemDescription;
+	NewItem.Icon = ItemIcon;
 	NewItem.Count = ItemCount;
 
 	if (!InventoryComponent->AddItem(NewItem)) // 인벤토리에 아이템 추가 실패

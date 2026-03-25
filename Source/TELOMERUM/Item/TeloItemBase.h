@@ -32,10 +32,13 @@ protected:
 	FName ItemID = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
+	FText ItemName = FText::GetEmpty();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	FText ItemDescription = FText::GetEmpty();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-	FText ItemName = FText::GetEmpty();
+	class UTexture2D* ItemIcon = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (ClampMin = "1"))
 	int32 ItemCount = 1;

@@ -21,6 +21,9 @@ struct FTeloInventoryItem
 	FText Description = FText::GetEmpty();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	class UTexture2D* Icon = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	int32 Count = 1;
 };
 

@@ -21,9 +21,14 @@ void UTeloInventoryEntryWidget::SetItemData(const FTeloInventoryItem& ItemData)
 {
 	CachedItemData = ItemData;
 
-	if (ItemNameText)
+	//if (ItemNameText)
+	//{
+	//	ItemNameText->SetText(ItemData.ItemName);
+	//}
+
+	if (ItemIconImage)
 	{
-		ItemNameText->SetText(ItemData.ItemName);
+		ItemIconImage->SetBrushFromTexture(ItemData.Icon);
 	}
 
 	if (ItemCountText)

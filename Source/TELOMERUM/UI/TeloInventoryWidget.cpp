@@ -43,12 +43,12 @@ FReply UTeloInventoryWidget::NativeOnKeyDown(const FGeometry& InGeometry, const 
 
 void UTeloInventoryWidget::RefreshInventory()
 {
-	if (!ItemListScrollBox)
+	if (!ItemWrapBox)
 	{
 		return;
 	}
 
-	ItemListScrollBox->ClearChildren(); // 기존 아이템 목록 제거
+	ItemWrapBox->ClearChildren(); // 기존 아이템 목록 제거
 
 	ATeloPlayerCharacter* PlayerCharacter = Cast<ATeloPlayerCharacter>(GetOwningPlayerPawn());
 	if (!PlayerCharacter)
@@ -87,7 +87,7 @@ void UTeloInventoryWidget::RefreshInventory()
 
 		EntryWidget->SetItemData(Item); // 아이템 데이터를 위젯에 설정
 		EntryWidget->OnInventoryEntryClicked.AddUObject(this, &UTeloInventoryWidget::SelectItem); // 아이템 클릭 시 SelectItem 함수 호출
-		ItemListScrollBox->AddChild(EntryWidget); // 스크롤 박스에 아이템 위젯 추가
+		ItemWrapBox->AddChild(EntryWidget); // 스크롤 박스에 아이템 위젯 추가
 	}
 }
 
