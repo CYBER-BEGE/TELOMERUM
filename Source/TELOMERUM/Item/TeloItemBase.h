@@ -32,6 +32,9 @@ protected:
 	FName ItemID = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
+	FText ItemDescription = FText::GetEmpty();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	FText ItemName = FText::GetEmpty();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (ClampMin = "1"))

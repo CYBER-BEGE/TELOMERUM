@@ -18,6 +18,9 @@ struct FTeloInventoryItem
 	FText ItemName = FText::GetEmpty();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	FText Description = FText::GetEmpty();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	int32 Count = 1;
 };
 
