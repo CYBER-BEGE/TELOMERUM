@@ -9,8 +9,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "Player/TeloLockOnComponent.h"
 #include "Player/TeloInteractComponent.h"
+#include "Components/SceneComponent.h"
 #include "Enemy/TeloEnemyCharacter.h"
 #include "Perception/AISense_Hearing.h"
+#include "TeloWeaponBase.h"
 
 // Sets default values
 ATeloPlayerCharacter::ATeloPlayerCharacter()
@@ -48,6 +50,10 @@ ATeloPlayerCharacter::ATeloPlayerCharacter()
 	// Interact 컴포넌트 생성
 	InteractComponent = CreateDefaultSubobject<UTeloInteractComponent>(TEXT("InteractComponent"));
 
+	// Weapon Attach 컴포넌트 생성
+	WeaponAttachComponent = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponAttachComponent"));
+	WeaponAttachComponent->SetupAttachment(GetMesh());
+
 	// 초기 상태 설정
 	MaxHP = 100.0f;
 	MoveSpeedScale = 1.5f;
@@ -78,6 +84,28 @@ void ATeloPlayerCharacter::BeginPlay()
 
 	PlayerController = Cast<APlayerController>(GetController());
 	CameraBoomDefaultRelativeLocation = CameraBoom->GetRelativeLocation(); // 카메라 붐의 기본 상대 위치 저장
+	WeaponAttachComponent->AttachToComponent(
+		GetMesh(),
+		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+		AttackSocketName
+	);
+
+	// Weapon 스폰
+	if (WeaponAttachComponent && WeaponClass)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.Instigator = GetInstigator();
+
+		WeaponInstance = GetWorld()->SpawnActor<ATeloWeaponBase>(WeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+		if (!WeaponInstance) return;
+
+		WeaponInstance->AttachToComponent(WeaponAttachComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	}
+	else 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] Can't Spawn Weapon - WeaponAttachComponent/WeaponClass"));
+	}
 
 	// 컴포넌트 값 확인
 	if (MoveAction == NULL)

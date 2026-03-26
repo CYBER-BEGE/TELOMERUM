@@ -50,6 +50,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class UTeloInteractComponent* InteractComponent;
 
+	/* Weapon Attach Component */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	class USceneComponent* WeaponAttachComponent;
+
 private:
 	/* Input Action */
 	UPROPERTY(EditAnywhere, Category = "Input Action")
@@ -140,6 +144,13 @@ private:
 
 	/* Interact */
 	void InteractInput();
+
+	/* Weapon */
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<class ATeloWeaponBase> WeaponClass;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	class ATeloWeaponBase* WeaponInstance;
 
 protected:
 	virtual void Landed(const FHitResult& Hit) override;
