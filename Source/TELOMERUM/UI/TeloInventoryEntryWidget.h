@@ -40,9 +40,17 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* EntryButton;
 
-	/* 부모 위젯에게 선택을 알리는 delegate */
+	/* 클릭 이벤트 핸들러 */
 	UFUNCTION()
 	void HandleEntryButtonClicked();
+
+	/* 호버링 이벤트 핸들러 */
+	UFUNCTION()
+	void HandleEntryButtonHovered();
+
+	/* 언호버링 이벤트 핸들러 */
+	UFUNCTION()
+	void HandleEntryButtonUnhovered();
 
 private:
 	/* 클릭됐을 때 어떤 아이템인지 부모에게 넘겨주기 위해 저장 */

@@ -1,9 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
-#include "UI/TeloInventoryEntryWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+
+#include "Engine/LocalPlayer.h"
+
+#include "UI/TeloInventoryEntryWidget.h"
+#include "UI/TeloUISubsystem.h"
+#include "UI/TeloTooltipWidget.h"
 
 bool UTeloInventoryEntryWidget::Initialize()
 {
@@ -12,6 +16,9 @@ bool UTeloInventoryEntryWidget::Initialize()
 	if (EntryButton)
 	{
 		EntryButton->OnClicked.AddDynamic(this, &UTeloInventoryEntryWidget::HandleEntryButtonClicked);
+
+		EntryButton->OnHovered.AddDynamic(this, &UTeloInventoryEntryWidget::HandleEntryButtonHovered);
+		EntryButton->OnUnhovered.AddDynamic(this, &UTeloInventoryEntryWidget::HandleEntryButtonUnhovered);
 	}
 
 	return bResult;
@@ -40,4 +47,31 @@ void UTeloInventoryEntryWidget::SetItemData(const FTeloInventoryItem& ItemData)
 void UTeloInventoryEntryWidget::HandleEntryButtonClicked()
 {
 	OnInventoryEntryClicked.Broadcast(CachedItemData);
+}
+
+void UTeloInventoryEntryWidget::HandleEntryButtonHovered()
+{
+	if (ULocalPlayer* LocalPlayer = GetOwningLocalPlayer())
+	{
+		if (UTeloUISubsystem* UISubsystem = LocalPlayer->GetSubsystem<UTeloUISubsystem>())
+		{
+			FTeloTooltipData TooltipData;
+			TooltipData.Title = CachedItemData.ItemName;
+			TooltipData.Description = CachedItemData.Description;
+			TooltipData.bUseDescription = false;
+
+			UISubsystem->ShowTooltip(TooltipData);
+		}
+	}
+}
+
+void UTeloInventoryEntryWidget::HandleEntryButtonUnhovered()
+{
+	if (ULocalPlayer* LocalPlayer = GetOwningLocalPlayer())
+	{
+		if (UTeloUISubsystem* UISubsystem = LocalPlayer->GetSubsystem<UTeloUISubsystem>())
+		{
+			UISubsystem->HideTooltip();
+		}
+	}
 }

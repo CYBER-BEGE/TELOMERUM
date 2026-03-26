@@ -13,6 +13,9 @@ void UTeloUISubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	Super::Initialize(Collection);
 }
 
+
+/* ==================== Inventory ==================== */
+
 void UTeloUISubsystem::SetInventoryWidgetClass(TSubclassOf<UTeloInventoryWidget> InWidgetClass)
 {
 	InventoryWidgetClass = InWidgetClass; // 위젯 클래스 설정
@@ -46,6 +49,8 @@ void UTeloUISubsystem::CloseInventory()
 
 	InventoryWidgetInstance->SetVisibility(ESlateVisibility::Hidden); // 위젯 숨김
 	ApplyGameInputMode(); // 게임 입력 모드 적용
+
+	HideTooltip(); // 인벤토리 닫을 때 툴팁도 숨김
 }
 
 void UTeloUISubsystem::ToggleInventory()
@@ -141,3 +146,72 @@ void UTeloUISubsystem::ApplyGameInputMode()
 	PlayerController->SetInputMode(InputMode); // 게임 입력 모드 적용
 	PlayerController->bShowMouseCursor = false; // 마우스 커서 숨김
 }
+
+
+/* ==================== Tooltip ===================== */
+
+void UTeloUISubsystem::SetTooltipWidgetClass(TSubclassOf<UTeloTooltipWidget> InWidgetClass)
+{
+	TooltipWidgetClass = InWidgetClass;
+	CreateTooltipWidget();
+}
+
+void UTeloUISubsystem::CreateTooltipWidget()
+{
+	if (!TooltipWidgetClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[UTeloUISubsystem] TooltipWidgetClass is NULL"));
+		return;
+	}
+
+	if (TooltipWidgetInstance)
+	{
+		return;
+	}
+
+	ULocalPlayer* LocalPlayer = GetLocalPlayer();
+	if (!LocalPlayer)
+	{
+		return;
+	}
+
+	APlayerController* PlayerController = LocalPlayer->GetPlayerController(GetWorld());
+	if (!PlayerController)
+	{
+		return;
+	}
+
+	TooltipWidgetInstance = CreateWidget<UTeloTooltipWidget>(PlayerController, TooltipWidgetClass);
+	if (TooltipWidgetInstance)
+	{
+		TooltipWidgetInstance->AddToViewport(100); // ZOrder를 100으로 설정하여 다른 UI 요소보다 위에 표시
+		TooltipWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void UTeloUISubsystem::ShowTooltip(const FTeloTooltipData& InTooltipData)
+{
+	if (!TooltipWidgetInstance)
+	{
+		CreateTooltipWidget();
+	}
+
+	if (!TooltipWidgetInstance)
+	{
+		return;
+	}
+
+	TooltipWidgetInstance->SetTooltipData(InTooltipData);
+	TooltipWidgetInstance->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UTeloUISubsystem::HideTooltip()
+{
+	if (!TooltipWidgetInstance)
+	{
+		return;
+	}
+
+	TooltipWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+}
+

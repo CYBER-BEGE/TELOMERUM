@@ -32,4 +32,8 @@ private:
 	/* 인벤토리 위젯 클래스 */
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<class UTeloInventoryWidget> InventoryWidgetClass;
+
+	/* 툴팁 위젯 클래스 */
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UTeloTooltipWidget> TooltipWidgetClass;
 };
