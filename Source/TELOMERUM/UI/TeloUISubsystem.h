@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/LocalPlayerSubsystem.h"
 #include "UI/TeloTooltipWidget.h"
+#include "Player/TeloInventoryComponent.h"
 #include "TeloUISubsystem.generated.h"
 
 /**
@@ -35,10 +36,17 @@ private:
 	UPROPERTY()
 	class UTeloTooltipWidget* TooltipWidgetInstance = nullptr;
 
+	/* 아이템 컨텍스트 메뉴 위젯 클래스 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UTeloItemContextMenuWidget> ItemContextMenuWidgetClass;
+
+	/* 아이템 컨텍스트 메뉴 위젯 인스턴스 */
+	UPROPERTY()
+	class UTeloItemContextMenuWidget* ItemContextMenuWidgetInstance = nullptr;
+
 public:
 	/* 인벤토리 위젯 클래스 설정 */
 	void SetInventoryWidgetClass(TSubclassOf<class UTeloInventoryWidget> InWidgetClass);
-
 	/* 인벤토리 위젯 표시 */
 	void OpenInventory();
 	/* 인벤토리 위젯 숨김 */
@@ -50,17 +58,25 @@ public:
 
 	/* 툴팁 위젯 클래스 설정 */
 	void SetTooltipWidgetClass(TSubclassOf<class UTeloTooltipWidget> InWidgetClass);
-
 	/* 툴팁 표시 */
 	void ShowTooltip(const FTeloTooltipData& InTooltipData);
 	/* 툴팁 숨김 */
 	void HideTooltip();
+
+	/* 아이템 컨텍스트 메뉴 위젯 클래스 설정 */
+	void SetItemContextMenuWidgetClass(TSubclassOf<class UTeloItemContextMenuWidget> InWidgetClass);
+	/* 아이템 컨텍스트 메뉴 표시 */
+	void ShowItemContextMenu(const FTeloInventoryItem& InItemData, const FVector2D& ScreenPosition);
+	/* 아이템 컨텍스트 메뉴 숨김 */
+	void HideItemContextMenu();
 
 private:
 	/* 인벤토리 위젯 생성 */
 	void CreateInventoryWidget();
 	/* 툴팁 위젯 생성 */
 	void CreateTooltipWidget();
+	/* 아이템 컨텍스트 메뉴 위젯 생성 */
+	void CreateItemContextMenuWidget();
 
 	/* UI 입력 모드 적용 */
 	void ApplyUIInputMode();

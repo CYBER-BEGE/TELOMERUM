@@ -36,4 +36,8 @@ private:
 	/* 툴팁 위젯 클래스 */
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<class UTeloTooltipWidget> TooltipWidgetClass;
+
+	/* 아이템 컨텍스트 메뉴 위젯 클래스 */
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UTeloItemContextMenuWidget> ItemContextMenuWidgetClass;
 };

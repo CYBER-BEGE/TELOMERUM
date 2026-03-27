@@ -2,11 +2,12 @@
 
 
 #include "UI/TeloUISubsystem.h"
-#include "UI/TeloInventoryWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "UI/TeloInventoryWidget.h"
+#include "UI/TeloItemContextMenuWidget.h"
 
 void UTeloUISubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -48,9 +49,10 @@ void UTeloUISubsystem::CloseInventory()
 	}
 
 	InventoryWidgetInstance->SetVisibility(ESlateVisibility::Hidden); // 위젯 숨김
-	ApplyGameInputMode(); // 게임 입력 모드 적용
+	ApplyGameInputMode();	// 게임 입력 모드 적용
 
-	HideTooltip(); // 인벤토리 닫을 때 툴팁도 숨김
+	HideTooltip();			// 인벤토리 닫을 때 툴팁도 숨김
+	HideItemContextMenu();	// 인벤토리 닫을 때 아이템 컨텍스트 메뉴도 숨김
 }
 
 void UTeloUISubsystem::ToggleInventory()
@@ -215,3 +217,71 @@ void UTeloUISubsystem::HideTooltip()
 	TooltipWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
 }
 
+
+/* ==================== Item Context Menu ==================== */
+
+void UTeloUISubsystem::SetItemContextMenuWidgetClass(TSubclassOf<UTeloItemContextMenuWidget> InWidgetClass)
+{
+	ItemContextMenuWidgetClass = InWidgetClass;
+	CreateItemContextMenuWidget();
+}
+
+void UTeloUISubsystem::CreateItemContextMenuWidget()
+{
+	if (!ItemContextMenuWidgetClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[UTeloUISubsystem] ItemContextMenuWidgetClass is NULL"));
+		return;
+	}
+
+	if (ItemContextMenuWidgetInstance)
+	{
+		return;
+	}
+
+	ULocalPlayer* LocalPlayer = GetLocalPlayer();
+	if (!LocalPlayer)
+	{
+		return;
+	}
+
+	APlayerController* PlayerController = LocalPlayer->GetPlayerController(GetWorld());
+	if (!PlayerController)
+	{
+		return;
+	}
+
+	ItemContextMenuWidgetInstance = CreateWidget<UTeloItemContextMenuWidget>(PlayerController, ItemContextMenuWidgetClass);
+	if (ItemContextMenuWidgetInstance)
+	{
+		ItemContextMenuWidgetInstance->AddToViewport(110);
+		ItemContextMenuWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void UTeloUISubsystem::ShowItemContextMenu(const FTeloInventoryItem& InItemData, const FVector2D& ScreenPosition)
+{
+	if (!ItemContextMenuWidgetInstance)
+	{
+		CreateItemContextMenuWidget();
+	}
+
+	if (!ItemContextMenuWidgetInstance)
+	{
+		return;
+	}
+
+	ItemContextMenuWidgetInstance->SetItemData(InItemData);
+	ItemContextMenuWidgetInstance->SetPositionInViewport(ScreenPosition + FVector2D(8.0f, 8.0f), true);
+	ItemContextMenuWidgetInstance->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UTeloUISubsystem::HideItemContextMenu()
+{
+	if (!ItemContextMenuWidgetInstance)
+	{
+		return;
+	}
+
+	ItemContextMenuWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+}
