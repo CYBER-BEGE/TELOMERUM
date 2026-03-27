@@ -15,5 +15,5 @@ class TELOMERUM_API UTeloAnimNoti_TraceAttack : public UAnimNotify
 	GENERATED_BODY()
 
 public:
-	virtual void Notify(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation) override;
+	virtual void Notify(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 };

@@ -145,12 +145,14 @@ private:
 	/* Interact */
 	void InteractInput();
 
-	/* Weapon */
+	
+	/* Weapon *//*
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<class ATeloWeaponBase> WeaponClass;
 
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 	class ATeloWeaponBase* WeaponInstance;
+	*/
 
 protected:
 	virtual void Landed(const FHitResult& Hit) override;

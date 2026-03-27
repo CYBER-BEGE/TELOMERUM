@@ -4,9 +4,10 @@
 #include "TeloAnimNoti_TraceAttack.h"
 #include "TeloCharacterBase.h"
 
-void UTeloAnimNoti_TraceAttack::Notify(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation)
+void UTeloAnimNoti_TraceAttack::Notify(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	Super::Notify(MeshComponent, Animation);
+	UE_LOG(LogTemp, Warning, TEXT(""));
+	Super::Notify(MeshComponent, Animation, EventReference);
 
 	if (!MeshComponent) return;
 

@@ -87,6 +87,11 @@ private:
 	FTimerHandle AttackTimerHandle;	// 공격 쿨타임 타이머 핸들
 	bool bCanAttack = true;			// 공격 가능 여부
 	bool bIsAttacking = false;		// 공격 중인지 여부
+	bool bAttackTracing = false;
+
+	FVector PreviousAttackTraceStart = FVector::ZeroVector;
+	FVector PreviousAttackTraceEnd = FVector::ZeroVector;
+	TSet<TWeakObjectPtr<AActor>> HitActorsThisSwing;
 
 	/** Functions **/
 
@@ -113,6 +118,9 @@ public:
 	float GetAttackDistance() const;
 	void AttackRequest(AActor* Target);
 	FOnAttackEnd OnAttackEnd;
+	void BeginAttackTrace();
+	void TickAttackTrace();
+	void EndAttackTrace();
 
 	void DoAttackEnd(); // 임시
 	void TraceAttack(FName DamageSourceBone); // 임시
@@ -121,6 +129,12 @@ public:
 	bool IsAttacking() const { return bIsAttacking; }
 	/* └> AnimNotify 사용하면서 변경점: 외부 미사용 시 protected로 옮기고 UFUNCTION 제거 */
 
+	/* Weapon */
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<class ATeloWeaponBase> WeaponClass;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	class ATeloWeaponBase* WeaponInstance;
 
 protected:
 	/** Variables **/

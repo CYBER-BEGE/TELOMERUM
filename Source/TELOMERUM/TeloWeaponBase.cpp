@@ -33,3 +33,20 @@ void ATeloWeaponBase::Tick(float DeltaTime)
 
 }
 
+bool ATeloWeaponBase::GetAttackTraceData(FVector& OutStart, FVector& OutEnd) const
+{
+	if (!WeaponMesh) return false;
+	if (TraceStartSocketName.IsNone() || TraceEndSocketName.IsNone()) return false;
+
+	if (!WeaponMesh->DoesSocketExist(TraceStartSocketName) ||
+		!WeaponMesh->DoesSocketExist(TraceEndSocketName))
+	{
+		return false;
+	}
+
+	OutStart = WeaponMesh->GetSocketLocation(TraceStartSocketName);
+	OutEnd = WeaponMesh->GetSocketLocation(TraceEndSocketName);
+
+	return true;
+}
+

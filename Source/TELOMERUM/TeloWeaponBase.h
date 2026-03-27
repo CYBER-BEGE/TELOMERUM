@@ -32,4 +32,18 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* WeaponMesh;
 
+	// 공격 판정 시작점 소켓 이름
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
+	FName TraceStartSocketName = TEXT("TraceStart");
+
+	// 공격 판정 끝점 소켓 이름
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
+	FName TraceEndSocketName = TEXT("TraceEnd");
+
+	// 무기 전용 판정 반경
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
+	float TraceRadius = 50.0f;
+
+public:
+	bool GetAttackTraceData(FVector& OutStart, FVector& OutEnd) const;
 };
