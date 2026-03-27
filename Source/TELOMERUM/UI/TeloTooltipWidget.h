@@ -4,22 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "UI/TeloUIDataTypes.h"
 #include "TeloTooltipWidget.generated.h"
-
-USTRUCT(BlueprintType)
-struct FTeloTooltipData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tooltip")
-	FText Title = FText::GetEmpty();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tooltip")
-	FText Description = FText::GetEmpty();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tooltip")
-	bool bUseDescription = false;
-};
 
 UCLASS()
 class TELOMERUM_API UTeloTooltipWidget : public UUserWidget

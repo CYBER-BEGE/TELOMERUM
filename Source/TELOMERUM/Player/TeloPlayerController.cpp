@@ -2,11 +2,13 @@
 
 
 #include "TeloPlayerController.h"
+
 #include "EnhancedInputSubsystems.h"
+
 #include "UI/TeloUISubsystem.h"
 #include "UI/TeloInventoryWidget.h"
 #include "UI/TeloTooltipWidget.h"
-#include "UI/TeloItemContextMenuWidget.h"
+#include "UI/TeloContextWidget.h"
 
 ATeloPlayerController::ATeloPlayerController()
 {
@@ -21,30 +23,27 @@ void ATeloPlayerController::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerController] DefaultMappingContexts is NULL"));
 	}
-
 	if (!InventoryWidgetClass)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerController] InventoryWidgetClass is NULL"));
 	}
-
 	if (!TooltipWidgetClass)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerController] TooltipWidgetClass is NULL"));
 	}
-
-	if (!ItemContextMenuWidgetClass)
+	if (!ContextWidgetClass)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerController] ItemContextMenuWidgetClass is NULL"));
 	}
 
-	// 인벤토리 위젯 클래스 설정
+	// UI 서브시스템에 위젯 클래스 설정
 	if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
 	{
 		if (UTeloUISubsystem* UISubsystem = LocalPlayer->GetSubsystem<UTeloUISubsystem>())
 		{
 			UISubsystem->SetInventoryWidgetClass(InventoryWidgetClass);
 			UISubsystem->SetTooltipWidgetClass(TooltipWidgetClass);
-			UISubsystem->SetItemContextMenuWidgetClass(ItemContextMenuWidgetClass);
+			UISubsystem->SetContextWidgetClass(ContextWidgetClass);
 		}
 	}
 }

@@ -4,8 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/LocalPlayerSubsystem.h"
-#include "UI/TeloTooltipWidget.h"
-#include "Player/TeloInventoryComponent.h"
+#include "UI/TeloUIDataTypes.h"
 #include "TeloUISubsystem.generated.h"
 
 /**
@@ -38,11 +37,14 @@ private:
 
 	/* 아이템 컨텍스트 메뉴 위젯 클래스 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UTeloItemContextMenuWidget> ItemContextMenuWidgetClass;
+	TSubclassOf<class UTeloContextWidget> ContextWidgetClass;
 
 	/* 아이템 컨텍스트 메뉴 위젯 인스턴스 */
 	UPROPERTY()
-	class UTeloItemContextMenuWidget* ItemContextMenuWidgetInstance = nullptr;
+	class UTeloContextWidget* ContextWidgetInstance = nullptr;
+
+	/* 현재 아이템 컨텍스트 메뉴가 참조하는 객체 (예: 아이템 데이터) */
+	TWeakObjectPtr<UObject> CurrentContextSource;
 
 public:
 	/* 인벤토리 위젯 클래스 설정 */
@@ -58,17 +60,21 @@ public:
 
 	/* 툴팁 위젯 클래스 설정 */
 	void SetTooltipWidgetClass(TSubclassOf<class UTeloTooltipWidget> InWidgetClass);
-	/* 툴팁 표시 */
-	void ShowTooltip(const FTeloTooltipData& InTooltipData);
+	/* 툴팁 표시 (TooltipData를 직접 표시할 때 사용) */
+	void ShowTooltipFromData(const FTeloTooltipData& InTooltipData);
+	/* 툴팁 표시 (SourceObject가 ITeloUIDataSource 인터페이스를 구현하고 있을 때 사용) */
+	void ShowTooltipFromSource(UObject* SourceObject);
 	/* 툴팁 숨김 */
 	void HideTooltip();
 
 	/* 아이템 컨텍스트 메뉴 위젯 클래스 설정 */
-	void SetItemContextMenuWidgetClass(TSubclassOf<class UTeloItemContextMenuWidget> InWidgetClass);
-	/* 아이템 컨텍스트 메뉴 표시 */
-	void ShowItemContextMenu(const FTeloInventoryItem& InItemData, const FVector2D& ScreenPosition);
+	void SetContextWidgetClass(TSubclassOf<class UTeloContextWidget> InWidgetClass);
+	/* 아이템 컨텍스트 메뉴 표시 (TooltipData를 직접 표시할 때 사용) */
+	void ShowContextFromData(const FTeloContextData& InMenuData, UObject* SourceObject, const FVector2D& ScreenPosition);
+	/* 아이템 컨텍스트 메뉴 표시 (SourceObject가 ITeloUIDataSource 인터페이스를 구현하고 있을 때 사용) */
+	void ShowContextFromSource(UObject* SourceObject, const FVector2D& ScreenPosition);
 	/* 아이템 컨텍스트 메뉴 숨김 */
-	void HideItemContextMenu();
+	void HideContext();
 
 private:
 	/* 인벤토리 위젯 생성 */
@@ -76,7 +82,10 @@ private:
 	/* 툴팁 위젯 생성 */
 	void CreateTooltipWidget();
 	/* 아이템 컨텍스트 메뉴 위젯 생성 */
-	void CreateItemContextMenuWidget();
+	void CreateContextWidget();
+
+	/* 아이템 컨텍스트 메뉴 액션 클릭 처리 */
+	void HandleContextActionClicked(FName ActionID);
 
 	/* UI 입력 모드 적용 */
 	void ApplyUIInputMode();

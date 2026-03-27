@@ -3,8 +3,8 @@
 
 #include "UI/TeloTooltipWidget.h"
 #include "Components/TextBlock.h"
-#include "Blueprint/WidgetLayoutLibrary.h"
 #include "GameFramework/PlayerController.h"
+//#include "Blueprint/WidgetLayoutLibrary.h"
 
 void UTeloTooltipWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {

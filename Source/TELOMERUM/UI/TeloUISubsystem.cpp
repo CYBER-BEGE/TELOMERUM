@@ -2,12 +2,14 @@
 
 
 #include "UI/TeloUISubsystem.h"
-#include "Blueprint/UserWidget.h"
+
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
-#include "Blueprint/WidgetBlueprintLibrary.h"
+
 #include "UI/TeloInventoryWidget.h"
-#include "UI/TeloItemContextMenuWidget.h"
+#include "UI/TeloTooltipWidget.h"
+#include "UI/TeloContextWidget.h"
+#include "Interfaces/TeloUIDataSource.h"
 
 void UTeloUISubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -52,7 +54,7 @@ void UTeloUISubsystem::CloseInventory()
 	ApplyGameInputMode();	// 게임 입력 모드 적용
 
 	HideTooltip();			// 인벤토리 닫을 때 툴팁도 숨김
-	HideItemContextMenu();	// 인벤토리 닫을 때 아이템 컨텍스트 메뉴도 숨김
+	HideContext();			// 인벤토리 닫을 때 아이템 컨텍스트 메뉴도 숨김
 }
 
 void UTeloUISubsystem::ToggleInventory()
@@ -76,13 +78,7 @@ bool UTeloUISubsystem::IsInventoryOpen() const
 
 void UTeloUISubsystem::CreateInventoryWidget()
 {
-	if (!InventoryWidgetClass)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[UTeloUISubsystem] InventoryWidgetClass is NULL"));
-		return;
-	}
-
-	if (InventoryWidgetInstance) // 위젯 중복 생성 방지
+	if (!InventoryWidgetClass || InventoryWidgetInstance) // 클래스가 없거나, 위젯이 이미 있다면
 	{
 		return;
 	}
@@ -145,7 +141,7 @@ void UTeloUISubsystem::ApplyGameInputMode()
 	}
 
 	FInputModeGameOnly InputMode;
-	PlayerController->SetInputMode(InputMode); // 게임 입력 모드 적용
+	PlayerController->SetInputMode(InputMode);	// 게임 입력 모드 적용
 	PlayerController->bShowMouseCursor = false; // 마우스 커서 숨김
 }
 
@@ -160,13 +156,7 @@ void UTeloUISubsystem::SetTooltipWidgetClass(TSubclassOf<UTeloTooltipWidget> InW
 
 void UTeloUISubsystem::CreateTooltipWidget()
 {
-	if (!TooltipWidgetClass)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[UTeloUISubsystem] TooltipWidgetClass is NULL"));
-		return;
-	}
-
-	if (TooltipWidgetInstance)
+	if (!TooltipWidgetClass || TooltipWidgetInstance) // 클래스가 없거나, 위젯이 이미 있다면
 	{
 		return;
 	}
@@ -191,7 +181,7 @@ void UTeloUISubsystem::CreateTooltipWidget()
 	}
 }
 
-void UTeloUISubsystem::ShowTooltip(const FTeloTooltipData& InTooltipData)
+void UTeloUISubsystem::ShowTooltipFromData(const FTeloTooltipData& InTooltipData)
 {
 	if (!TooltipWidgetInstance)
 	{
@@ -207,6 +197,29 @@ void UTeloUISubsystem::ShowTooltip(const FTeloTooltipData& InTooltipData)
 	TooltipWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 }
 
+void UTeloUISubsystem::ShowTooltipFromSource(UObject* SourceObject)
+{
+	if (!SourceObject)
+	{
+		return;
+	}
+
+	ITeloUIDataSource* Source = Cast<ITeloUIDataSource>(SourceObject);
+	if (!Source)
+	{
+		return;
+	}
+
+	FTeloTooltipData TooltipData;
+	if (!Source->GetTooltipData(TooltipData))
+	{
+		HideTooltip();
+		return;
+	}
+
+	ShowTooltipFromData(TooltipData);
+}
+
 void UTeloUISubsystem::HideTooltip()
 {
 	if (!TooltipWidgetInstance)
@@ -220,21 +233,15 @@ void UTeloUISubsystem::HideTooltip()
 
 /* ==================== Item Context Menu ==================== */
 
-void UTeloUISubsystem::SetItemContextMenuWidgetClass(TSubclassOf<UTeloItemContextMenuWidget> InWidgetClass)
+void UTeloUISubsystem::SetContextWidgetClass(TSubclassOf<UTeloContextWidget> InWidgetClass)
 {
-	ItemContextMenuWidgetClass = InWidgetClass;
-	CreateItemContextMenuWidget();
+	ContextWidgetClass = InWidgetClass;
+	CreateContextWidget();
 }
 
-void UTeloUISubsystem::CreateItemContextMenuWidget()
+void UTeloUISubsystem::CreateContextWidget()
 {
-	if (!ItemContextMenuWidgetClass)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[UTeloUISubsystem] ItemContextMenuWidgetClass is NULL"));
-		return;
-	}
-
-	if (ItemContextMenuWidgetInstance)
+	if (!ContextWidgetClass || ContextWidgetInstance)
 	{
 		return;
 	}
@@ -251,37 +258,85 @@ void UTeloUISubsystem::CreateItemContextMenuWidget()
 		return;
 	}
 
-	ItemContextMenuWidgetInstance = CreateWidget<UTeloItemContextMenuWidget>(PlayerController, ItemContextMenuWidgetClass);
-	if (ItemContextMenuWidgetInstance)
+	ContextWidgetInstance = CreateWidget<UTeloContextWidget>(PlayerController, ContextWidgetClass);
+	if (ContextWidgetInstance)
 	{
-		ItemContextMenuWidgetInstance->AddToViewport(110);
-		ItemContextMenuWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+		ContextWidgetInstance->AddToViewport(110); // ZOrder를 110으로 설정하여 툴팁보다 위에 표시
+		ContextWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+		ContextWidgetInstance->OnActionClicked.AddUObject(this, &UTeloUISubsystem::HandleContextActionClicked);
 	}
 }
 
-void UTeloUISubsystem::ShowItemContextMenu(const FTeloInventoryItem& InItemData, const FVector2D& ScreenPosition)
+void UTeloUISubsystem::ShowContextFromData(const FTeloContextData& InMenuData, UObject* SourceObject, const FVector2D& ScreenPosition)
 {
-	if (!ItemContextMenuWidgetInstance)
+	if (!ContextWidgetInstance)
 	{
-		CreateItemContextMenuWidget();
+		CreateContextWidget();
 	}
 
-	if (!ItemContextMenuWidgetInstance)
+	if (!ContextWidgetInstance)
 	{
 		return;
 	}
 
-	ItemContextMenuWidgetInstance->SetItemData(InItemData);
-	ItemContextMenuWidgetInstance->SetPositionInViewport(ScreenPosition + FVector2D(8.0f, 8.0f), true);
-	ItemContextMenuWidgetInstance->SetVisibility(ESlateVisibility::Visible);
+	CurrentContextSource = SourceObject;
+
+	ContextWidgetInstance->SetMenuData(InMenuData);
+	ContextWidgetInstance->SetPositionInViewport(ScreenPosition + FVector2D(8.0f, 8.0f), true);
+	ContextWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 }
 
-void UTeloUISubsystem::HideItemContextMenu()
+void UTeloUISubsystem::ShowContextFromSource(UObject* SourceObject, const FVector2D& ScreenPosition)
 {
-	if (!ItemContextMenuWidgetInstance)
+	if (!SourceObject)
 	{
 		return;
 	}
 
-	ItemContextMenuWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+	ITeloUIDataSource* Source = Cast<ITeloUIDataSource>(SourceObject);
+	if (!Source)
+	{
+		return;
+	}
+
+	FTeloContextData MenuData;
+	Source->GetContextActions(MenuData.Actions);
+
+	if (MenuData.Actions.IsEmpty())
+	{
+		HideContext();
+		return;
+	}
+
+	ShowContextFromData(MenuData, SourceObject, ScreenPosition);
+}
+
+void UTeloUISubsystem::HideContext()
+{
+	CurrentContextSource = nullptr;
+
+	if (!ContextWidgetInstance)
+	{
+		return;
+	}
+
+	ContextWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UTeloUISubsystem::HandleContextActionClicked(FName ActionID)
+{
+	UObject* SourceObject = CurrentContextSource.Get();
+	if (!SourceObject)
+	{
+		HideContext();
+		return;
+	}
+
+	ITeloUIDataSource* Source = Cast<ITeloUIDataSource>(SourceObject);
+	if (Source)
+	{
+		Source->HandleContextAction(ActionID);
+	}
+
+	HideContext();
 }

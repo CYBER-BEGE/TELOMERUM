@@ -39,5 +39,5 @@ private:
 
 	/* 아이템 컨텍스트 메뉴 위젯 클래스 */
 	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<class UTeloItemContextMenuWidget> ItemContextMenuWidgetClass;
+	TSubclassOf<class UTeloContextWidget> ContextWidgetClass;
 };

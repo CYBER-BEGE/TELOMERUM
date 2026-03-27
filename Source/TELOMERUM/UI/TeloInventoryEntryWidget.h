@@ -5,38 +5,45 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Player/TeloInventoryComponent.h"
-#include "Components/Image.h"
+#include "Interfaces/TeloUIDataSource.h"
 #include "TeloInventoryEntryWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TELOMERUM_API UTeloInventoryEntryWidget : public UUserWidget
+class TELOMERUM_API UTeloInventoryEntryWidget : public UUserWidget, public ITeloUIDataSource
 {
 	GENERATED_BODY()
 
-	/* 아이템이 클릭됐을 때 부모 위젯에게 알리는 delegate 선언 */
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventoryEntryClicked, const FTeloInventoryItem&);
 	
 public:
 	virtual bool Initialize() override;
 
+	/* 아이템 데이터를 위젯에 적용 */
 	void SetItemData(const FTeloInventoryItem& ItemData);
 
 	/* 아이템이 클릭됐을 때 부모 위젯에게 알리는 delegate */
 	FOnInventoryEntryClicked OnInventoryEntryClicked;
 
-protected:
-	//UPROPERTY(meta = (BindWidget))
-	//class UTextBlock* ItemNameText;
+	/* 툴팁 데이터를 가져옵 (반환값이 false인 경우 툴팁이 표시되지 않음) */
+	virtual bool GetTooltipData(FTeloTooltipData& OutTooltipData) const override;
+	/* 컨텍스트 메뉴 액션을 가져옵 */
+	virtual void GetContextActions(TArray<FTeloContextAction>& OutActions) const override;
+	/* 컨텍스트 메뉴 액션이 선택되었을 때 호출됨 */
+	virtual void HandleContextAction(FName ActionID) override;
 
+protected:
+	/* 아이템 이름 텍스트 */
 	UPROPERTY(meta = (BindWidget))
 	class UImage* ItemIconImage;
 
+	/* 아이템 개수 텍스트 (1개인 경우 숨김) */
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* ItemCountText;
 
+	/* 아이템 등급에 따른 테두리 이미지 */
 	UPROPERTY(meta = (BindWidget))
 	class UButton* EntryButton;
 

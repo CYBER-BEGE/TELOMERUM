@@ -2,14 +2,16 @@
 
 
 #include "UI/TeloInventoryEntryWidget.h"
-#include "UI/TeloUISubsystem.h"
-#include "UI/TeloTooltipWidget.h"
-
-#include "Components/TextBlock.h"
-#include "Components/Button.h"
 
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
+
+#include "Components/TextBlock.h"
+#include "Components/Button.h"
+#include "Components/Image.h"
+
+#include "UI/TeloUISubsystem.h"
+#include "UI/TeloTooltipWidget.h"
 
 bool UTeloInventoryEntryWidget::Initialize()
 {
@@ -18,7 +20,6 @@ bool UTeloInventoryEntryWidget::Initialize()
 	if (EntryButton)
 	{
 		EntryButton->OnClicked.AddDynamic(this, &UTeloInventoryEntryWidget::HandleEntryButtonClicked);
-
 		EntryButton->OnHovered.AddDynamic(this, &UTeloInventoryEntryWidget::HandleEntryButtonHovered);
 		EntryButton->OnUnhovered.AddDynamic(this, &UTeloInventoryEntryWidget::HandleEntryButtonUnhovered);
 	}
@@ -30,11 +31,6 @@ void UTeloInventoryEntryWidget::SetItemData(const FTeloInventoryItem& ItemData)
 {
 	CachedItemData = ItemData;
 
-	//if (ItemNameText)
-	//{
-	//	ItemNameText->SetText(ItemData.ItemName);
-	//}
-
 	if (ItemIconImage)
 	{
 		ItemIconImage->SetBrushFromTexture(ItemData.Icon);
@@ -43,6 +39,42 @@ void UTeloInventoryEntryWidget::SetItemData(const FTeloInventoryItem& ItemData)
 	if (ItemCountText)
 	{
 		ItemCountText->SetText(FText::AsNumber(ItemData.Count));
+	}
+}
+
+bool UTeloInventoryEntryWidget::GetTooltipData(FTeloTooltipData& OutTooltipData) const
+{
+	OutTooltipData.Title = CachedItemData.ItemName;
+	OutTooltipData.Description = CachedItemData.Description;
+	OutTooltipData.bUseDescription = true;
+
+	return true;
+}
+
+void UTeloInventoryEntryWidget::GetContextActions(TArray<FTeloContextAction>& OutActions) const
+{
+	FTeloContextAction UseAction;
+	UseAction.ActionID = TEXT("Use");
+	UseAction.Label = FText::FromString(TEXT("사용"));
+	OutActions.Add(UseAction);
+
+	FTeloContextAction DropAction;
+	DropAction.ActionID = TEXT("Drop");
+	DropAction.Label = FText::FromString(TEXT("버리기"));
+	OutActions.Add(DropAction);
+}
+
+void UTeloInventoryEntryWidget::HandleContextAction(FName ActionID)
+{
+	if (ActionID == TEXT("Use"))
+	{
+		UE_LOG(LogTemp, Log, TEXT("[UTeloInventoryEntryWidget] Use Item: %s"),
+			*CachedItemData.ItemID.ToString());
+	}
+	else if (ActionID == TEXT("Drop"))
+	{
+		UE_LOG(LogTemp, Log, TEXT("[UTeloInventoryEntryWidget] Drop Item: %s"),
+			*CachedItemData.ItemID.ToString());
 	}
 }
 
@@ -67,7 +99,7 @@ void UTeloInventoryEntryWidget::HandleEntryButtonClicked()
 				return;
 			}
 
-			UISubsystem->ShowItemContextMenu(CachedItemData, FVector2D(MouseX, MouseY));
+			UISubsystem->ShowContextFromSource(this, FVector2D(MouseX, MouseY)); // 클릭 시 컨텍스트 메뉴 표시
 		}
 	}
 }
@@ -78,12 +110,7 @@ void UTeloInventoryEntryWidget::HandleEntryButtonHovered()
 	{
 		if (UTeloUISubsystem* UISubsystem = LocalPlayer->GetSubsystem<UTeloUISubsystem>())
 		{
-			FTeloTooltipData TooltipData;
-			TooltipData.Title = CachedItemData.ItemName;
-			TooltipData.Description = CachedItemData.Description;
-			TooltipData.bUseDescription = false;
-
-			UISubsystem->ShowTooltip(TooltipData);
+			UISubsystem->ShowTooltipFromSource(this);
 		}
 	}
 }
