@@ -41,6 +41,34 @@ FReply UTeloInventoryWidget::NativeOnKeyDown(const FGeometry& InGeometry, const 
 	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
+FReply UTeloInventoryWidget::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	const FKey PressedButton = InMouseEvent.GetEffectingButton();
+
+	// 좌클릭, 우클릭일 때만 컨텍스트 바깥 클릭 검사
+	if (PressedButton == EKeys::LeftMouseButton || PressedButton == EKeys::RightMouseButton)
+	{
+		if (ULocalPlayer* LocalPlayer = GetOwningLocalPlayer())
+		{
+			if (UTeloUISubsystem* UISubsystem = LocalPlayer->GetSubsystem<UTeloUISubsystem>())
+			{
+				if (UISubsystem->IsContextOpen()) // 컨텍스트 메뉴가 열려 있을 때
+				{
+					const FVector2D ScreenPosition = InMouseEvent.GetScreenSpacePosition();
+
+					if (!UISubsystem->IsScreenPositionInsideContext(ScreenPosition)) // 클릭한 위치가 컨텍스트 메뉴 바깥일 때
+					{
+						UISubsystem->HideContext();
+					}
+				}
+			}
+		}
+	}
+
+	// 여기서 Handled를 반환하면 자식 버튼 클릭이 막힐 수 있으니 그대로 넘김
+	return Super::NativeOnPreviewMouseButtonDown(InGeometry, InMouseEvent);
+}
+
 void UTeloInventoryWidget::RefreshInventory()
 {
 	if (!ItemWrapBox)

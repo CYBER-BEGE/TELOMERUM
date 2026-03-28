@@ -340,3 +340,20 @@ void UTeloUISubsystem::HandleContextActionClicked(FName ActionID)
 
 	HideContext();
 }
+
+bool UTeloUISubsystem::IsContextOpen() const
+{
+	return ContextWidgetInstance
+		&& ContextWidgetInstance->IsInViewport()
+		&& ContextWidgetInstance->GetVisibility() == ESlateVisibility::Visible;
+}
+
+bool UTeloUISubsystem::IsScreenPositionInsideContext(const FVector2D& ScreenPosition) const
+{
+	if (!ContextWidgetInstance)
+	{
+		return false;
+	}
+
+	return ContextWidgetInstance->IsScreenPositionInside(ScreenPosition);
+}

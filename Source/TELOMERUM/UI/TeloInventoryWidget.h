@@ -21,13 +21,10 @@ public:
 
 	/* 키 입력 처리 함수 */
 	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
+
+	/* 마우스 버튼 입력을 자식 위젯보다 먼저 처리 */
+	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	
-	/* 인벤토리 UI를 새로고침하는 함수 */
-	void RefreshInventory();
-
-	/* 인벤토리 아이템이 선택됐을 때 호출되는 함수 */
-	void SelectItem(const struct FTeloInventoryItem& ItemData);
-
 protected:
 	/* 인벤토리 아이템 목록을 표시하는 균등 그리드 패널 */
 	UPROPERTY(meta = (BindWidget))
@@ -48,4 +45,10 @@ protected:
 	/* 선택된 아이템의 설명을 표시하는 텍스트 블록 */
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* SelectedItemDescriptionText;
+
+public:
+	/* 인벤토리 UI를 새로고침하는 함수 */
+	void RefreshInventory();
+	/* 인벤토리 아이템이 선택됐을 때 호출되는 함수 */
+	void SelectItem(const struct FTeloInventoryItem& ItemData);
 };

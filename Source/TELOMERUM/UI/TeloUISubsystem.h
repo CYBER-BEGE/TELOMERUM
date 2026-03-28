@@ -76,6 +76,11 @@ public:
 	/* 아이템 컨텍스트 메뉴 숨김 */
 	void HideContext();
 
+	/* 컨텍스트 메뉴가 현재 열려 있는지 확인 */
+	bool IsContextOpen() const;
+	/* 화면 좌표가 현재 열려 있는 컨텍스트 메뉴 안인지 확인 */
+	bool IsScreenPositionInsideContext(const FVector2D& ScreenPosition) const;
+
 private:
 	/* 인벤토리 위젯 생성 */
 	void CreateInventoryWidget();
