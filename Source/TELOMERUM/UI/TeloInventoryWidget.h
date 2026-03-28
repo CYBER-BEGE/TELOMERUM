@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "UI/TeloScreenWidgetBase.h"
 #include "Components/WrapBox.h"
 #include "TeloInventoryWidget.generated.h"
 
@@ -11,19 +11,13 @@
  * 
  */
 UCLASS()
-class TELOMERUM_API UTeloInventoryWidget : public UUserWidget
+class TELOMERUM_API UTeloInventoryWidget : public UTeloScreenWidgetBase
 {
 	GENERATED_BODY()
 
 public:
-	/* 위젯 초기화 함수 */
-	virtual bool Initialize() override;
-
 	/* 키 입력 처리 함수 */
 	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
-
-	/* 마우스 버튼 입력을 자식 위젯보다 먼저 처리 */
-	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	
 protected:
 	/* 인벤토리 아이템 목록을 표시하는 균등 그리드 패널 */

@@ -2,25 +2,19 @@
 
 
 #include "UI/TeloInventoryWidget.h"
-#include "UI/TeloUISubsystem.h"
+
 #include "Engine/LocalPlayer.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Input/Reply.h"
 #include "InputCoreTypes.h"
-#include "Player/TeloPlayerCharacter.h"
-#include "Player/TeloInventoryComponent.h"
-#include "UI/TeloInventoryEntryWidget.h"
+
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 
-bool UTeloInventoryWidget::Initialize()
-{
-	const bool bResult = Super::Initialize();
-
-	SetIsFocusable(true); // 위젯이 포커스를 받을 수 있도록 설정
-
-	return bResult;
-}
+#include "Player/TeloPlayerCharacter.h"
+#include "Player/TeloInventoryComponent.h"
+#include "UI/TeloUISubsystem.h"
+#include "UI/TeloInventoryEntryWidget.h"
 
 FReply UTeloInventoryWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
@@ -28,45 +22,14 @@ FReply UTeloInventoryWidget::NativeOnKeyDown(const FGeometry& InGeometry, const 
 
 	if (PressedKey == EKeys::Escape || PressedKey == EKeys::I)
 	{
-		if (ULocalPlayer* LocalPlayer = GetOwningLocalPlayer())
+		if (UTeloUISubsystem* UISubsystem = GetTeloUISubsystem())
 		{
-			if (UTeloUISubsystem* UISubsystem = LocalPlayer->GetSubsystem<UTeloUISubsystem>())
-			{
-				UISubsystem->CloseInventory();
-				return FReply::Handled();
-			}
+			UISubsystem->CloseInventory(); // 인벤토리 UI 닫기
+			return FReply::Handled();
 		}
 	}
 
 	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
-}
-
-FReply UTeloInventoryWidget::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
-{
-	const FKey PressedButton = InMouseEvent.GetEffectingButton();
-
-	// 좌클릭, 우클릭일 때만 컨텍스트 바깥 클릭 검사
-	if (PressedButton == EKeys::LeftMouseButton || PressedButton == EKeys::RightMouseButton)
-	{
-		if (ULocalPlayer* LocalPlayer = GetOwningLocalPlayer())
-		{
-			if (UTeloUISubsystem* UISubsystem = LocalPlayer->GetSubsystem<UTeloUISubsystem>())
-			{
-				if (UISubsystem->IsContextOpen()) // 컨텍스트 메뉴가 열려 있을 때
-				{
-					const FVector2D ScreenPosition = InMouseEvent.GetScreenSpacePosition();
-
-					if (!UISubsystem->IsScreenPositionInsideContext(ScreenPosition)) // 클릭한 위치가 컨텍스트 메뉴 바깥일 때
-					{
-						UISubsystem->HideContext();
-					}
-				}
-			}
-		}
-	}
-
-	// 여기서 Handled를 반환하면 자식 버튼 클릭이 막힐 수 있으니 그대로 넘김
-	return Super::NativeOnPreviewMouseButtonDown(InGeometry, InMouseEvent);
 }
 
 void UTeloInventoryWidget::RefreshInventory()
@@ -95,8 +58,6 @@ void UTeloInventoryWidget::RefreshInventory()
 	{
 		return;
 	}
-
-	//SelectItem(Items[0]); // 첫 번째 아이템을 기본 선택
 
 	if (!InventoryEntryWidgetClass)
 	{
