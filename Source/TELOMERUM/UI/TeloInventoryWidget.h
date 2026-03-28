@@ -18,6 +18,8 @@ class TELOMERUM_API UTeloInventoryWidget : public UTeloScreenWidgetBase
 public:
 	/* 키 입력 처리 함수 */
 	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
+	/* 화면이 열릴 때 호출되는 함수 */
+	virtual void OnScreenOpened() override;
 	
 protected:
 	/* 인벤토리 아이템 목록을 표시하는 균등 그리드 패널 */

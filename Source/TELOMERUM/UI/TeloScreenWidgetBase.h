@@ -23,4 +23,10 @@ public:
 protected:
 	/* 화면에 표시된 UI가 컨텍스트 메뉴 바깥에서 클릭됐을 때 호출되는 함수 */
 	class UTeloUISubsystem* GetTeloUISubsystem() const;
+
+public:
+	/* 화면이 열릴 때 호출되는 공통 훅 */
+	virtual void OnScreenOpened();
+	/* 화면이 닫힐 때 호출되는 공통 훅 */
+	virtual void OnScreenClosed();
 };

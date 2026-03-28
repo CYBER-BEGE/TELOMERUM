@@ -3,10 +3,3 @@
 
 #include "UI/TeloUIDataTypes.h"
 
-TeloUIDataTypes::TeloUIDataTypes()
-{
-}
-
-TeloUIDataTypes::~TeloUIDataTypes()
-{
-}

@@ -47,7 +47,5 @@ struct FTeloContextData
 
 class TELOMERUM_API TeloUIDataTypes
 {
-public:
-	TeloUIDataTypes();
-	~TeloUIDataTypes();
+
 };

@@ -50,3 +50,11 @@ UTeloUISubsystem* UTeloScreenWidgetBase::GetTeloUISubsystem() const
 
 	return nullptr;
 }
+
+void UTeloScreenWidgetBase::OnScreenOpened()
+{
+}
+
+void UTeloScreenWidgetBase::OnScreenClosed()
+{
+}

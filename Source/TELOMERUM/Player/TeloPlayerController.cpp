@@ -33,7 +33,7 @@ void ATeloPlayerController::BeginPlay()
 	}
 	if (!ContextWidgetClass)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerController] ItemContextMenuWidgetClass is NULL"));
+		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerController] ContextWidgetClass is NULL"));
 	}
 
 	// UI 서브시스템에 위젯 클래스 설정

@@ -6,14 +6,120 @@
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
 
+#include "Interfaces/TeloUIDataSource.h"
+#include "UI/TeloScreenWidgetBase.h"
 #include "UI/TeloInventoryWidget.h"
 #include "UI/TeloTooltipWidget.h"
 #include "UI/TeloContextWidget.h"
-#include "Interfaces/TeloUIDataSource.h"
+
+/* ==================== Subsystem Lifecycle ==================== */
 
 void UTeloUISubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+}
+
+
+/* ==================== Screen Widget Management ==================== */
+
+void UTeloUISubsystem::OpenScreenWidget(UTeloScreenWidgetBase* ScreenWidget)
+{
+	if (!ScreenWidget)
+	{
+		return;
+	}
+
+	// 이미 열려있는 화면 위젯이 새로 열려고 하는 위젯과 다르다면, 현재 열려있는 화면 위젯 닫기
+	if (CurrentScreenWidget && CurrentScreenWidget != ScreenWidget)
+	{
+		CurrentScreenWidget->OnScreenClosed();
+		CurrentScreenWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	CurrentScreenWidget = ScreenWidget; // 입력받은 위젯을 현재 화면 위젯으로 설정
+
+	HideTooltip(); // 툴팁 숨김
+	HideContext(); // 아이템 컨텍스트 메뉴 숨김
+
+	// 새로 열려고 하는 위젯 표시 및 UI 입력 모드 적용
+	CurrentScreenWidget->SetVisibility(ESlateVisibility::Visible);
+	CurrentScreenWidget->OnScreenOpened();
+
+	ApplyUIInputMode(CurrentScreenWidget); // UI 입력 모드 적용
+	CurrentScreenWidget->SetKeyboardFocus();
+}
+
+void UTeloUISubsystem::CloseScreenWidget(UTeloScreenWidgetBase* ScreenWidget)
+{
+	if (!ScreenWidget)
+	{
+		return;
+	}
+
+	ScreenWidget->OnScreenClosed();
+	ScreenWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	HideTooltip();
+	HideContext();
+
+	// 현재 화면 위젯 초기화 및 게임 입력 모드 적용
+	if (CurrentScreenWidget == ScreenWidget)
+	{
+		CurrentScreenWidget = nullptr;
+		ApplyGameInputMode(); // 게임 입력 모드 적용
+	}
+}
+
+bool UTeloUISubsystem::IsScreenWidgetOpen(const UTeloScreenWidgetBase* ScreenWidget) const
+{
+	return ScreenWidget													// 위젯 인스턴스가 존재하는지 확인
+		&& ScreenWidget->IsInViewport()									// 위젯이 뷰포트에 있는지 확인
+		&& ScreenWidget->GetVisibility() == ESlateVisibility::Visible;	// 위젯이 보이는 상태인지 확인
+}
+
+
+/* ==================== Input Mode Management ==================== */
+
+void UTeloUISubsystem::ApplyUIInputMode(UTeloScreenWidgetBase* FocusWidget)
+{
+	ULocalPlayer* LocalPlayer = GetLocalPlayer();
+	if (!LocalPlayer)
+	{
+		return;
+	}
+
+	APlayerController* PlayerController = LocalPlayer->GetPlayerController(GetWorld());
+	if (!PlayerController)
+	{
+		return;
+	}
+
+	// UI 입력 모드로 설정
+	FInputModeUIOnly InputMode;
+	InputMode.SetWidgetToFocus(FocusWidget ? FocusWidget->TakeWidget() : TSharedPtr<SWidget>()); // 위젯에 포커스 설정
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock); // 마우스가 뷰포트에 고정되지 않도록 설정
+
+	PlayerController->SetInputMode(InputMode); // 입력 모드 적용
+	PlayerController->bShowMouseCursor = true; // 마우스 커서 표시
+}
+
+void UTeloUISubsystem::ApplyGameInputMode()
+{
+	ULocalPlayer* LocalPlayer = GetLocalPlayer();
+	if (!LocalPlayer)
+	{
+		return;
+	}
+
+	APlayerController* PlayerController = LocalPlayer->GetPlayerController(GetWorld());
+	if (!PlayerController)
+	{
+		return;
+	}
+
+	FInputModeGameOnly InputMode;
+	PlayerController->SetInputMode(InputMode);	// 게임 입력 모드 적용
+	PlayerController->bShowMouseCursor = false; // 마우스 커서 숨김
 }
 
 
@@ -37,10 +143,7 @@ void UTeloUISubsystem::OpenInventory()
 		return;
 	}
 
-	InventoryWidgetInstance->SetVisibility(ESlateVisibility::Visible); // 위젯 표시
-	InventoryWidgetInstance->RefreshInventory(); // 인벤토리 UI 새로고침
-	ApplyUIInputMode(); // UI 입력 모드 적용
-	InventoryWidgetInstance->SetKeyboardFocus(); // 위젯에 키보드 포커스 설정
+	OpenScreenWidget(InventoryWidgetInstance); // 위젯을 열기
 }
 
 void UTeloUISubsystem::CloseInventory()
@@ -50,11 +153,7 @@ void UTeloUISubsystem::CloseInventory()
 		return;
 	}
 
-	InventoryWidgetInstance->SetVisibility(ESlateVisibility::Hidden); // 위젯 숨김
-	ApplyGameInputMode();	// 게임 입력 모드 적용
-
-	HideTooltip();			// 인벤토리 닫을 때 툴팁도 숨김
-	HideContext();			// 인벤토리 닫을 때 아이템 컨텍스트 메뉴도 숨김
+	CloseScreenWidget(InventoryWidgetInstance); // 위젯을 닫기
 }
 
 void UTeloUISubsystem::ToggleInventory()
@@ -71,9 +170,7 @@ void UTeloUISubsystem::ToggleInventory()
 
 bool UTeloUISubsystem::IsInventoryOpen() const
 {
-	return InventoryWidgetInstance													// 위젯 인스턴스가 존재하는지 확인
-		&& InventoryWidgetInstance->IsInViewport()									// 위젯이 뷰포트에 있는지 확인
-		&& InventoryWidgetInstance->GetVisibility() == ESlateVisibility::Visible;	// 위젯이 보이는 상태인지 확인
+	return IsScreenWidgetOpen(InventoryWidgetInstance); // 인벤토리 위젯이 열려있는지 여부 반환
 }
 
 void UTeloUISubsystem::CreateInventoryWidget()
@@ -101,48 +198,6 @@ void UTeloUISubsystem::CreateInventoryWidget()
 		InventoryWidgetInstance->AddToViewport();
 		InventoryWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
 	}
-}
-
-void UTeloUISubsystem::ApplyUIInputMode()
-{
-	ULocalPlayer* LocalPlayer = GetLocalPlayer();
-	if (!LocalPlayer)
-	{
-		return;
-	}
-
-	APlayerController* PlayerController = LocalPlayer->GetPlayerController(GetWorld());
-	if (!PlayerController)
-	{
-		return;
-	}
-
-	// UI 입력 모드 설정
-	FInputModeUIOnly InputMode;
-	InputMode.SetWidgetToFocus(InventoryWidgetInstance ? InventoryWidgetInstance->TakeWidget() : TSharedPtr<SWidget>()); // 인벤토리 위젯에 포커스 설정
-	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock); // 마우스가 뷰포트에 고정되지 않도록 설정
-
-	PlayerController->SetInputMode(InputMode); // 입력 모드 적용
-	PlayerController->bShowMouseCursor = true; // 마우스 커서 표시
-}
-
-void UTeloUISubsystem::ApplyGameInputMode()
-{
-	ULocalPlayer* LocalPlayer = GetLocalPlayer();
-	if (!LocalPlayer)
-	{
-		return;
-	}
-
-	APlayerController* PlayerController = LocalPlayer->GetPlayerController(GetWorld());
-	if (!PlayerController)
-	{
-		return;
-	}
-
-	FInputModeGameOnly InputMode;
-	PlayerController->SetInputMode(InputMode);	// 게임 입력 모드 적용
-	PlayerController->bShowMouseCursor = false; // 마우스 커서 숨김
 }
 
 

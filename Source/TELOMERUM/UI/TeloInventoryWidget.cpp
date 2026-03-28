@@ -32,6 +32,12 @@ FReply UTeloInventoryWidget::NativeOnKeyDown(const FGeometry& InGeometry, const 
 	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
+void UTeloInventoryWidget::OnScreenOpened()
+{
+	Super::OnScreenOpened();
+	RefreshInventory();
+}
+
 void UTeloInventoryWidget::RefreshInventory()
 {
 	if (!ItemWrapBox)

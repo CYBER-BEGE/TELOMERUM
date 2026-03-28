@@ -46,7 +46,18 @@ private:
 	/* 현재 아이템 컨텍스트 메뉴가 참조하는 객체 (예: 아이템 데이터) */
 	TWeakObjectPtr<UObject> CurrentContextSource;
 
+	/* 현재 화면에 표시된 UI 위젯 */
+	UPROPERTY()
+	class UTeloScreenWidgetBase* CurrentScreenWidget = nullptr;
+
 public:
+	/* 위젯 열기 (다른 위젯이 이미 열려있다면 닫고 새로 열기) */
+	void OpenScreenWidget(class UTeloScreenWidgetBase* ScreenWidget);
+	/* 위젯 닫고 게임 입력 모드로 돌아가기 */
+	void CloseScreenWidget(class UTeloScreenWidgetBase* ScreenWidget);
+	/* ScreenWidget이 현재 열려있는지 확인 */
+	bool IsScreenWidgetOpen(const class UTeloScreenWidgetBase* ScreenWidget) const;
+
 	/* 인벤토리 위젯 클래스 설정 */
 	void SetInventoryWidgetClass(TSubclassOf<class UTeloInventoryWidget> InWidgetClass);
 	/* 인벤토리 위젯 표시 */
@@ -93,7 +104,7 @@ private:
 	void HandleContextActionClicked(FName ActionID);
 
 	/* UI 입력 모드 적용 */
-	void ApplyUIInputMode();
+	void ApplyUIInputMode(class UTeloScreenWidgetBase* FocusWidget);
 	/* 게임 입력 모드 적용 */
 	void ApplyGameInputMode();
 };

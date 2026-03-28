@@ -11,7 +11,6 @@
 #include "Components/Image.h"
 
 #include "UI/TeloUISubsystem.h"
-#include "UI/TeloTooltipWidget.h"
 
 bool UTeloInventoryEntryWidget::Initialize()
 {
