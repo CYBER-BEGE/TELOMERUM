@@ -44,6 +44,19 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
 	float TraceRadius = 50.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
+	float WeaponSpeed = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
+	float WeaponDamage = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
+	float WeaponRange = 1.0f;
+
 public:
 	bool GetAttackTraceData(FVector& OutStart, FVector& OutEnd) const;
+
+	// 공격 애니메이션 몽타주 - 반드시 BP에서 지정
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	class UAnimMontage* AttackMontage;
 };

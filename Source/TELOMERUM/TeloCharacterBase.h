@@ -51,11 +51,11 @@ protected:
 
 	// 공격 판정 소켓 이름 - 반드시 BP에서 지정
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	FName AttackSocketName;
+	FName WeaponSocketName;
 
-	// 공격 애니메이션 몽타주 - 반드시 BP에서 지정
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	class UAnimMontage* AttackMontage;
+	/* Weapon Attach Component */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	class USceneComponent* WeaponAttachComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	float AttackSpeed = 1.5f;
@@ -75,6 +75,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	float KnockupImpulse = 300.0f;
 
+	void GetWeaponData();
+	void GetWeaponAnim();
 
 private:
 	/** Variables **/
@@ -114,7 +116,7 @@ public:
 	/** Functions **/
 
 	/* Attack */
-	FName GetAttackSocketName() const { return AttackSocketName; }
+	FName GetAttackSocketName() const { return WeaponSocketName; }
 	float GetAttackDistance() const;
 	void AttackRequest(AActor* Target);
 	FOnAttackEnd OnAttackEnd;

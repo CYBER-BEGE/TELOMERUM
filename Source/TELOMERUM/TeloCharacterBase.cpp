@@ -12,7 +12,9 @@ ATeloCharacterBase::ATeloCharacterBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	// Weapon Attach 컴포넌트 생성
+	WeaponAttachComponent = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponAttachComponent"));
+	WeaponAttachComponent->SetupAttachment(GetMesh());
 }
 
 // Called when the game starts or when spawned
@@ -20,11 +22,33 @@ void ATeloCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (AttackSocketName.IsNone())
-		UE_LOG(LogTemp, Warning, TEXT("[%s] AttackSocketName is NULL"), *GetActorLabel());
+	if (WeaponSocketName.IsNone())
+		UE_LOG(LogTemp, Warning, TEXT("[%s] WeaponSocketName is NULL"), *GetActorLabel());
 
-	if (!AttackMontage)
-		UE_LOG(LogTemp, Warning, TEXT("[%s] AttackMontage is NULL"), *GetActorLabel());
+	WeaponAttachComponent->AttachToComponent(
+		GetMesh(),
+		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+		WeaponSocketName
+	);
+
+	// Weapon 스폰
+	if (WeaponAttachComponent && WeaponClass)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.Instigator = GetInstigator();
+
+		WeaponInstance = GetWorld()->SpawnActor<ATeloWeaponBase>(WeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+		if (!WeaponInstance) return;
+
+		WeaponInstance->AttachToComponent(WeaponAttachComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] Can't Spawn Weapon - WeaponAttachComponent/WeaponClass"));
+	}
+
+	//if (!AttackMontage) UE_LOG(LogTemp, Warning, TEXT("[%s] AttackMontage is NULL"), *GetActorLabel());
 }
 
 // Called every frame
@@ -72,9 +96,9 @@ float ATeloCharacterBase::GetAttackDistance() const
 		return FVector::Dist(TraceStart, TraceEnd);
 	}
 
-	if (AttackSocketName.IsNone()) return 0.0f;
+	if (WeaponSocketName.IsNone()) return 0.0f;
 
-	TraceStart = GetMesh()->GetSocketLocation(AttackSocketName);
+	TraceStart = GetMesh()->GetSocketLocation(WeaponSocketName);
 	TraceEnd = TraceStart + (GetActorForwardVector() * AttackRange);
 
 	return FVector::Dist(TraceStart, TraceEnd);
@@ -83,6 +107,14 @@ float ATeloCharacterBase::GetAttackDistance() const
 void ATeloCharacterBase::AttackRequest(AActor* Target)
 {
 	DoAttack(Target);
+}
+
+void ATeloCharacterBase::GetWeaponData()
+{
+}
+
+void ATeloCharacterBase::GetWeaponAnim()
+{
 }
 
 float ATeloCharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -371,7 +403,7 @@ void ATeloCharacterBase::DrawHitDebug(const FHitResult& Hit)
 void ATeloCharacterBase::DoAttack(AActor* Target)
 {
 	if (!bCanAttack || bIsAttacking) return;
-	if (AttackSocketName.IsNone() || !AttackMontage || !GetMesh()) return;
+	if (WeaponSocketName.IsNone() ||/* !WeaponAnim ||*/ !GetMesh()) return;
 	
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (!AnimInstance) 
@@ -387,10 +419,10 @@ void ATeloCharacterBase::DoAttack(AActor* Target)
 	RotateToTarget(Target);
 	//TraceAttack(AttackSocketName);
 
-	if(AttackMontage && AnimInstance)
+	if(/*AttackMontage &&*/ AnimInstance)
 	{
-		AnimInstance->Montage_Play(AttackMontage);
-		UE_LOG(LogTemp, Warning, TEXT("AttackMontage Asset: %s"), *GetNameSafe(AttackMontage));
+		AnimInstance->Montage_Play(WeaponInstance->AttackMontage);
+		/*UE_LOG(LogTemp, Warning, TEXT("AttackMontage Asset: %s"), *GetNameSafe(AttackMontage));*/
 	}
 
 	//GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &ATeloCharacterBase::DoAttackEnd, AttackSpeed, false);
