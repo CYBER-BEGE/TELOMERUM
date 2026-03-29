@@ -3,18 +3,17 @@
 
 #include "UI/TeloInventoryWidget.h"
 
-#include "Engine/LocalPlayer.h"
-#include "Blueprint/WidgetBlueprintLibrary.h"
-#include "Input/Reply.h"
 #include "InputCoreTypes.h"
 
-#include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
+#include "Components/UniformGridPanel.h"
+#include "Components/UniformGridSlot.h"
 
 #include "Player/TeloPlayerCharacter.h"
 #include "Player/TeloInventoryComponent.h"
 #include "UI/TeloUISubsystem.h"
 #include "UI/TeloInventoryEntryWidget.h"
+#include "UI/TeloInventorySlotWidget.h"
 
 FReply UTeloInventoryWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
@@ -35,17 +34,19 @@ FReply UTeloInventoryWidget::NativeOnKeyDown(const FGeometry& InGeometry, const 
 void UTeloInventoryWidget::OnScreenOpened()
 {
 	Super::OnScreenOpened();
+
+	// 슬롯 위젯 생성 후 데이터 갱신
+	SelectedSlotIndex = INDEX_NONE;
+	BuildSlotWidgets();
 	RefreshInventory();
 }
 
-void UTeloInventoryWidget::RefreshInventory()
+void UTeloInventoryWidget::BuildSlotWidgets()
 {
-	if (!ItemWrapBox)
+	if (!SlotGridPanel)
 	{
 		return;
 	}
-
-	ItemWrapBox->ClearChildren(); // 기존 아이템 목록 제거
 
 	ATeloPlayerCharacter* PlayerCharacter = Cast<ATeloPlayerCharacter>(GetOwningPlayerPawn());
 	if (!PlayerCharacter)
@@ -59,31 +60,126 @@ void UTeloInventoryWidget::RefreshInventory()
 		return;
 	}
 
-	const TArray<FTeloInventoryItem>& Items = InventoryComponent->GetItems();
-	if (Items.IsEmpty())
+	if (!InventorySlotWidgetClass)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("[UTeloInventoryWidget] InventorySlotWidgetClass is NULL"));
 		return;
 	}
 
-	if (!InventoryEntryWidgetClass)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[UTeloInventoryWidget] InventoryEntryWidgetClass is NULL"));
-		return;
-	}
+	// 기존 슬롯 위젯 제거
+	SlotGridPanel->ClearChildren();
+	SlotWidgets.Reset();
 
-	for (const FTeloInventoryItem& Item : Items)
+	// 인벤토리 슬롯 개수만큼 슬롯 위젯 생성
+	const int32 SlotCount = InventoryComponent->GetSlotCount();
+	for (int32 SlotIndex = 0; SlotIndex < SlotCount; ++SlotIndex)
 	{
-		// 아이템 데이터를 표시할 위젯 생성
-		UTeloInventoryEntryWidget* EntryWidget = CreateWidget<UTeloInventoryEntryWidget>(GetOwningPlayer(), InventoryEntryWidgetClass);
-		if (!EntryWidget)
+		UTeloInventorySlotWidget* SlotWidget = CreateWidget<UTeloInventorySlotWidget>(GetOwningPlayer(), InventorySlotWidgetClass);
+
+		// 슬롯 위젯 생성 실패 시 다음 슬롯으로 넘어감
+		if (!SlotWidget)
 		{
 			continue;
 		}
 
-		EntryWidget->SetItemData(Item); // 아이템 데이터를 위젯에 설정
-		EntryWidget->OnInventoryEntryClicked.AddUObject(this, &UTeloInventoryWidget::SelectItem); // 아이템 클릭 시 SelectItem 함수 호출
-		ItemWrapBox->AddChild(EntryWidget); // 스크롤 박스에 아이템 위젯 추가
+		// 슬롯 위젯 초기화
+		SlotWidget->SetSlotIndex(SlotIndex);
+		SlotWidget->SetEntryWidgetClass(InventoryEntryWidgetClass);
+		SlotWidget->OnSlotLeftClicked.AddUObject(this, &UTeloInventoryWidget::HandleSlotLeftClicked);
+
+		const int32 Row = SlotIndex / InventoryColumnCount;
+		const int32 Column = SlotIndex % InventoryColumnCount;
+
+		// UniformGridPanel에 슬롯 위젯 추가
+		if (UUniformGridSlot* GridSlot = SlotGridPanel->AddChildToUniformGrid(SlotWidget, Row, Column))
+		{
+			GridSlot->SetHorizontalAlignment(HAlign_Fill);
+			GridSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+
+		SlotWidgets.Add(SlotWidget);
 	}
+}
+
+void UTeloInventoryWidget::RefreshInventory()
+{
+	if (!SlotGridPanel)
+	{
+		return;
+	}
+
+	ATeloPlayerCharacter* PlayerCharacter = Cast<ATeloPlayerCharacter>(GetOwningPlayerPawn());
+	if (!PlayerCharacter)
+	{
+		return;
+	}
+
+	UTeloInventoryComponent* InventoryComponent = PlayerCharacter->GetInventoryComponent();
+	if (!InventoryComponent)
+	{
+		return;
+	}
+
+	// 인벤토리 슬롯 데이터 가져오기
+	const TArray<FTeloInventorySlot>& Slots = InventoryComponent->GetSlots();
+	if (SlotWidgets.Num() != Slots.Num())
+	{
+		BuildSlotWidgets();
+	}
+
+	// 각 슬롯 위젯에 슬롯 데이터 설정 및 선택 상태 업데이트
+	for (int32 SlotIndex = 0; SlotIndex < Slots.Num() && SlotIndex < SlotWidgets.Num(); ++SlotIndex)
+	{
+		if (!SlotWidgets[SlotIndex])
+		{
+			continue;
+		}
+
+		SlotWidgets[SlotIndex]->RefreshSlot(Slots[SlotIndex]);
+		SlotWidgets[SlotIndex]->SetSelected(SlotIndex == SelectedSlotIndex);
+	}
+
+	// 선택된 슬롯이 비었으면 정보 패널 초기화
+	if (!InventoryComponent->IsValidSlotIndex(SelectedSlotIndex) || InventoryComponent->IsSlotEmpty(SelectedSlotIndex))
+	{
+		ClearSelectedItemInfo();
+	}
+}
+
+void UTeloInventoryWidget::HandleSlotLeftClicked(int32 ClickedSlotIndex)
+{
+	ATeloPlayerCharacter* PlayerCharacter = Cast<ATeloPlayerCharacter>(GetOwningPlayerPawn());
+	if (!PlayerCharacter)
+	{
+		return;
+	}
+
+	UTeloInventoryComponent* InventoryComponent = PlayerCharacter->GetInventoryComponent();
+	if (!InventoryComponent)
+	{
+		return;
+	}
+
+	if (!InventoryComponent->IsValidSlotIndex(ClickedSlotIndex))
+	{
+		return;
+	}
+
+	const TArray<FTeloInventorySlot>& Slots = InventoryComponent->GetSlots();
+
+	// 빈 슬롯을 클릭하면 선택 해제 및 정보 패널 초기화
+	if (Slots[ClickedSlotIndex].IsEmpty())
+	{
+		SelectedSlotIndex = INDEX_NONE;
+		ClearSelectedItemInfo();
+		RefreshInventory();
+		return;
+	}
+
+	// 아이템이 있는 슬롯이면 해당 슬롯을 선택 상태로 갱신
+	SelectedSlotIndex = ClickedSlotIndex;
+	SelectItem(Slots[ClickedSlotIndex].ItemData);
+	RefreshInventory();
 }
 
 void UTeloInventoryWidget::SelectItem(const FTeloInventoryItem& ItemData)
@@ -101,5 +197,23 @@ void UTeloInventoryWidget::SelectItem(const FTeloInventoryItem& ItemData)
 	if (SelectedItemDescriptionText)
 	{
 		SelectedItemDescriptionText->SetText(ItemData.Description);
+	}
+}
+
+void UTeloInventoryWidget::ClearSelectedItemInfo()
+{
+	if (SelectedItemNameText)
+	{
+		SelectedItemNameText->SetText(FText::GetEmpty());
+	}
+
+	if (SelectedItemCountText)
+	{
+		SelectedItemCountText->SetText(FText::GetEmpty());
+	}
+
+	if (SelectedItemDescriptionText)
+	{
+		SelectedItemDescriptionText->SetText(FText::GetEmpty());
 	}
 }
