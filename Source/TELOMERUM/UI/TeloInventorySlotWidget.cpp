@@ -109,3 +109,13 @@ FReply UTeloInventorySlotWidget::NativeOnPreviewMouseButtonDown(const FGeometry&
 
 	return FReply::Handled();
 }
+
+UTeloUISubsystem* UTeloInventorySlotWidget::GetTeloUISubsystem() const
+{
+	if (ULocalPlayer* LocalPlayer = GetOwningLocalPlayer())
+	{
+		return LocalPlayer->GetSubsystem<UTeloUISubsystem>();
+	}
+
+	return nullptr;
+}
