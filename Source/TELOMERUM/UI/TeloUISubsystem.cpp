@@ -5,6 +5,7 @@
 
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 
 #include "Interfaces/TeloUIDataSource.h"
 #include "UI/TeloScreenWidgetBase.h"
@@ -28,6 +29,9 @@ void UTeloUISubsystem::OpenScreenWidget(UTeloScreenWidgetBase* ScreenWidget)
 	{
 		return;
 	}
+
+	// 다른 화면으로 전환하기 전에 현재 드래그 드롭 취소
+	UWidgetBlueprintLibrary::CancelDragDrop();
 
 	// 이미 열려있는 화면 위젯이 새로 열려고 하는 위젯과 다르다면, 현재 열려있는 화면 위젯 닫기
 	if (CurrentScreenWidget && CurrentScreenWidget != ScreenWidget)
@@ -55,6 +59,9 @@ void UTeloUISubsystem::CloseScreenWidget(UTeloScreenWidgetBase* ScreenWidget)
 	{
 		return;
 	}
+
+	// 현재 진행 중인 드래그 드롭이 있으면 먼저 취소
+	UWidgetBlueprintLibrary::CancelDragDrop();
 
 	ScreenWidget->OnScreenClosed();
 	ScreenWidget->SetVisibility(ESlateVisibility::Hidden);
