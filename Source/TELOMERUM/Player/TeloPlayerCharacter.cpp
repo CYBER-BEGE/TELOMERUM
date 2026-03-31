@@ -10,6 +10,9 @@
 #include "Player/TeloLockOnComponent.h"
 #include "Player/TeloInteractComponent.h"
 #include "Enemy/TeloEnemyCharacter.h"
+#include "UI/TeloUISubsystem.h"
+#include "Engine/LocalPlayer.h"
+#include "Player/TeloInventoryComponent.h"
 #include "Perception/AISense_Hearing.h"
 
 // Sets default values
@@ -47,6 +50,9 @@ ATeloPlayerCharacter::ATeloPlayerCharacter()
 
 	// Interact 컴포넌트 생성
 	InteractComponent = CreateDefaultSubobject<UTeloInteractComponent>(TEXT("InteractComponent"));
+
+	// Inventory 컴포넌트 생성
+	InventoryComponent = CreateDefaultSubobject<UTeloInventoryComponent>(TEXT("InventoryComponent"));
 
 	// 초기 상태 설정
 	MaxHP = 100.0f;
@@ -98,6 +104,8 @@ void ATeloPlayerCharacter::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] LockOnAction is NULL"));
 	if (InteractAction == NULL)
 		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] InteractAction is NULL"));
+	if (InventoryAction == NULL)
+		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] InventoryAction is NULL"));
 }
 
 // Called every frame
@@ -145,6 +153,9 @@ void ATeloPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 		// Interact
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::InteractInput);
+
+		// Inventory
+		EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::InventoryInput);
 	}
 	else
 	{
@@ -435,4 +446,26 @@ void ATeloPlayerCharacter::InteractInput()
 	{
 		InteractComponent->TryInteract();
 	}
+}
+
+void ATeloPlayerCharacter::InventoryInput()
+{
+	if (!PlayerController)
+	{
+		return;
+	}
+
+	ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
+	if (!LocalPlayer)
+	{
+		return;
+	}
+
+	UTeloUISubsystem* UISubsystem = LocalPlayer->GetSubsystem<UTeloUISubsystem>();
+	if (!UISubsystem)
+	{
+		return;
+	}
+
+	UISubsystem->ToggleInventory();
 }
