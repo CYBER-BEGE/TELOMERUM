@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "Perception/AISense.h"
 #include "TeloAIController.generated.h"
 
 /**
@@ -27,11 +28,16 @@ private:
 
 	class UBlackboardComponent* BlackboardComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "AI")
 	class UAIPerceptionComponent* AIPerceptionComponent;
 
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	class UAISenseConfig_Sight* SightConfig;
+
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	class UAISenseConfig_Damage* DamageConfig;
+
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	class UAISenseConfig_Hearing* HearingConfig;
 
 	// LastTargetLocation 보정 범위
 	UPROPERTY(VisibleAnywhere, Category = "AI")
@@ -40,7 +46,10 @@ private:
 	/** Functions **/
 	//virtual void OnPossess(APawn* InPawn) override;
 	
-	/* 타겟 감지 시 호출됨 */
+	/* Perceive */
 	UFUNCTION()
 	void OnTargetperceived(AActor* Actor, FAIStimulus Stimulus);
+	void UpdateTargetActor(AActor* Actor, const FVector& LastStimulusLocation);
+	bool IsSensing(AActor* Actor, FAISenseID SenseID) const;
+	
 };

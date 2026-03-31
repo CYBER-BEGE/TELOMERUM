@@ -5,6 +5,7 @@
 #include "Components/WidgetComponent.h"
 #include "TeloAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Perception/AISense_Damage.h"
 
 ATeloEnemyCharacter::ATeloEnemyCharacter()
 {
@@ -68,6 +69,30 @@ void ATeloEnemyCharacter::SetLockOnMarkerVisible(bool bVisible)
 
 	LockOnMarkerWidget->SetHiddenInGame(!bVisible);
 	LockOnMarkerWidget->SetVisibility(bVisible, true);
+}
+
+void ATeloEnemyCharacter::ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse)
+{
+	AController* AttackerController = nullptr;
+	if (APawn* AttackerPawn = Cast<APawn>(DamageCauser))
+	{
+		AttackerController = AttackerPawn->GetController();
+	}
+	
+	AActor* AttackerActor = AttackerController ? AttackerController->GetPawn() : DamageCauser;
+	if (AttackerActor)
+	{
+		UAISense_Damage::ReportDamageEvent(
+			this,
+			this,
+			AttackerActor,
+			Damage,
+			AttackerActor->GetActorLocation(),
+			GetActorLocation()
+		);
+	}
+
+	Super::ApplyDamage(Damage, DamageCauser, DamageLocation, DamageImpulse);
 }
 
 void ATeloEnemyCharacter::HitActor(const FHitResult& HitResult)

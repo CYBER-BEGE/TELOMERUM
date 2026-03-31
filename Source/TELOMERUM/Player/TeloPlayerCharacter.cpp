@@ -13,6 +13,7 @@
 #include "UI/TeloUISubsystem.h"
 #include "Engine/LocalPlayer.h"
 #include "Player/TeloInventoryComponent.h"
+#include "Perception/AISense_Hearing.h"
 
 // Sets default values
 ATeloPlayerCharacter::ATeloPlayerCharacter()
@@ -216,6 +217,12 @@ void ATeloPlayerCharacter::DoMove(float Right, float Forward)
 
 		AddMovementInput(ForwardDirection, Forward * MoveSpeedScale);
 		AddMovementInput(RightDirection, Right * MoveSpeedScale);
+
+		if (!IsCrouched())
+		{
+			// 이동 시 소음 보고 (소음 반경 1000)
+			UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), 1.0f, this, 3000.0f);
+		}
 	}
 }
 

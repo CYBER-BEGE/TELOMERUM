@@ -52,5 +52,8 @@ public:
 	class ATeloPatrolSpline* GetPatrolSpline() const { return PatrolSpline; }
 
 protected:
+	/* Take Damage */
+	virtual void ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse);
+
 	void HitActor(const FHitResult& HitResult) override;
 };
