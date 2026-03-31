@@ -71,6 +71,9 @@ private:
 	/* 슬롯 좌클릭 처리 */
 	void HandleSlotLeftClicked(int32 ClickedSlotIndex);
 
+	/* 슬롯 드래그 드롭으로 아이템 이동이 발생했을 때 처리 */
+	void HandleSlotDropped(int32 SourceSlotIndex, int32 TargetSlotIndex);
+
 	/* 선택 아이템 정보 패널 초기화 */
 	void ClearSelectedItemInfo();
 };

@@ -85,7 +85,8 @@ void UTeloInventoryWidget::BuildSlotWidgets()
 		// 슬롯 위젯 초기화
 		SlotWidget->SetSlotIndex(SlotIndex);
 		SlotWidget->SetEntryWidgetClass(InventoryEntryWidgetClass);
-		SlotWidget->OnSlotLeftClicked.AddUObject(this, &UTeloInventoryWidget::HandleSlotLeftClicked);
+		SlotWidget->OnSlotLeftClicked.AddUObject(this, &UTeloInventoryWidget::HandleSlotLeftClicked);	// 슬롯 좌클릭 이벤트 바인딩
+		SlotWidget->OnSlotDropped.AddUObject(this, &UTeloInventoryWidget::HandleSlotDropped);			// 슬롯 드래그 드롭 이벤트 바인딩
 
 		const int32 Row = SlotIndex / InventoryColumnCount;
 		const int32 Column = SlotIndex % InventoryColumnCount;
@@ -179,6 +180,41 @@ void UTeloInventoryWidget::HandleSlotLeftClicked(int32 ClickedSlotIndex)
 	// 아이템이 있는 슬롯이면 해당 슬롯을 선택 상태로 갱신
 	SelectedSlotIndex = ClickedSlotIndex;
 	SelectItem(Slots[ClickedSlotIndex].ItemData);
+	RefreshInventory();
+}
+
+void UTeloInventoryWidget::HandleSlotDropped(int32 SourceSlotIndex, int32 TargetSlotIndex)
+{
+	ATeloPlayerCharacter* PlayerCharacter = Cast<ATeloPlayerCharacter>(GetOwningPlayerPawn());
+	if (!PlayerCharacter)
+	{
+		return;
+	}
+
+	UTeloInventoryComponent* InventoryComponent = PlayerCharacter->GetInventoryComponent();
+	if (!InventoryComponent)
+	{
+		return;
+	}
+
+	if (!InventoryComponent->IsValidSlotIndex(SourceSlotIndex) ||
+		!InventoryComponent->IsValidSlotIndex(TargetSlotIndex))
+	{
+		return;
+	}
+
+	// 자기 자신에게 드롭한 경우는 이동 없이 UI만 갱신
+	if (SourceSlotIndex == TargetSlotIndex)
+	{
+		RefreshInventory();
+		return;
+	}
+
+	InventoryComponent->MoveSlot(SourceSlotIndex, TargetSlotIndex);
+
+	// 드래그 이동 후 선택 상태와 정보 패널 초기화
+	SelectedSlotIndex = INDEX_NONE;
+	ClearSelectedItemInfo();
 	RefreshInventory();
 }
 

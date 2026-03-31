@@ -18,7 +18,7 @@ bool UTeloInventoryEntryWidget::Initialize()
 
 	if (EntryButton)
 	{
-		EntryButton->OnClicked.AddDynamic(this, &UTeloInventoryEntryWidget::HandleEntryButtonClicked);
+		// 클릭은 SlotWidget이 처리하고, EntryWidget은 호버 툴팁만 담당
 		EntryButton->OnHovered.AddDynamic(this, &UTeloInventoryEntryWidget::HandleEntryButtonHovered);
 		EntryButton->OnUnhovered.AddDynamic(this, &UTeloInventoryEntryWidget::HandleEntryButtonUnhovered);
 	}
