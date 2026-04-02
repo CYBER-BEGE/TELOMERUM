@@ -387,20 +387,29 @@ void UTeloUISubsystem::HideContext()
 
 void UTeloUISubsystem::HandleContextActionClicked(FName ActionID)
 {
+	// 참조하는 객체가 없으면 컨텍스트 메뉴 숨김
 	UObject* SourceObject = CurrentContextSource.Get();
 	if (!SourceObject)
 	{
-		HideContext();
+		HideContext(); 
 		return;
 	}
 
+	// 참조하는 객체가 ITeloUIDataSource 인터페이스를 구현하고 있다면, 액션 처리 함수 호출
 	ITeloUIDataSource* Source = Cast<ITeloUIDataSource>(SourceObject);
 	if (Source)
 	{
 		Source->HandleContextAction(ActionID);
 	}
 
+	// 액션 처리 후 컨텍스트 메뉴 숨김
 	HideContext();
+
+	// 컨텍스트 메뉴 액션 후 현재 화면 위젯에 다시 포커스를 돌려줌
+	if (CurrentScreenWidget && CurrentScreenWidget->IsInViewport())
+	{
+		CurrentScreenWidget->SetKeyboardFocus();
+	}
 }
 
 bool UTeloUISubsystem::IsContextOpen() const

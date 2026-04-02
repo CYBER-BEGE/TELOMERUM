@@ -97,6 +97,9 @@ bool UTeloInventoryComponent::AddItem(const FTeloInventoryItem& NewItem)
 			*NewItem.ItemID.ToString(),
 			Slots[StackableSlotIndex].ItemData.Count);
 
+		// 인벤토리 데이터 변경 알림
+		OnInventoryChanged.Broadcast();
+
 		return true;
 	}
 
@@ -115,6 +118,9 @@ bool UTeloInventoryComponent::AddItem(const FTeloInventoryItem& NewItem)
 		*NewItem.ItemID.ToString(),
 		EmptySlotIndex,
 		NewItem.Count);
+
+	// 인벤토리 데이터 변경 알림
+	OnInventoryChanged.Broadcast();
 
 	return true;
 }
@@ -144,6 +150,10 @@ bool UTeloInventoryComponent::MoveSlot(int32 FromIndex, int32 ToIndex)
 	{
 		ToSlot.ItemData = FromSlot.ItemData;
 		FromSlot.Clear();
+
+		// 인벤토리 데이터 변경 알림
+		OnInventoryChanged.Broadcast();
+
 		return true;
 	}
 
@@ -152,6 +162,10 @@ bool UTeloInventoryComponent::MoveSlot(int32 FromIndex, int32 ToIndex)
 	{
 		ToSlot.ItemData.Count += FromSlot.ItemData.Count;
 		FromSlot.Clear();
+
+		// 인벤토리 데이터 변경 알림
+		OnInventoryChanged.Broadcast();
+
 		return true;
 	}
 
@@ -167,6 +181,10 @@ bool UTeloInventoryComponent::SwapSlot(int32 SlotA, int32 SlotB)
 	}
 
 	Slots.Swap(SlotA, SlotB);
+
+	// 인벤토리 데이터 변경 알림
+	OnInventoryChanged.Broadcast();
+
 	return true;
 }
 
@@ -215,6 +233,9 @@ bool UTeloInventoryComponent::ConsumeItemAtSlot(int32 SlotIndex, int32 Amount)
 	{
 		Slot.Clear();
 	}
+
+	// 인벤토리 데이터 변경 알림
+	OnInventoryChanged.Broadcast();
 
 	return true;
 }

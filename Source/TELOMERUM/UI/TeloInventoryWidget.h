@@ -20,6 +20,8 @@ public:
 	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 	/* 화면이 열릴 때 호출되는 함수 */
 	virtual void OnScreenOpened() override;
+	/* 화면이 닫힐 때 인벤토리 변경 델리게이트 바인딩 해제 */
+	virtual void OnScreenClosed() override;
 	
 protected:
 	/* 인벤토리 아이템을 담는 UniformGridPanel */

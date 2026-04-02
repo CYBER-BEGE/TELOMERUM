@@ -30,47 +30,59 @@ protected:
 	UStaticMeshComponent* Mesh;
 
 
-	/* 아이템 기존 정보 */
+	/* =============== 아이템 기존 정보 =============== */
 
+	/* 아이템 ID */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	FName ItemID = NAME_None;
 
+	/* 아이템 이름 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	FText ItemName = FText::GetEmpty();
 
+	/* 아이템 설명 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	FText ItemDescription = FText::GetEmpty();
 
+	/* 아이템 아이콘 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	class UTexture2D* ItemIcon = nullptr;
 
+	/* 아이템 개수 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (ClampMin = "1"))
 	int32 ItemCount = 1;
 
 
-	/* 아이템 사용 관련 */
+	/* =============== 아이템 사용 관련 =============== */
 
+	/* 아이템이 사용 가능한지 여부 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Use")
 	bool bUsable = false;
 
+	/* 아이템 사용 시 소비되는지 여부 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Use")
 	bool bConsumeOnUse = true;
 
+	/* 아이템 사용 타입 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Use")
 	ETeloItemUseType UseType = ETeloItemUseType::None;
 
+	/* 아이템 사용 시 효과값 (예: HP 회복량) */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Use")
 	float UseValue = 0.0f;
 
 
-	/* 상호작용 관련 */
+	/* =============== 상호작용 관련 =============== */
 
+	/* 아이템이 상호작용 가능한지 여부 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Property")
 	bool bCanInteract = true;
 
+	/* 아이템이 이미 습득된 상태인지 여부 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item|Property")
 	bool bIsPickedUp = false;
 
+	/* 상호작용 UI에 표시할 문구 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Property")
 	FText InteractText = FText::FromString(TEXT("E : 습득"));
 

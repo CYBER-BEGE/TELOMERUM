@@ -35,10 +35,40 @@ void UTeloInventoryWidget::OnScreenOpened()
 {
 	Super::OnScreenOpened();
 
+	ATeloPlayerCharacter* PlayerCharacter = Cast<ATeloPlayerCharacter>(GetOwningPlayerPawn());
+	if (PlayerCharacter)
+	{
+		if (UTeloInventoryComponent* InventoryComponent = PlayerCharacter->GetInventoryComponent())
+		{
+			// 중복 바인딩 방지 후 인벤토리 변경 이벤트 연결
+			InventoryComponent->OnInventoryChanged.RemoveAll(this); // 기존 바인딩 제거
+			InventoryComponent->OnInventoryChanged.AddUObject(this, &UTeloInventoryWidget::RefreshInventory); // 인벤토리 변경 시 UI 새로고침
+		}
+	}
+
 	// 슬롯 위젯 생성 후 데이터 갱신
 	SelectedSlotIndex = INDEX_NONE;
 	BuildSlotWidgets();
 	RefreshInventory();
+}
+
+void UTeloInventoryWidget::OnScreenClosed()
+{
+	Super::OnScreenClosed();
+
+	ATeloPlayerCharacter* PlayerCharacter = Cast<ATeloPlayerCharacter>(GetOwningPlayerPawn());
+	if (!PlayerCharacter)
+	{
+		return;
+	}
+
+	UTeloInventoryComponent* InventoryComponent = PlayerCharacter->GetInventoryComponent();
+	if (!InventoryComponent)
+	{
+		return;
+	}
+
+	InventoryComponent->OnInventoryChanged.RemoveAll(this);
 }
 
 void UTeloInventoryWidget::BuildSlotWidgets()
@@ -140,10 +170,15 @@ void UTeloInventoryWidget::RefreshInventory()
 		SlotWidgets[SlotIndex]->SetSelected(SlotIndex == SelectedSlotIndex);
 	}
 
-	// 선택된 슬롯이 비었으면 정보 패널 초기화
-	if (!InventoryComponent->IsValidSlotIndex(SelectedSlotIndex) || InventoryComponent->IsSlotEmpty(SelectedSlotIndex))
+	// 선택된 슬롯 상태에 따라 우측 정보 패널도 다시 갱신
+	if (!InventoryComponent->IsValidSlotIndex(SelectedSlotIndex) ||
+		InventoryComponent->IsSlotEmpty(SelectedSlotIndex))
 	{
-		ClearSelectedItemInfo();
+		ClearSelectedItemInfo(); // 선택된 슬롯이 유효하지 않거나 빈 슬롯이면 정보 패널 초기화
+	}
+	else
+	{
+		SelectItem(Slots[SelectedSlotIndex].ItemData); // 선택된 슬롯이 유효한 아이템이 있는 슬롯이면 정보 패널 갱신
 	}
 }
 

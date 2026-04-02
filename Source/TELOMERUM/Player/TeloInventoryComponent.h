@@ -12,18 +12,23 @@ struct FTeloInventoryItem
 {
 	GENERATED_BODY()
 
+	/* 아이템 고유 ID */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	FName ItemID = NAME_None;
 
+	/* 아이템 이름 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	FText ItemName = FText::GetEmpty();
 
+	/* 아이템 설명 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	FText Description = FText::GetEmpty();
 
+	/* 아이템 아이콘 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	class UTexture2D* Icon = nullptr;
 
+	/* 아이템 개수 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	int32 Count = 1;
 
@@ -64,6 +69,9 @@ class TELOMERUM_API UTeloInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	/* 인벤토리 데이터가 변경되었을 때 알리는 델리게이트 */
+	DECLARE_MULTICAST_DELEGATE(FOnInventoryChanged);
+
 public:	
 	// Sets default values for this component's properties
 	UTeloInventoryComponent();
@@ -80,16 +88,6 @@ private:
 	/* 인벤토리 슬롯 배열 */
 	UPROPERTY(VisibleAnywhere, Category = "Inventory")
 	TArray<FTeloInventorySlot> Slots;
-
-public:
-	///* 아이템 추가 (이미 존재하는 아이템이면 개수만 증가) */
-	//bool AddItem(const FTeloInventoryItem& NewItem);
-//
-//	/* 아이템 목록 반환 */
-//	const TArray<FTeloInventoryItem>& GetItems() const { return Items; }
-//
-//	/* 아이템 개수 반환 */
-//	int32 GetItemCount() const { return Items.Num(); }
 
 public:
 	/* 인벤토리 슬롯 배열을 SlotCount만큼 초기화 */
@@ -121,6 +119,10 @@ public:
 
 	/* 슬롯의 아이템을 지정한 수량만큼 소비 */
 	bool ConsumeItemAtSlot(int32 SlotIndex, int32 Amount = 1);
+
+public:
+	/* 인벤토리 데이터가 변경되었을 때 UI 등에 알리기 위한 델리게이트 */
+	FOnInventoryChanged OnInventoryChanged;
 
 private:
 	/* 스택 가능한 슬롯 인덱스 탐색 */
