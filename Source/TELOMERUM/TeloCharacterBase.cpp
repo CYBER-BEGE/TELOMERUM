@@ -209,3 +209,26 @@ void ATeloCharacterBase::RotateToTarget(const AActor* Target)
 		SetActorRotation(FRotator(0.f, TargetYaw.Yaw, 0.f));
 	}
 }
+
+bool ATeloCharacterBase::RecoverHP(float Amount)
+{
+	if (Amount <= 0.0f)
+	{
+		return false;
+	}
+
+	// 이미 최대 HP라면 회복 실패
+	if (NowHP >= MaxHP)
+	{
+		return false;
+	}
+
+	NowHP = FMath::Clamp(NowHP + Amount, 0.0f, MaxHP);
+
+	UE_LOG(LogTemp, Log, TEXT("[%s] HP Recover: %f / Current HP: %f"),
+		*GetActorLabel(),
+		Amount,
+		NowHP);
+
+	return true;
+}

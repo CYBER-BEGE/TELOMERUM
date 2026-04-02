@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Interfaces/TeloInteractable.h"
+#include "Item/TeloItemTypes.h"
 #include "TeloItemBase.generated.h"
 
 UCLASS()
@@ -28,6 +29,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Mesh;
 
+
+	/* 아이템 기존 정보 */
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	FName ItemID = NAME_None;
 
@@ -42,6 +46,24 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (ClampMin = "1"))
 	int32 ItemCount = 1;
+
+
+	/* 아이템 사용 관련 */
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Use")
+	bool bUsable = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Use")
+	bool bConsumeOnUse = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Use")
+	ETeloItemUseType UseType = ETeloItemUseType::None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Use")
+	float UseValue = 0.0f;
+
+
+	/* 상호작용 관련 */
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Property")
 	bool bCanInteract = true;

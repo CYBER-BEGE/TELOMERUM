@@ -14,6 +14,7 @@
 #include "Engine/LocalPlayer.h"
 #include "Player/TeloInventoryComponent.h"
 #include "Perception/AISense_Hearing.h"
+#include "Item/TeloItemTypes.h"
 
 // Sets default values
 ATeloPlayerCharacter::ATeloPlayerCharacter()
@@ -468,4 +469,64 @@ void ATeloPlayerCharacter::InventoryInput()
 	}
 
 	UISubsystem->ToggleInventory();
+}
+
+bool ATeloPlayerCharacter::TryUseItemAtSlot(int32 SlotIndex)
+{
+	if (!InventoryComponent)
+	{
+		return false;
+	}
+
+	if (!InventoryComponent->IsValidSlotIndex(SlotIndex))
+	{
+		return false;
+	}
+
+	const TArray<FTeloInventorySlot>& Slots = InventoryComponent->GetSlots();
+	if (!Slots.IsValidIndex(SlotIndex))
+	{
+		return false;
+	}
+
+	const FTeloInventorySlot& Slot = Slots[SlotIndex];
+	if (Slot.IsEmpty())
+	{
+		return false;
+	}
+
+	const FTeloInventoryItem& ItemData = Slot.ItemData;
+
+	// 사용 불가능한 아이템이면 실패
+	if (!ItemData.bUsable)
+	{
+		return false;
+	}
+
+	bool bUseSucceeded = false;
+
+	switch (ItemData.UseType)
+	{
+	case ETeloItemUseType::HealHP:
+		// HP 회복 아이템
+		bUseSucceeded = RecoverHP(ItemData.UseValue);
+		break;
+
+	case ETeloItemUseType::HealStamina:
+		bUseSucceeded = false;
+		break;
+
+	case ETeloItemUseType::None:
+	default:
+		bUseSucceeded = false;
+		break;
+	}
+
+	// 사용 성공 + 소비형 아이템이면 개수 감소
+	if (bUseSucceeded && ItemData.bConsumeOnUse)
+	{
+		InventoryComponent->ConsumeItemAtSlot(SlotIndex, 1);
+	}
+
+	return bUseSucceeded;
 }

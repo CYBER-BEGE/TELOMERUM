@@ -77,6 +77,11 @@ void ATeloItemBase::Interact(AActor* Interactor)
 	NewItem.Icon = ItemIcon;
 	NewItem.Count = ItemCount;
 
+	NewItem.bUsable = bUsable;
+	NewItem.bConsumeOnUse = bConsumeOnUse;
+	NewItem.UseType = UseType;
+	NewItem.UseValue = UseValue;
+
 	if (!InventoryComponent->AddItem(NewItem)) // 인벤토리에 아이템 추가 실패
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[%s] Failed to add item to inventory"), *GetActorLabel());

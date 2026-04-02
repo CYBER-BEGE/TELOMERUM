@@ -184,3 +184,37 @@ int32 UTeloInventoryComponent::GetItemCount() const
 
 	return OccupiedCount;
 }
+
+bool UTeloInventoryComponent::ConsumeItemAtSlot(int32 SlotIndex, int32 Amount)
+{
+	if (!IsValidSlotIndex(SlotIndex))
+	{
+		return false;
+	}
+
+	if (Amount <= 0)
+	{
+		return false;
+	}
+
+	FTeloInventorySlot& Slot = Slots[SlotIndex];
+	if (Slot.IsEmpty())
+	{
+		return false;
+	}
+
+	if (Slot.ItemData.Count < Amount)
+	{
+		return false;
+	}
+
+	Slot.ItemData.Count -= Amount;
+
+	/* 개수가 0 이하가 되면 슬롯 비우기 */
+	if (Slot.ItemData.Count <= 0)
+	{
+		Slot.Clear();
+	}
+
+	return true;
+}

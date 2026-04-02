@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Item/TeloItemTypes.h"
 #include "TeloInventoryComponent.generated.h"
 
 USTRUCT(BlueprintType)
@@ -25,6 +26,22 @@ struct FTeloInventoryItem
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	int32 Count = 1;
+
+	/* 사용 가능한 아이템인지 여부 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	bool bUsable = false;
+
+	/* 사용 후 아이템을 소비할지 여부 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	bool bConsumeOnUse = true;
+
+	/* 아이템 사용 타입 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	ETeloItemUseType UseType = ETeloItemUseType::None;
+
+	/* 아이템 사용 수치 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	float UseValue = 0.0f;
 };
 
 USTRUCT(BlueprintType)
@@ -101,6 +118,9 @@ public:
 
 	/* 실제 아이템이 들어있는 슬롯 수 반환 */
 	int32 GetItemCount() const;
+
+	/* 슬롯의 아이템을 지정한 수량만큼 소비 */
+	bool ConsumeItemAtSlot(int32 SlotIndex, int32 Amount = 1);
 
 private:
 	/* 스택 가능한 슬롯 인덱스 탐색 */

@@ -56,6 +56,7 @@ void UTeloInventorySlotWidget::RefreshSlot(const FTeloInventorySlot& InSlotData)
 	}
 
 	EntryWidgetInstance->SetItemData(CachedSlotData.ItemData);
+	EntryWidgetInstance->SetSlotIndex(CachedSlotIndex);
 	ItemContainer->AddChild(EntryWidgetInstance);
 }
 
