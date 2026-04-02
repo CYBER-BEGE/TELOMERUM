@@ -18,7 +18,7 @@ void UTeloAnimNotiState_TraceAttack::NotifyBegin(
 	ATeloCharacterBase* Character = Cast<ATeloCharacterBase>(MeshComp->GetOwner());
 	if (!Character) return;
 
-	Character->BeginAttackTrace();
+	Character->StartAttackTrace();
 }
 
 void UTeloAnimNotiState_TraceAttack::NotifyTick(

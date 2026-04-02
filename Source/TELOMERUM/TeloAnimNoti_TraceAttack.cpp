@@ -17,5 +17,5 @@ void UTeloAnimNoti_TraceAttack::Notify(USkeletalMeshComponent* MeshComponent, UA
 	ATeloCharacterBase* Character = Cast<ATeloCharacterBase>(OwnerActor);
 	if (!Character) return;
 
-	Character->TraceAttack(Character->GetAttackSocketName());
+	//Character->BeginAttackTrace(Character->GetAttackSocketName());
 }

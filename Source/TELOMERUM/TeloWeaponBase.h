@@ -34,11 +34,14 @@ protected:
 
 	// 공격 판정 시작점 소켓 이름
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
-	FName TraceStartSocketName = TEXT("TraceStart");
+	FName TraceSocketA = TEXT("SocketA");
 
 	// 공격 판정 끝점 소켓 이름
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
-	FName TraceEndSocketName = TEXT("TraceEnd");
+	FName TraceSocketB = TEXT("SocketB");
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
+	bool bUseTwoSocketTrace = false;
 
 	// 무기 전용 판정 반경
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")

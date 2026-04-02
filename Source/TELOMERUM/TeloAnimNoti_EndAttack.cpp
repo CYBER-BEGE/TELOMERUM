@@ -17,5 +17,5 @@ void UTeloAnimNoti_EndAttack::Notify(USkeletalMeshComponent* MeshComponent, UAni
 	if (!Character) return;
 
 	UE_LOG(LogTemp, Display, TEXT("[%s] AnimNotify End Attack"), *Character->GetActorNameOrLabel());
-	Character->DoAttackEnd();
+	//Character->EndAttack();
 }

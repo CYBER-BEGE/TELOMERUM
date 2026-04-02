@@ -257,7 +257,7 @@ void ATeloPlayerCharacter::DoLook(float Yaw, float Pitch)
 void ATeloPlayerCharacter::DoJumpStart()
 {
 	bCanCrouch = false; // 점프 중에는 앉기 불가능
-	DoAttackEnd();		// 점프 시 공격 강제종료
+	EndAttack();		// 점프 시 공격 강제종료
 	DoCrouchEnd();		// 점프 시 앉기 강제종료
 
 	Jump();
@@ -317,7 +317,7 @@ void ATeloPlayerCharacter::DoDashStart()
 	//if (InputVector.IsNearlyZero()) return; // 이동 입력이 없을 시 종료
 	//if (GetCharacterMovement()->GetCurrentAcceleration().IsNearlyZero()) return; // 가속이 없을 시 종료 (입력 없을 시)
 	
-	DoAttackEnd(); // 대시 시 공격 강제종료
+	EndAttack(); // 대시 시 공격 강제종료
 
 	bIsDashing = true;
 	bCanDash = false;
@@ -422,7 +422,7 @@ void ATeloPlayerCharacter::AttackInput()
 		Target = LockOnComponent->GetTarget();
 	} 
 	
-	DoAttack(Target);
+	StartAttack(Target);
 }
 
 void ATeloPlayerCharacter::RotateToTarget(const AActor* Target)
