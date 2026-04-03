@@ -167,4 +167,36 @@ private:
 	void DrawHitDebug(const FHitResult& Hit);
 
 	bool GetAttackTracePoints(FVector& TraceA, FVector& TraceB) const;
+
+public:
+	/** Interfaces **/
+
+	/* Take Damage */
+	virtual void ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse);
+	
+	/** Functions **/
+
+	/* Attack */
+	FName GetAttackSocketName() const { return AttackSocketName; }
+	float GetAttackDistance() const;
+	void AttackRequest(AActor* Target);
+	FOnAttackEnd OnAttackEnd;
+
+	UFUNCTION(BlueprintPure, Category = "Animation State")
+	bool IsAttacking() const { return bIsAttacking; }
+
+protected:
+	/** Variables **/
+
+	/** Functions **/
+
+	/* Attack */
+	void DoAttack(AActor* Target);
+	void DoAttackEnd();
+	virtual void HitActor(const FHitResult& HitResult);
+	virtual void RotateToTarget(const AActor* Target); // 타겟 방향으로 회전
+
+public:
+	/* HP를 회복하고 성공 여부를 반환 */
+	bool RecoverHP(float Amount);
 };

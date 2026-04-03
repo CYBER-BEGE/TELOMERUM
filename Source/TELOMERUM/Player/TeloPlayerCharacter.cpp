@@ -11,8 +11,12 @@
 #include "Player/TeloInteractComponent.h"
 #include "Components/SceneComponent.h"
 #include "Enemy/TeloEnemyCharacter.h"
+#include "UI/TeloUISubsystem.h"
+#include "Engine/LocalPlayer.h"
+#include "Player/TeloInventoryComponent.h"
 #include "Perception/AISense_Hearing.h"
-#include "TeloWeaponBase.h"
+#include "Item/TeloItemTypes.h"
+#include "Item/TeloItemBase.h"
 
 // Sets default values
 ATeloPlayerCharacter::ATeloPlayerCharacter()
@@ -50,10 +54,8 @@ ATeloPlayerCharacter::ATeloPlayerCharacter()
 	// Interact 컴포넌트 생성
 	InteractComponent = CreateDefaultSubobject<UTeloInteractComponent>(TEXT("InteractComponent"));
 
-	/*
-	// Weapon Attach 컴포넌트 생성
-	WeaponAttachComponent = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponAttachComponent"));
-	WeaponAttachComponent->SetupAttachment(GetMesh());*/
+	// Inventory 컴포넌트 생성
+	InventoryComponent = CreateDefaultSubobject<UTeloInventoryComponent>(TEXT("InventoryComponent"));
 
 	// 초기 상태 설정
 	MaxHP = 100.0f;
@@ -105,6 +107,8 @@ void ATeloPlayerCharacter::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] LockOnAction is NULL"));
 	if (InteractAction == NULL)
 		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] InteractAction is NULL"));
+	if (InventoryAction == NULL)
+		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] InventoryAction is NULL"));
 }
 
 // Called every frame
@@ -152,6 +156,9 @@ void ATeloPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 		// Interact
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::InteractInput);
+
+		// Inventory
+		EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::InventoryInput);
 	}
 	else
 	{
@@ -442,4 +449,151 @@ void ATeloPlayerCharacter::InteractInput()
 	{
 		InteractComponent->TryInteract();
 	}
+}
+
+void ATeloPlayerCharacter::InventoryInput()
+{
+	if (!PlayerController)
+	{
+		return;
+	}
+
+	ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
+	if (!LocalPlayer)
+	{
+		return;
+	}
+
+	UTeloUISubsystem* UISubsystem = LocalPlayer->GetSubsystem<UTeloUISubsystem>();
+	if (!UISubsystem)
+	{
+		return;
+	}
+
+	UISubsystem->ToggleInventory();
+}
+
+bool ATeloPlayerCharacter::TryUseItemAtSlot(int32 SlotIndex)
+{
+	if (!InventoryComponent)
+	{
+		return false;
+	}
+
+	if (!InventoryComponent->IsValidSlotIndex(SlotIndex))
+	{
+		return false;
+	}
+
+	const TArray<FTeloInventorySlot>& Slots = InventoryComponent->GetSlots();
+	if (!Slots.IsValidIndex(SlotIndex))
+	{
+		return false;
+	}
+
+	const FTeloInventorySlot& Slot = Slots[SlotIndex];
+	if (Slot.IsEmpty())
+	{
+		return false;
+	}
+
+	const FTeloInventoryItem& ItemData = Slot.ItemData;
+
+	// 사용 불가능한 아이템이면 실패
+	if (!ItemData.bUsable)
+	{
+		return false;
+	}
+
+	bool bUseSucceeded = false;
+
+	switch (ItemData.UseType)
+	{
+	case ETeloItemUseType::HealHP:
+		// HP 회복 아이템
+		bUseSucceeded = RecoverHP(ItemData.UseValue);
+		break;
+
+	case ETeloItemUseType::HealStamina:
+		bUseSucceeded = false;
+		break;
+
+	case ETeloItemUseType::None:
+	default:
+		bUseSucceeded = false;
+		break;
+	}
+
+	// 사용 성공 + 소비형 아이템이면 개수 감소
+	if (bUseSucceeded && ItemData.bConsumeOnUse)
+	{
+		InventoryComponent->ConsumeItemAtSlot(SlotIndex, 1);
+	}
+
+	return bUseSucceeded;
+}
+
+bool ATeloPlayerCharacter::TryDropItemAtSlot(int32 SlotIndex)
+{
+	if (!InventoryComponent)
+	{
+		return false;
+	}
+
+	if (!InventoryComponent->IsValidSlotIndex(SlotIndex))
+	{
+		return false;
+	}
+
+	const TArray<FTeloInventorySlot>& Slots = InventoryComponent->GetSlots();
+	if (!Slots.IsValidIndex(SlotIndex))
+	{
+		return false;
+	}
+
+	const FTeloInventorySlot& Slot = Slots[SlotIndex];
+	if (Slot.IsEmpty())
+	{
+		return false;
+	}
+
+	const FTeloInventoryItem& ItemData = Slot.ItemData;
+
+	// 월드에 다시 생성할 클래스 정보가 없으면 드롭 불가
+	if (!ItemData.WorldItemClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] TryDropItemAtSlot failed: WorldItemClass is NULL"));
+		return false;
+	}
+
+	// 플레이어 앞쪽에 아이템 드롭 위치 계산
+	const FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 100.0f) + FVector(0.0f, 0.0f, 30.0f);
+	const FRotator SpawnRotation = GetActorRotation();
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = this;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	ATeloItemBase* DroppedItem = GetWorld()->SpawnActor<ATeloItemBase>(ItemData.WorldItemClass, SpawnLocation, SpawnRotation, SpawnParams);
+
+	if (!DroppedItem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] TryDropItemAtSlot failed: SpawnActor failed"));
+		return false;
+	}
+
+	// 인벤토리 데이터 기준으로 월드 아이템 초기화
+	DroppedItem->InitializeFromInventoryItem(ItemData);
+
+	// 현재는 슬롯 전체 스택을 한 번에 버리는 방식
+	const bool bConsumeSucceeded = InventoryComponent->ConsumeItemAtSlot(SlotIndex, ItemData.Count);
+	if (!bConsumeSucceeded)
+	{
+		// 드롭 스폰은 성공했는데 인벤토리 소비가 실패하면 월드 아이템 제거
+		DroppedItem->Destroy();
+		return false;
+	}
+
+	return true;
 }

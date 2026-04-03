@@ -91,13 +91,26 @@ void UTeloInteractComponent::CreateInteractWidget()
 
 void UTeloInteractComponent::ShowInteractWidget(AActor* InteractActor)
 {
+	// 상호작용 UI를 표시할 액터가 유효한지 검사
 	if (!InteractWidgetInstance || !InteractActor)
+	{
 		return;
+	}
 
+	// 다른 전체 화면 UI가 열려 있는 동안엔 상호작용 UI 표시 금지
+	if (bSuppressInteractWidget)
+	{
+		HideInteractWidget();
+		return;
+	}
+
+	// 상호작용 대상이 상호작용 인터페이스를 구현하고 있다면 UI에 텍스트 설정
 	if (ITeloInteractable* Interactable = Cast<ITeloInteractable>(InteractActor))
 	{
 		InteractWidgetInstance->SetInteractText(Interactable->GetInteractText());
-		InteractWidgetInstance->SetVisibility(ESlateVisibility::Visible);
+
+		// 입력을 절대 먹지 않도록 표시
+		InteractWidgetInstance->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
 }
 
@@ -107,6 +120,20 @@ void UTeloInteractComponent::HideInteractWidget()
 	{
 		InteractWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
 	}
+}
+
+void UTeloInteractComponent::SetInteractWidgetSuppressed(bool bSuppressed)
+{
+	bSuppressInteractWidget = bSuppressed;
+
+	if (bSuppressInteractWidget)
+	{
+		HideInteractWidget();
+		return;
+	}
+
+	// 다시 허용되면 현재 주변 상호작용 후보를 기준으로 UI 재계산
+	RefreshCurrentInteractActor();
 }
 
 bool UTeloInteractComponent::IsValidInteractActor(AActor* Actor) const
