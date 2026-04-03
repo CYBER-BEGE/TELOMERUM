@@ -12,6 +12,8 @@
 #include "UI/TeloInventoryWidget.h"
 #include "UI/TeloTooltipWidget.h"
 #include "UI/TeloContextWidget.h"
+#include "Player/TeloPlayerCharacter.h"
+#include "Player/TeloInteractComponent.h"
 
 /* ==================== Subsystem Lifecycle ==================== */
 
@@ -45,6 +47,15 @@ void UTeloUISubsystem::OpenScreenWidget(UTeloScreenWidgetBase* ScreenWidget)
 	HideTooltip(); // 툴팁 숨김
 	HideContext(); // 아이템 컨텍스트 메뉴 숨김
 
+	// 전체 화면 UI가 열리는 동안 상호작용 UI는 숨김
+	if (ATeloPlayerCharacter* PlayerCharacter = Cast<ATeloPlayerCharacter>(GetLocalPlayer()->GetPlayerController(GetWorld())->GetPawn()))
+	{
+		if (UTeloInteractComponent* InteractComponent = PlayerCharacter->GetInteractComponent())
+		{
+			InteractComponent->SetInteractWidgetSuppressed(true);
+		}
+	}
+
 	// 새로 열려고 하는 위젯 표시 및 UI 입력 모드 적용
 	CurrentScreenWidget->SetVisibility(ESlateVisibility::Visible);
 	CurrentScreenWidget->OnScreenOpened();
@@ -73,6 +84,16 @@ void UTeloUISubsystem::CloseScreenWidget(UTeloScreenWidgetBase* ScreenWidget)
 	if (CurrentScreenWidget == ScreenWidget)
 	{
 		CurrentScreenWidget = nullptr;
+
+		// 전체 화면 UI가 닫혔으니 상호작용 UI 다시 허용
+		if (ATeloPlayerCharacter* PlayerCharacter = Cast<ATeloPlayerCharacter>(GetLocalPlayer()->GetPlayerController(GetWorld())->GetPawn()))
+		{
+			if (UTeloInteractComponent* InteractComponent = PlayerCharacter->GetInteractComponent())
+			{
+				InteractComponent->SetInteractWidgetSuppressed(false); // 상호작용 UI 다시 허용
+			}
+		}
+
 		ApplyGameInputMode(); // 게임 입력 모드 적용
 	}
 }
@@ -405,9 +426,10 @@ void UTeloUISubsystem::HandleContextActionClicked(FName ActionID)
 	// 액션 처리 후 컨텍스트 메뉴 숨김
 	HideContext();
 
-	// 컨텍스트 메뉴 액션 후 현재 화면 위젯에 다시 포커스를 돌려줌
+	// 컨텍스트 메뉴 액션 후 현재 화면 위젯에 입력 모드와 포커스를 다시 복구
 	if (CurrentScreenWidget && CurrentScreenWidget->IsInViewport())
 	{
+		ApplyUIInputMode(CurrentScreenWidget);
 		CurrentScreenWidget->SetKeyboardFocus();
 	}
 }

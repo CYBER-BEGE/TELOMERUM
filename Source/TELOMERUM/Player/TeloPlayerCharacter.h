@@ -170,6 +170,13 @@ public:
 	// Returns InventoryComponent
 	FORCEINLINE class UTeloInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
 
+	// Returns InteractComponent
+	FORCEINLINE class UTeloInteractComponent* GetInteractComponent() const { return InteractComponent; }
+
+public:
 	/* 인벤토리 슬롯의 아이템 사용 시도 */
 	bool TryUseItemAtSlot(int32 SlotIndex);
+
+	/* 인벤토리 슬롯의 아이템을 월드에 드롭 시도 */
+	bool TryDropItemAtSlot(int32 SlotIndex);
 };

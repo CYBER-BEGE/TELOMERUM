@@ -12,6 +12,10 @@ struct FTeloInventoryItem
 {
 	GENERATED_BODY()
 
+	/* 월드 아이템 클래스 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	TSubclassOf<class ATeloItemBase> WorldItemClass = nullptr;
+
 	/* 아이템 고유 ID */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	FName ItemID = NAME_None;

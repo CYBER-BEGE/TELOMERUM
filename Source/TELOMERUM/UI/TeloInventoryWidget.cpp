@@ -158,6 +158,19 @@ void UTeloInventoryWidget::RefreshInventory()
 		BuildSlotWidgets();
 	}
 
+	// 선택 슬롯 유효성 정리
+	if (!InventoryComponent->IsValidSlotIndex(SelectedSlotIndex) || InventoryComponent->IsSlotEmpty(SelectedSlotIndex))
+	{
+		// 선택된 슬롯이 비었거나 유효하지 않다면 선택 상태까지 해제
+		SelectedSlotIndex = INDEX_NONE;
+		ClearSelectedItemInfo();
+	}
+	else
+	{
+		// 선택된 슬롯이 유효하다면 해당 아이템 정보로 패널 갱신
+		SelectItem(Slots[SelectedSlotIndex].ItemData);
+	}
+
 	// 각 슬롯 위젯에 슬롯 데이터 설정 및 선택 상태 업데이트
 	for (int32 SlotIndex = 0; SlotIndex < Slots.Num() && SlotIndex < SlotWidgets.Num(); ++SlotIndex)
 	{
@@ -168,17 +181,6 @@ void UTeloInventoryWidget::RefreshInventory()
 
 		SlotWidgets[SlotIndex]->RefreshSlot(Slots[SlotIndex]);
 		SlotWidgets[SlotIndex]->SetSelected(SlotIndex == SelectedSlotIndex);
-	}
-
-	// 선택된 슬롯 상태에 따라 우측 정보 패널도 다시 갱신
-	if (!InventoryComponent->IsValidSlotIndex(SelectedSlotIndex) ||
-		InventoryComponent->IsSlotEmpty(SelectedSlotIndex))
-	{
-		ClearSelectedItemInfo(); // 선택된 슬롯이 유효하지 않거나 빈 슬롯이면 정보 패널 초기화
-	}
-	else
-	{
-		SelectItem(Slots[SelectedSlotIndex].ItemData); // 선택된 슬롯이 유효한 아이템이 있는 슬롯이면 정보 패널 갱신
 	}
 }
 

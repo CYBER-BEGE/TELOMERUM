@@ -91,8 +91,17 @@ void UTeloInventoryEntryWidget::HandleContextAction(FName ActionID)
 	}
 	else if (ActionID == TEXT("Drop")) // Drop 액션 선택 시
 	{
-		UE_LOG(LogTemp, Log, TEXT("[UTeloInventoryEntryWidget] Drop Item: %s"),
-			*CachedItemData.ItemID.ToString());
+		ATeloPlayerCharacter* PlayerCharacter = Cast<ATeloPlayerCharacter>(GetOwningPlayerPawn());
+		if (!PlayerCharacter)
+		{
+			return;
+		}
+
+		const bool bDropSucceeded = PlayerCharacter->TryDropItemAtSlot(CachedSlotIndex); // 아이템 버리기 시도
+
+		UE_LOG(LogTemp, Log, TEXT("[UTeloInventoryEntryWidget] Drop Item: %s / Result: %s"),
+			*CachedItemData.ItemID.ToString(),
+			bDropSucceeded ? TEXT("Success") : TEXT("Fail"));
 	}
 }
 

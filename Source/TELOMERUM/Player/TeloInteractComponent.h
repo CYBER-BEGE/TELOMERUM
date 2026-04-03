@@ -90,4 +90,10 @@ public:
 
 	/* 상호작용 시도 */
 	void TryInteract();
+
+	/* 다른 전체 화면 UI가 열려 있는 동안 상호작용 위젯 표시를 막을지 여부 */
+	bool bSuppressInteractWidget = false;
+
+	/* 상호작용 위젯 표시를 일시적으로 막거나 다시 허용 */
+	void SetInteractWidgetSuppressed(bool bSuppressed);
 };

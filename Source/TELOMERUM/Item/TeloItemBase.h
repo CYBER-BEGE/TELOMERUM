@@ -95,4 +95,7 @@ public:
 
 	/* UI에 표시할 상호작용 문구 */
 	virtual FText GetInteractText() const override;
+
+	/* 인벤토리 데이터 기준으로 월드 아이템 정보를 다시 초기화 */
+	void InitializeFromInventoryItem(const struct FTeloInventoryItem& InItemData);
 };
