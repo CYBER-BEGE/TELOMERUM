@@ -309,45 +309,10 @@ void ATeloCharacterBase::TickAttackTrace()
 	QueryParams.AddIgnoredActor(this);
 	QueryParams.AddIgnoredActor(WeaponInstance);
 
-	GetWorld()->SweepMultiByObjectType(
-		OutHits,
-		PrevTraceA,
-		CurrentTraceA,
-		FQuat::Identity,
-		ObjectParams,
-		CollisionShape,
-		QueryParams
-	);
-
-	GetWorld()->SweepMultiByObjectType(
-		OutHits,
-		PrevTraceB,
-		CurrentTraceB,
-		FQuat::Identity,
-		ObjectParams,
-		CollisionShape,
-		QueryParams
-	);
-
-	GetWorld()->SweepMultiByObjectType(
-		OutHits,
-		PrevTraceA,
-		PrevTraceB,
-		FQuat::Identity,
-		ObjectParams,
-		CollisionShape,
-		QueryParams
-	);
-
-	GetWorld()->SweepMultiByObjectType(
-		OutHits,
-		CurrentTraceA,
-		CurrentTraceB,
-		FQuat::Identity,
-		ObjectParams,
-		CollisionShape,
-		QueryParams
-	);
+	GetWorld()->SweepMultiByObjectType(OutHits, PrevTraceA,	CurrentTraceA, FQuat::Identity, ObjectParams, CollisionShape, QueryParams);
+	GetWorld()->SweepMultiByObjectType(OutHits, PrevTraceB, CurrentTraceB, FQuat::Identity, ObjectParams, CollisionShape, QueryParams);
+	GetWorld()->SweepMultiByObjectType(OutHits, PrevTraceA, PrevTraceB, FQuat::Identity, ObjectParams, CollisionShape, QueryParams);
+	GetWorld()->SweepMultiByObjectType(OutHits, CurrentTraceA, CurrentTraceB, FQuat::Identity, ObjectParams, CollisionShape, QueryParams);
 
 	for (const FHitResult& Hit : OutHits)
 	{

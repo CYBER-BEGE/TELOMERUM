@@ -44,6 +44,8 @@ public:
 	void TickAttackTrace();
 	void EndAttackTrace();
 
+	void EndAttack(); // 임시
+
 	/* ==================== Query ==================== */
 
 	float GetAttackDistance() const;
@@ -119,7 +121,7 @@ protected:
 	void StartAttack(AActor* Target);
 	
 	/* 공격 State 초기화 함수 */
-	void EndAttack();
+	//void EndAttack();
 
 	/* ==================== Override ==================== */
 
