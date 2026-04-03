@@ -122,4 +122,8 @@ protected:
 	void DoAttackEnd();
 	virtual void HitActor(const FHitResult& HitResult);
 	virtual void RotateToTarget(const AActor* Target); // 타겟 방향으로 회전
+
+public:
+	/* HP를 회복하고 성공 여부를 반환 */
+	bool RecoverHP(float Amount);
 };

@@ -11,6 +11,7 @@
 #include "Components/Image.h"
 
 #include "UI/TeloUISubsystem.h"
+#include "Player/TeloPlayerCharacter.h"
 
 bool UTeloInventoryEntryWidget::Initialize()
 {
@@ -41,6 +42,11 @@ void UTeloInventoryEntryWidget::SetItemData(const FTeloInventoryItem& ItemData)
 	}
 }
 
+void UTeloInventoryEntryWidget::SetSlotIndex(int32 InSlotIndex)
+{
+	CachedSlotIndex = InSlotIndex;
+}
+
 bool UTeloInventoryEntryWidget::GetTooltipData(FTeloTooltipData& OutTooltipData) const
 {
 	OutTooltipData.Title = CachedItemData.ItemName;
@@ -52,10 +58,14 @@ bool UTeloInventoryEntryWidget::GetTooltipData(FTeloTooltipData& OutTooltipData)
 
 void UTeloInventoryEntryWidget::GetContextActions(TArray<FTeloContextAction>& OutActions) const
 {
-	FTeloContextAction UseAction;
-	UseAction.ActionID = TEXT("Use");
-	UseAction.Label = FText::FromString(TEXT("사용"));
-	OutActions.Add(UseAction);
+	// 사용 가능한 아이템일 때만 Use 액션 추가
+	if (CachedItemData.bUsable)
+	{
+		FTeloContextAction UseAction;
+		UseAction.ActionID = TEXT("Use");
+		UseAction.Label = FText::FromString(TEXT("사용"));
+		OutActions.Add(UseAction);
+	}
 
 	FTeloContextAction DropAction;
 	DropAction.ActionID = TEXT("Drop");
@@ -65,15 +75,33 @@ void UTeloInventoryEntryWidget::GetContextActions(TArray<FTeloContextAction>& Ou
 
 void UTeloInventoryEntryWidget::HandleContextAction(FName ActionID)
 {
-	if (ActionID == TEXT("Use"))
+	if (ActionID == TEXT("Use")) // Use 액션 선택 시
 	{
-		UE_LOG(LogTemp, Log, TEXT("[UTeloInventoryEntryWidget] Use Item: %s"),
-			*CachedItemData.ItemID.ToString());
+		ATeloPlayerCharacter* PlayerCharacter = Cast<ATeloPlayerCharacter>(GetOwningPlayerPawn());
+		if (!PlayerCharacter)
+		{
+			return;
+		}
+
+		const bool bUseSucceeded = PlayerCharacter->TryUseItemAtSlot(CachedSlotIndex); // 아이템 사용 시도
+
+		UE_LOG(LogTemp, Log, TEXT("[UTeloInventoryEntryWidget] Use Item: %s / Result: %s"),
+			*CachedItemData.ItemID.ToString(),
+			bUseSucceeded ? TEXT("Success") : TEXT("Fail"));
 	}
-	else if (ActionID == TEXT("Drop"))
+	else if (ActionID == TEXT("Drop")) // Drop 액션 선택 시
 	{
-		UE_LOG(LogTemp, Log, TEXT("[UTeloInventoryEntryWidget] Drop Item: %s"),
-			*CachedItemData.ItemID.ToString());
+		ATeloPlayerCharacter* PlayerCharacter = Cast<ATeloPlayerCharacter>(GetOwningPlayerPawn());
+		if (!PlayerCharacter)
+		{
+			return;
+		}
+
+		const bool bDropSucceeded = PlayerCharacter->TryDropItemAtSlot(CachedSlotIndex); // 아이템 버리기 시도
+
+		UE_LOG(LogTemp, Log, TEXT("[UTeloInventoryEntryWidget] Drop Item: %s / Result: %s"),
+			*CachedItemData.ItemID.ToString(),
+			bDropSucceeded ? TEXT("Success") : TEXT("Fail"));
 	}
 }
 

@@ -71,11 +71,18 @@ void ATeloItemBase::Interact(AActor* Interactor)
 	}
 
 	FTeloInventoryItem NewItem;
+	NewItem.WorldItemClass = GetClass();
+
 	NewItem.ItemID = ItemID;
 	NewItem.ItemName = ItemName;
 	NewItem.Description = ItemDescription;
 	NewItem.Icon = ItemIcon;
 	NewItem.Count = ItemCount;
+
+	NewItem.bUsable = bUsable;
+	NewItem.bConsumeOnUse = bConsumeOnUse;
+	NewItem.UseType = UseType;
+	NewItem.UseValue = UseValue;
 
 	if (!InventoryComponent->AddItem(NewItem)) // 인벤토리에 아이템 추가 실패
 	{
@@ -96,4 +103,22 @@ void ATeloItemBase::Interact(AActor* Interactor)
 FText ATeloItemBase::GetInteractText() const
 {
 	return InteractText;
+}
+
+void ATeloItemBase::InitializeFromInventoryItem(const FTeloInventoryItem& InItemData)
+{
+	ItemID = InItemData.ItemID;
+	ItemName = InItemData.ItemName;
+	ItemDescription = InItemData.Description;
+	ItemIcon = InItemData.Icon;
+	ItemCount = InItemData.Count;
+
+	bUsable = InItemData.bUsable;
+	bConsumeOnUse = InItemData.bConsumeOnUse;
+	UseType = InItemData.UseType;
+	UseValue = InItemData.UseValue;
+
+	// 월드에 다시 드롭된 직후에는 습득 가능한 상태여야 함
+	bIsPickedUp = false;
+	bCanInteract = true;
 }

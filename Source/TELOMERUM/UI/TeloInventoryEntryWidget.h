@@ -23,6 +23,8 @@ public:
 
 	/* 아이템 데이터를 위젯에 적용 */
 	void SetItemData(const FTeloInventoryItem& ItemData);
+	/* 현재 아이템이 들어있는 슬롯 인덱스를 설정 */
+	void SetSlotIndex(int32 InSlotIndex);
 
 	/* 아이템이 클릭됐을 때 부모 위젯에게 알리는 delegate */
 	FOnInventoryEntryClicked OnInventoryEntryClicked;
@@ -62,4 +64,7 @@ protected:
 private:
 	/* 클릭됐을 때 어떤 아이템인지 부모에게 넘겨주기 위해 저장 */
 	FTeloInventoryItem CachedItemData;
+
+	/* 현재 아이템이 들어있는 슬롯 인덱스 */
+	int32 CachedSlotIndex = INDEX_NONE;
 };

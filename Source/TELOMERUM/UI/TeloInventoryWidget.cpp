@@ -35,10 +35,40 @@ void UTeloInventoryWidget::OnScreenOpened()
 {
 	Super::OnScreenOpened();
 
+	ATeloPlayerCharacter* PlayerCharacter = Cast<ATeloPlayerCharacter>(GetOwningPlayerPawn());
+	if (PlayerCharacter)
+	{
+		if (UTeloInventoryComponent* InventoryComponent = PlayerCharacter->GetInventoryComponent())
+		{
+			// 중복 바인딩 방지 후 인벤토리 변경 이벤트 연결
+			InventoryComponent->OnInventoryChanged.RemoveAll(this); // 기존 바인딩 제거
+			InventoryComponent->OnInventoryChanged.AddUObject(this, &UTeloInventoryWidget::RefreshInventory); // 인벤토리 변경 시 UI 새로고침
+		}
+	}
+
 	// 슬롯 위젯 생성 후 데이터 갱신
 	SelectedSlotIndex = INDEX_NONE;
 	BuildSlotWidgets();
 	RefreshInventory();
+}
+
+void UTeloInventoryWidget::OnScreenClosed()
+{
+	Super::OnScreenClosed();
+
+	ATeloPlayerCharacter* PlayerCharacter = Cast<ATeloPlayerCharacter>(GetOwningPlayerPawn());
+	if (!PlayerCharacter)
+	{
+		return;
+	}
+
+	UTeloInventoryComponent* InventoryComponent = PlayerCharacter->GetInventoryComponent();
+	if (!InventoryComponent)
+	{
+		return;
+	}
+
+	InventoryComponent->OnInventoryChanged.RemoveAll(this);
 }
 
 void UTeloInventoryWidget::BuildSlotWidgets()
@@ -128,6 +158,19 @@ void UTeloInventoryWidget::RefreshInventory()
 		BuildSlotWidgets();
 	}
 
+	// 선택 슬롯 유효성 정리
+	if (!InventoryComponent->IsValidSlotIndex(SelectedSlotIndex) || InventoryComponent->IsSlotEmpty(SelectedSlotIndex))
+	{
+		// 선택된 슬롯이 비었거나 유효하지 않다면 선택 상태까지 해제
+		SelectedSlotIndex = INDEX_NONE;
+		ClearSelectedItemInfo();
+	}
+	else
+	{
+		// 선택된 슬롯이 유효하다면 해당 아이템 정보로 패널 갱신
+		SelectItem(Slots[SelectedSlotIndex].ItemData);
+	}
+
 	// 각 슬롯 위젯에 슬롯 데이터 설정 및 선택 상태 업데이트
 	for (int32 SlotIndex = 0; SlotIndex < Slots.Num() && SlotIndex < SlotWidgets.Num(); ++SlotIndex)
 	{
@@ -138,12 +181,6 @@ void UTeloInventoryWidget::RefreshInventory()
 
 		SlotWidgets[SlotIndex]->RefreshSlot(Slots[SlotIndex]);
 		SlotWidgets[SlotIndex]->SetSelected(SlotIndex == SelectedSlotIndex);
-	}
-
-	// 선택된 슬롯이 비었으면 정보 패널 초기화
-	if (!InventoryComponent->IsValidSlotIndex(SelectedSlotIndex) || InventoryComponent->IsSlotEmpty(SelectedSlotIndex))
-	{
-		ClearSelectedItemInfo();
 	}
 }
 
