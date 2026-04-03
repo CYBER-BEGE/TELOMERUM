@@ -115,7 +115,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	float KnockupImpulse = 300.0f;
 
+	/* 공격 가능 조건 체크, 공격 State 설정 함수 */
 	void StartAttack(AActor* Target);
+	
+	/* 공격 State 초기화 함수 */
 	void EndAttack();
 
 	/* ==================== Override ==================== */
@@ -133,11 +136,11 @@ private:
 	/* Attack */
 	bool bCanAttack = true;			// 공격 가능 여부
 	bool bIsAttacking = false;		// 공격 중인지 여부
-	bool bAttackTracing = false;
+	bool bAttackTracing = false;	// 공격 판정 중인지 여부
 
 	/* Attack Trace */
-	FVector PreviousAttackTraceStart = FVector::ZeroVector;
-	FVector PreviousAttackTraceEnd = FVector::ZeroVector;
+	FVector PrevTraceA = FVector::ZeroVector;
+	FVector PrevTraceB = FVector::ZeroVector;
 	TSet<TWeakObjectPtr<AActor>> AlreadyHitActors;
 
 	/* ==================== Damage Internal ==================== */
@@ -160,5 +163,6 @@ private:
 
 	void DrawAttackDebug(FVector TraceStart, FVector TraceEnd);
 	void DrawHitDebug(const FHitResult& Hit);
-	
+
+	bool GetAttackTracePoints(FVector& TraceA, FVector& TraceB) const;
 };

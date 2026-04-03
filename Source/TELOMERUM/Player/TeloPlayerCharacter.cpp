@@ -422,7 +422,7 @@ void ATeloPlayerCharacter::AttackInput()
 		Target = LockOnComponent->GetTarget();
 	} 
 	
-	StartAttack(Target);
+	AttackRequest(Target);
 }
 
 void ATeloPlayerCharacter::RotateToTarget(const AActor* Target)

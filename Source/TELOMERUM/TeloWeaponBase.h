@@ -56,10 +56,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
 	float WeaponRange = 1.0f;
 
-public:
-	bool GetAttackTraceData(FVector& OutStart, FVector& OutEnd) const;
-
 	// 공격 애니메이션 몽타주 - 반드시 BP에서 지정
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	class UAnimMontage* AttackMontage;
+public:
+	bool GetAttackTraceData(FVector& OutStart, FVector& OutEnd) const;
+	bool IsTwoSocketTrace() const { return bUseTwoSocketTrace; }
+
+	class UAnimMontage* GetAttackMontage() const { return AttackMontage; }
 };
