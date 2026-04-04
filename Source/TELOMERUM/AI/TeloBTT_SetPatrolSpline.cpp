@@ -2,8 +2,10 @@
 
 
 #include "TeloBTT_SetPatrolSpline.h"
+
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+
 #include "TeloEnemyCharacter.h"
 #include "TeloPatrolSpline.h"
 

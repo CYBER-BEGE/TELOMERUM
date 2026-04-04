@@ -2,7 +2,9 @@
 
 
 #include "TeloBTT_AIPatrol.h"
+
 #include "BehaviorTree/BlackboardComponent.h"
+
 #include "TeloPatrolSpline.h"
 
 UTeloBTT_AIPatrol::UTeloBTT_AIPatrol()

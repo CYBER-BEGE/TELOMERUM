@@ -2,14 +2,13 @@
 
 
 #include "TeloAIController.h"
+
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
-
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Damage.h"
 #include "Perception/AISenseConfig_Hearing.h"
-
 #include "NavigationSystem.h"
 
 ATeloAIController::ATeloAIController()

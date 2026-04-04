@@ -2,9 +2,11 @@
 
 
 #include "TeloBTD_CheckAttackDistance.h"
+
 #include "AIController.h"
-#include "TeloCharacterBase.h"
 #include "BehaviorTree/BlackboardComponent.h"
+
+#include "TeloCharacterBase.h"
 
 /* 공격 범위 내에 적이 있으면 True, 없으면 False 리턴 */
 bool UTeloBTD_CheckAttackDistance::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComponent, uint8* NodeMemory) const

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
+
 #include "TeloBTT_AIPatrol.generated.h"
 
 /**
@@ -21,7 +22,8 @@ protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComponent, uint8* NodeMemory) override;
 
 private:
+	/* 순찰 타입 - True: 왕복 순찰 사용, False: 순환 순찰 사용 */
 	UPROPERTY(EditAnywhere, Category = "Patrol")
-	bool bUsePingPong = false; // True: 왕복 순찰 사용, False: 순환 순찰 사용
+	bool bUsePingPong = false;
 	
 };
