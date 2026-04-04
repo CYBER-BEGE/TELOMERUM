@@ -56,6 +56,8 @@ void ATeloEnemyCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+/* ==================== Lock On ==================== */
+
 FVector ATeloEnemyCharacter::GetLockOnPointLocation() const
 {
 	// LockOnPoint가 유효하면 그 위치 반환, 아니면 액터 위치 반환
@@ -70,6 +72,8 @@ void ATeloEnemyCharacter::SetLockOnMarkerVisible(bool bVisible)
 	LockOnMarkerWidget->SetHiddenInGame(!bVisible);
 	LockOnMarkerWidget->SetVisibility(bVisible, true);
 }
+
+/* ==================== HP ==================== */
 
 void ATeloEnemyCharacter::ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse)
 {
@@ -94,6 +98,8 @@ void ATeloEnemyCharacter::ApplyDamage(float Damage, AActor* DamageCauser, const 
 
 	Super::ApplyDamage(Damage, DamageCauser, DamageLocation, DamageImpulse);
 }
+
+/* ==================== Attack ==================== */
 
 void ATeloEnemyCharacter::HitActor(const FHitResult& HitResult)
 {
