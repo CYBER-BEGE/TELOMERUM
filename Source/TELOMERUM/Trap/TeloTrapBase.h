@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+
 #include "TeloTrapBase.generated.h"
 
 // 함정의 정의: 파괴되지 않는다(일회성이 아님), 캐릭터에게 데미지를 준다

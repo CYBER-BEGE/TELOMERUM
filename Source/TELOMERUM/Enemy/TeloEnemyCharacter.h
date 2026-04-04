@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "TeloCharacterBase.h"
+
 #include "TeloEnemyCharacter.generated.h"
 
 /**

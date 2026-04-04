@@ -2,10 +2,12 @@
 
 
 #include "TeloEnemyCharacter.h"
+
 #include "Components/WidgetComponent.h"
-#include "TeloAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/AISense_Damage.h"
+
+#include "TeloAIController.h"
 
 ATeloEnemyCharacter::ATeloEnemyCharacter()
 {

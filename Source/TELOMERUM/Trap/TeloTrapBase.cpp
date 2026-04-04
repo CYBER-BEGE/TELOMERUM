@@ -2,6 +2,7 @@
 
 
 #include "Trap/TeloTrapBase.h"
+
 #include "Interfaces/TeloDamageable.h"
 
 // Sets default values
