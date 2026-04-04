@@ -30,64 +30,73 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
-	/* Player Controller */
+	/* 입력 처리용 컨트롤러 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	APlayerController* PlayerController;
 
-	/* Camera boom positioning the camera behind the character */
+	/* 카메라-캐릭터 간 거리 유지, 카메라 회전에 사용 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
-	/* Follow camera */
+	/* 실제 카메라 컴포넌트 (CameraBoom의 자식) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 
-	/* Lock On Component */
+	/* 적 락온 컴포넌트 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class UTeloLockOnComponent* LockOnComponent;
 
-	/* Interact Component */
+	/* 상호작용 컴포넌트 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class UTeloInteractComponent* InteractComponent;
 
-	/* Inventory Component */
+	/* 인벤토리 컴포넌트 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class UTeloInventoryComponent* InventoryComponent;
 
 private:
-	/* Input Action */
+	/* 이동 InputAction */
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* MoveAction;
 
+	/* 카메라 이동, 회전 InputAction */
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* LookAction;
 
+	/* 점프 InputAction */
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* JumpAction;
 
+	/* 앉기 InputAction */
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* CrouchAction;
 
+	/* 대시 InputAction */
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* DashAction;
 
+	/* 공격 InputAction */
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* AttackAction;
 
+	/* 방어 InputAction */
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* BlockAction;
 
+	/* 락온 InputAction */
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* LockOnAction;
 
+	/* 상호작용 InputAction */
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* InteractAction;
 
+	/* 인벤토리 InputAction */
 	UPROPERTY(EditAnywhere, Category = "Input Action")
 	class UInputAction* InventoryAction;
 
 private:
-	/* Movement Components */
+	/* Movement Component 초기화 함수 */
 	void ResetMovementComps();
 
 	/* Move */
@@ -136,8 +145,10 @@ private:
 	//void ApplyLockOnMovementMode(bool bLockOn);
 
 	/* Attack */
+	/* 공격 입력 처리 함수 */
 	void AttackInput();
-	class ATeloEnemyCharacter* GetAttackTarget() const; // 락온 대상 가져오기
+	/* Target 방향으로 회전 */
+	void RotateToTarget(const AActor* Target) override;
 
 	/* Interact */
 	void InteractInput();
@@ -148,9 +159,6 @@ private:
 protected:
 	virtual void Landed(const FHitResult& Hit) override;
 	virtual bool CanJumpInternal_Implementation() const override;
-
-	/* Attack */
-	void RotateToTarget(const AActor* Target) override; // 락온 타겟 방향으로 회전
 
 public:
 	/* Animation State */
