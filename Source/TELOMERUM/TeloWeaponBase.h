@@ -24,9 +24,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 protected:
-	/* 무기 메시 */
+	/* 메시 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	class UStaticMeshComponent* WeaponMesh;
+	class UStaticMeshComponent* Mesh;
 
 	/* 공격 애니메이션 몽타주 - 반드시 BP에서 지정 */
 	UPROPERTY(EditDefaultsOnly, Category = "Attack")

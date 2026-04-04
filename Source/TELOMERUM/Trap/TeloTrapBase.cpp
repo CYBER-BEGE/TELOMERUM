@@ -36,7 +36,7 @@ void ATeloTrapBase::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 	// ITeloDamageable 인터페이스가 구현된 액터 = 데미지 줄 수 있는 액터
 	if (ITeloDamageable* Damageable = Cast<ITeloDamageable>(OtherActor))
 	{
-		Damageable->ApplyDamage(Damage, this, Hit.ImpactPoint, FVector::ZeroVector);
+		Damageable->ApplyDamage(TrapDamage, this, Hit.ImpactPoint, FVector::ZeroVector);
 	}
 }
 
