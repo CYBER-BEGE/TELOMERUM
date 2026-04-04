@@ -2,6 +2,7 @@
 
 
 #include "TeloAnimNoti_TraceAttack.h"
+
 #include "TeloCharacterBase.h"
 
 void UTeloAnimNoti_TraceAttack::Notify(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)

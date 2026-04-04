@@ -3,6 +3,7 @@
 
 #include "TeloAnimNotiState_TraceAttack.h"
 #include "Components/SkeletalMeshComponent.h"
+
 #include "TeloCharacterBase.h"
 
 void UTeloAnimNotiState_TraceAttack::NotifyBegin(
