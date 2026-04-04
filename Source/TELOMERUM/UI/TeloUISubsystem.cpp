@@ -23,7 +23,7 @@ void UTeloUISubsystem::Initialize(FSubsystemCollectionBase& Collection)
 }
 
 
-/* ==================== Screen Widget Management ==================== */
+/* ==================== Screen Widget Setup ==================== */
 
 void UTeloUISubsystem::OpenScreenWidget(UTeloScreenWidgetBase* ScreenWidget)
 {

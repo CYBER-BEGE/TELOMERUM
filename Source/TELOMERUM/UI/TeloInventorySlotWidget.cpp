@@ -16,62 +16,7 @@
 #include "UI/TeloInventoryEntryWidget.h"
 #include "UI/TeloDragDropOperation.h"
 
-void UTeloInventorySlotWidget::SetSlotIndex(int32 InSlotIndex)
-{
-	CachedSlotIndex = InSlotIndex;
-}
-
-void UTeloInventorySlotWidget::SetEntryWidgetClass(TSubclassOf<UTeloInventoryEntryWidget> InEntryWidgetClass)
-{
-	InventoryEntryWidgetClass = InEntryWidgetClass;
-}
-
-void UTeloInventorySlotWidget::RefreshSlot(const FTeloInventorySlot& InSlotData)
-{
-	CachedSlotData = InSlotData;
-
-	if (!ItemContainer)
-	{
-		return;
-	}
-
-	ItemContainer->ClearChildren();
-	EntryWidgetInstance = nullptr;
-
-	if (CachedSlotData.IsEmpty())
-	{
-		return;
-	}
-
-	if (!InventoryEntryWidgetClass)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[UTeloInventorySlotWidget] InventoryEntryWidgetClass is NULL"));
-		return;
-	}
-
-	EntryWidgetInstance = CreateWidget<UTeloInventoryEntryWidget>(GetOwningPlayer(), InventoryEntryWidgetClass);
-	if (!EntryWidgetInstance)
-	{
-		return;
-	}
-
-	EntryWidgetInstance->SetItemData(CachedSlotData.ItemData);
-	EntryWidgetInstance->SetSlotIndex(CachedSlotIndex);
-	ItemContainer->AddChild(EntryWidgetInstance);
-}
-
-void UTeloInventorySlotWidget::SetSelected(bool bInSelected)
-{
-	if (!SlotBorder)
-	{
-		return;
-	}
-
-	SlotBorder->SetBrushColor(
-		bInSelected
-		? FLinearColor(1.0f, 0.8f, 0.2f, 1.0f)
-		: FLinearColor::White);
-}
+/* ===================== Widget Event Handlers ==================== */
 
 FReply UTeloInventorySlotWidget::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
@@ -180,6 +125,69 @@ bool UTeloInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const F
 	OnSlotDropped.Broadcast(DragOperation->SourceSlotIndex, CachedSlotIndex); // 슬롯 이동이 발생했음을 부모 인벤토리 위젯에 알림
 	return true;
 }
+
+
+/* ==================== Inventory Slot Setup ==================== */
+
+void UTeloInventorySlotWidget::SetSlotIndex(int32 InSlotIndex)
+{
+	CachedSlotIndex = InSlotIndex;
+}
+
+void UTeloInventorySlotWidget::SetEntryWidgetClass(TSubclassOf<UTeloInventoryEntryWidget> InEntryWidgetClass)
+{
+	InventoryEntryWidgetClass = InEntryWidgetClass;
+}
+
+void UTeloInventorySlotWidget::RefreshSlot(const FTeloInventorySlot& InSlotData)
+{
+	CachedSlotData = InSlotData;
+
+	if (!ItemContainer)
+	{
+		return;
+	}
+
+	ItemContainer->ClearChildren();
+	EntryWidgetInstance = nullptr;
+
+	if (CachedSlotData.IsEmpty())
+	{
+		return;
+	}
+
+	if (!InventoryEntryWidgetClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[UTeloInventorySlotWidget] InventoryEntryWidgetClass is NULL"));
+		return;
+	}
+
+	EntryWidgetInstance = CreateWidget<UTeloInventoryEntryWidget>(GetOwningPlayer(), InventoryEntryWidgetClass);
+	if (!EntryWidgetInstance)
+	{
+		return;
+	}
+
+	EntryWidgetInstance->SetItemData(CachedSlotData.ItemData);
+	EntryWidgetInstance->SetSlotIndex(CachedSlotIndex);
+	ItemContainer->AddChild(EntryWidgetInstance);
+}
+
+void UTeloInventorySlotWidget::SetSelected(bool bInSelected)
+{
+	if (!SlotBorder)
+	{
+		return;
+	}
+
+	SlotBorder->SetBrushColor(
+		bInSelected
+		? FLinearColor(1.0f, 0.8f, 0.2f, 1.0f)
+		: FLinearColor::White);
+}
+
+
+/* ==================== Internal Functions ==================== */
 
 UTeloUISubsystem* UTeloInventorySlotWidget::GetTeloUISubsystem() const
 {

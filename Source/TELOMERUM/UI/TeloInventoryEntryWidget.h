@@ -16,19 +16,15 @@ class TELOMERUM_API UTeloInventoryEntryWidget : public UUserWidget, public ITelo
 {
 	GENERATED_BODY()
 
+	/* 아이템이 클릭됐을 때 부모 위젯에게 알리는 delegate */
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventoryEntryClicked, const FTeloInventoryItem&);
 	
+	/* ==================== Subsystem Lifecycle ==================== */
 public:
 	virtual bool Initialize() override;
 
-	/* 아이템 데이터를 위젯에 적용 */
-	void SetItemData(const FTeloInventoryItem& ItemData);
-	/* 현재 아이템이 들어있는 슬롯 인덱스를 설정 */
-	void SetSlotIndex(int32 InSlotIndex);
-
-	/* 아이템이 클릭됐을 때 부모 위젯에게 알리는 delegate */
-	FOnInventoryEntryClicked OnInventoryEntryClicked;
-
+	/* ==================== Tooltip & Context Menu ==================== */
+public:
 	/* 툴팁 데이터를 가져옵 (반환값이 false인 경우 툴팁이 표시되지 않음) */
 	virtual bool GetTooltipData(FTeloTooltipData& OutTooltipData) const override;
 	/* 컨텍스트 메뉴 액션을 가져옵 */
@@ -36,6 +32,7 @@ public:
 	/* 컨텍스트 메뉴 액션이 선택되었을 때 호출됨 */
 	virtual void HandleContextAction(FName ActionID) override;
 
+	/* ==================== Widget Components ==================== */
 protected:
 	/* 아이템 이름 텍스트 */
 	UPROPERTY(meta = (BindWidget))
@@ -49,6 +46,8 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* EntryButton;
 
+	/* ===================== Widget Event Handlers ==================== */
+protected:
 	/* 클릭 이벤트 핸들러 */
 	UFUNCTION()
 	void HandleEntryButtonClicked();
@@ -61,10 +60,22 @@ protected:
 	UFUNCTION()
 	void HandleEntryButtonUnhovered();
 
+	/* ==================== Delegates ==================== */
+public:
+	/* 아이템이 클릭됐을 때 부모 위젯에게 알리는 delegate */
+	FOnInventoryEntryClicked OnInventoryEntryClicked;
+
+	/* ==================== Inventory Entry Setup ==================== */
+public:
+	/* 아이템 데이터를 위젯에 적용 */
+	void SetItemData(const FTeloInventoryItem& ItemData);
+	/* 현재 아이템이 들어있는 슬롯 인덱스를 설정 */
+	void SetSlotIndex(int32 InSlotIndex);
+
+	/* ==================== Cached Data ==================== */
 private:
 	/* 클릭됐을 때 어떤 아이템인지 부모에게 넘겨주기 위해 저장 */
 	FTeloInventoryItem CachedItemData;
-
 	/* 현재 아이템이 들어있는 슬롯 인덱스 */
 	int32 CachedSlotIndex = INDEX_NONE;
 };

@@ -13,6 +13,8 @@
 #include "UI/TeloUISubsystem.h"
 #include "Player/TeloPlayerCharacter.h"
 
+/* ==================== Subsystem Lifecycle ==================== */
+
 bool UTeloInventoryEntryWidget::Initialize()
 {
 	const bool bResult = Super::Initialize();
@@ -27,25 +29,8 @@ bool UTeloInventoryEntryWidget::Initialize()
 	return bResult;
 }
 
-void UTeloInventoryEntryWidget::SetItemData(const FTeloInventoryItem& ItemData)
-{
-	CachedItemData = ItemData;
 
-	if (ItemIconImage)
-	{
-		ItemIconImage->SetBrushFromTexture(ItemData.Icon);
-	}
-
-	if (ItemCountText)
-	{
-		ItemCountText->SetText(FText::AsNumber(ItemData.Count));
-	}
-}
-
-void UTeloInventoryEntryWidget::SetSlotIndex(int32 InSlotIndex)
-{
-	CachedSlotIndex = InSlotIndex;
-}
+/* ==================== Tooltip & Context Menu ==================== */
 
 bool UTeloInventoryEntryWidget::GetTooltipData(FTeloTooltipData& OutTooltipData) const
 {
@@ -105,6 +90,9 @@ void UTeloInventoryEntryWidget::HandleContextAction(FName ActionID)
 	}
 }
 
+
+/* ===================== Widget Event Handlers ==================== */
+
 void UTeloInventoryEntryWidget::HandleEntryButtonClicked()
 {
 	OnInventoryEntryClicked.Broadcast(CachedItemData);
@@ -151,4 +139,27 @@ void UTeloInventoryEntryWidget::HandleEntryButtonUnhovered()
 			UISubsystem->HideTooltip();
 		}
 	}
+}
+
+
+/* ==================== Inventory Entry Management ==================== */
+
+void UTeloInventoryEntryWidget::SetItemData(const FTeloInventoryItem& ItemData)
+{
+	CachedItemData = ItemData;
+
+	if (ItemIconImage)
+	{
+		ItemIconImage->SetBrushFromTexture(ItemData.Icon);
+	}
+
+	if (ItemCountText)
+	{
+		ItemCountText->SetText(FText::AsNumber(ItemData.Count));
+	}
+}
+
+void UTeloInventoryEntryWidget::SetSlotIndex(int32 InSlotIndex)
+{
+	CachedSlotIndex = InSlotIndex;
 }

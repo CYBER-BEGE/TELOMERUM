@@ -15,6 +15,9 @@
 #include "UI/TeloInventoryEntryWidget.h"
 #include "UI/TeloInventorySlotWidget.h"
 
+
+/* ==================== UUserWidget Overrides ==================== */
+
 FReply UTeloInventoryWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	const FKey PressedKey = InKeyEvent.GetKey();
@@ -70,6 +73,82 @@ void UTeloInventoryWidget::OnScreenClosed()
 
 	InventoryComponent->OnInventoryChanged.RemoveAll(this);
 }
+
+
+/* ===================== Inventory UI Setup ==================== */
+
+void UTeloInventoryWidget::RefreshInventory()
+{
+	if (!SlotGridPanel)
+	{
+		return;
+	}
+
+	ATeloPlayerCharacter* PlayerCharacter = Cast<ATeloPlayerCharacter>(GetOwningPlayerPawn());
+	if (!PlayerCharacter)
+	{
+		return;
+	}
+
+	UTeloInventoryComponent* InventoryComponent = PlayerCharacter->GetInventoryComponent();
+	if (!InventoryComponent)
+	{
+		return;
+	}
+
+	// 인벤토리 슬롯 데이터 가져오기
+	const TArray<FTeloInventorySlot>& Slots = InventoryComponent->GetSlots();
+	if (SlotWidgets.Num() != Slots.Num())
+	{
+		BuildSlotWidgets();
+	}
+
+	// 선택 슬롯 유효성 정리
+	if (!InventoryComponent->IsValidSlotIndex(SelectedSlotIndex) || InventoryComponent->IsSlotEmpty(SelectedSlotIndex))
+	{
+		// 선택된 슬롯이 비었거나 유효하지 않다면 선택 상태까지 해제
+		SelectedSlotIndex = INDEX_NONE;
+		ClearSelectedItemInfo();
+	}
+	else
+	{
+		// 선택된 슬롯이 유효하다면 해당 아이템 정보로 패널 갱신
+		SelectItem(Slots[SelectedSlotIndex].ItemData);
+	}
+
+	// 각 슬롯 위젯에 슬롯 데이터 설정 및 선택 상태 업데이트
+	for (int32 SlotIndex = 0; SlotIndex < Slots.Num() && SlotIndex < SlotWidgets.Num(); ++SlotIndex)
+	{
+		if (!SlotWidgets[SlotIndex])
+		{
+			continue;
+		}
+
+		SlotWidgets[SlotIndex]->RefreshSlot(Slots[SlotIndex]);
+		SlotWidgets[SlotIndex]->SetSelected(SlotIndex == SelectedSlotIndex);
+	}
+}
+
+void UTeloInventoryWidget::SelectItem(const FTeloInventoryItem& ItemData)
+{
+	if (SelectedItemNameText)
+	{
+		SelectedItemNameText->SetText(ItemData.ItemName);
+	}
+
+	if (SelectedItemCountText)
+	{
+		SelectedItemCountText->SetText(FText::AsNumber(ItemData.Count));
+	}
+
+	if (SelectedItemDescriptionText)
+	{
+		SelectedItemDescriptionText->SetText(ItemData.Description);
+	}
+}
+
+
+/* ===================== Internal Functions ==================== */
 
 void UTeloInventoryWidget::BuildSlotWidgets()
 {
@@ -129,58 +208,6 @@ void UTeloInventoryWidget::BuildSlotWidgets()
 		}
 
 		SlotWidgets.Add(SlotWidget);
-	}
-}
-
-void UTeloInventoryWidget::RefreshInventory()
-{
-	if (!SlotGridPanel)
-	{
-		return;
-	}
-
-	ATeloPlayerCharacter* PlayerCharacter = Cast<ATeloPlayerCharacter>(GetOwningPlayerPawn());
-	if (!PlayerCharacter)
-	{
-		return;
-	}
-
-	UTeloInventoryComponent* InventoryComponent = PlayerCharacter->GetInventoryComponent();
-	if (!InventoryComponent)
-	{
-		return;
-	}
-
-	// 인벤토리 슬롯 데이터 가져오기
-	const TArray<FTeloInventorySlot>& Slots = InventoryComponent->GetSlots();
-	if (SlotWidgets.Num() != Slots.Num())
-	{
-		BuildSlotWidgets();
-	}
-
-	// 선택 슬롯 유효성 정리
-	if (!InventoryComponent->IsValidSlotIndex(SelectedSlotIndex) || InventoryComponent->IsSlotEmpty(SelectedSlotIndex))
-	{
-		// 선택된 슬롯이 비었거나 유효하지 않다면 선택 상태까지 해제
-		SelectedSlotIndex = INDEX_NONE;
-		ClearSelectedItemInfo();
-	}
-	else
-	{
-		// 선택된 슬롯이 유효하다면 해당 아이템 정보로 패널 갱신
-		SelectItem(Slots[SelectedSlotIndex].ItemData);
-	}
-
-	// 각 슬롯 위젯에 슬롯 데이터 설정 및 선택 상태 업데이트
-	for (int32 SlotIndex = 0; SlotIndex < Slots.Num() && SlotIndex < SlotWidgets.Num(); ++SlotIndex)
-	{
-		if (!SlotWidgets[SlotIndex])
-		{
-			continue;
-		}
-
-		SlotWidgets[SlotIndex]->RefreshSlot(Slots[SlotIndex]);
-		SlotWidgets[SlotIndex]->SetSelected(SlotIndex == SelectedSlotIndex);
 	}
 }
 
@@ -253,24 +280,6 @@ void UTeloInventoryWidget::HandleSlotDropped(int32 SourceSlotIndex, int32 Target
 	SelectedSlotIndex = INDEX_NONE;
 	ClearSelectedItemInfo();
 	RefreshInventory();
-}
-
-void UTeloInventoryWidget::SelectItem(const FTeloInventoryItem& ItemData)
-{
-	if (SelectedItemNameText)
-	{
-		SelectedItemNameText->SetText(ItemData.ItemName);
-	}
-
-	if (SelectedItemCountText)
-	{
-		SelectedItemCountText->SetText(FText::AsNumber(ItemData.Count));
-	}
-
-	if (SelectedItemDescriptionText)
-	{
-		SelectedItemDescriptionText->SetText(ItemData.Description);
-	}
 }
 
 void UTeloInventoryWidget::ClearSelectedItemInfo()

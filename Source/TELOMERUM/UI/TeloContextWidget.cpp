@@ -2,8 +2,12 @@
 
 
 #include "UI/TeloContextWidget.h"
-#include "UI/TeloContextEntryWidget.h"
+
 #include "Components/VerticalBox.h"
+
+#include "UI/TeloContextEntryWidget.h"
+
+/* ==================== Context Menu Setup ==================== */
 
 void UTeloContextWidget::SetMenuData(const FTeloContextData& InMenuData)
 {
@@ -24,6 +28,24 @@ void UTeloContextWidget::SetMenuData(const FTeloContextData& InMenuData)
 		AddEntry(Action);
 	}
 }
+
+bool UTeloContextWidget::IsScreenPositionInside(const FVector2D& ScreenPosition) const
+{
+	if (!IsInViewport()) // 위젯이 뷰포트에 표시되고 있는지 확인
+	{
+		return false;
+	}
+
+	if (GetVisibility() != ESlateVisibility::Visible) // 위젯이 현재 보이는 상태인지 확인
+	{
+		return false;
+	}
+
+	return GetCachedGeometry().IsUnderLocation(ScreenPosition); // 화면 좌표가 위젯의 영역 안에 있는지 검사
+}
+
+
+/* ==================== Internal Functions ==================== */
 
 void UTeloContextWidget::ClearEntries()
 {
@@ -62,19 +84,4 @@ void UTeloContextWidget::AddEntry(const FTeloContextAction& InActionData)
 void UTeloContextWidget::HandleEntryClicked(FName ActionID)
 {
 	OnActionClicked.Broadcast(ActionID);
-}
-
-bool UTeloContextWidget::IsScreenPositionInside(const FVector2D& ScreenPosition) const
-{
-	if (!IsInViewport()) // 위젯이 뷰포트에 표시되고 있는지 확인
-	{
-		return false;
-	}
-
-	if (GetVisibility() != ESlateVisibility::Visible) // 위젯이 현재 보이는 상태인지 확인
-	{
-		return false;
-	}
-
-	return GetCachedGeometry().IsUnderLocation(ScreenPosition); // 화면 좌표가 위젯의 영역 안에 있는지 검사
 }
