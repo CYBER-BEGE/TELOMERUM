@@ -99,10 +99,10 @@ public:
 	bool RecoverHP(float Amount);
 
 public:
-	/* 데미지 적용 함수(공격자 호출) */
+	/* 외부에서 호출되는 데미지 적용 함수 */
 	virtual void ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse);
 private:
-	/* 데미지 적용 함수(피격자 호출) */
+	/* 내부 데미지 적용 함수 */
 	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	/* 피격 쿨타임 */
 	void DamageCooldown();

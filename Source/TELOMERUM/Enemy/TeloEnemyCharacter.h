@@ -49,7 +49,7 @@ public:
 	void SetLockOnMarkerVisible(bool bVisible);
 
 protected:
-	/* 데미지 적용 함수(피격자 호출) */
+	/* 외부에서 호출되는 데미지 적용 함수 */
 	virtual void ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse);
 
 	/* 공격 판정 함수: 공격 적중 시 */
