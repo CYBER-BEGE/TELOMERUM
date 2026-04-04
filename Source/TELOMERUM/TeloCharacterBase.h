@@ -58,7 +58,7 @@ protected:
 
 	/* 공격 범위 */
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	float AttackSize = 50.0f;
+	float AttackRadius = 50.0f;
 
 	/* 공격력 */
 	UPROPERTY(EditAnywhere, Category = "Attack")
@@ -149,7 +149,7 @@ private:
 	/* 공격 히트박스 디버그 드로잉 함수 */
 	void DrawAttackDebug(FVector TraceStart, FVector TraceEnd);
 	/* 판정지점 받아오는 함수 */
-	bool GetAttackTracePoints(FVector& TraceA, FVector& TraceB) const;
+	bool GetAttackTracePoint(FVector& TraceA, FVector& TraceB) const;
 
 private:
 	/* 공격 State: 공격 가능한 상태인가? */

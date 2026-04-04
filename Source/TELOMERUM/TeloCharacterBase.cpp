@@ -186,7 +186,7 @@ void ATeloCharacterBase::StartAttackTrace()
 	FVector TraceA;
 	FVector TraceB;
 
-	if (!GetAttackTracePoints(TraceA, TraceB)) return;
+	if (!GetAttackTracePoint(TraceA, TraceB)) return;
 
 	UE_LOG(LogTemp, Display, TEXT("[%s] Attack Trace 시작"), *GetActorLabel());
 
@@ -203,7 +203,7 @@ void ATeloCharacterBase::TickAttackTrace()
 	FVector TraceA;
 	FVector TraceB;
 
-	if (!GetAttackTracePoints(TraceA, TraceB)) return;
+	if (!GetAttackTracePoint(TraceA, TraceB)) return;
 
 	const FVector CurrentTraceA = TraceA;
 	const FVector CurrentTraceB = TraceB;
@@ -220,7 +220,7 @@ void ATeloCharacterBase::TickAttackTrace()
 	ObjectParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 
 	FCollisionShape CollisionShape;
-	CollisionShape.SetSphere(AttackSize);
+	CollisionShape.SetSphere(AttackRadius);
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
@@ -270,7 +270,7 @@ float ATeloCharacterBase::GetAttackDistance() const
 	FVector TraceEnd;
 	float TraceRadius = 0.0f;
 
-	if (WeaponInstance && WeaponInstance->GetAttackTraceData(TraceStart, TraceEnd))
+	if (WeaponInstance && WeaponInstance->GetTraceSoketVector(TraceStart, TraceEnd))
 	{
 		return FVector::Dist(TraceStart, TraceEnd);
 	}
@@ -337,7 +337,7 @@ void ATeloCharacterBase::DrawAttackDebug(FVector TraceStart, FVector TraceEnd)
 	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Yellow, false, 5.0f, 0, 2.0f);
 }
 
-bool ATeloCharacterBase::GetAttackTracePoints(FVector& TraceA, FVector& TraceB) const
+bool ATeloCharacterBase::GetAttackTracePoint(FVector& TraceA, FVector& TraceB) const
 {
 	TraceA = FVector::ZeroVector;
 	TraceB = FVector::ZeroVector;
@@ -348,7 +348,7 @@ bool ATeloCharacterBase::GetAttackTracePoints(FVector& TraceA, FVector& TraceB) 
 		return false;
 	}
 
-	if (!WeaponInstance->GetAttackTraceData(TraceA, TraceB))
+	if (!WeaponInstance->GetTraceSoketVector(TraceA, TraceB))
 	{
 		UE_LOG(LogTemp, Display, TEXT("[%s] 현재 장착중인 Weapon에 TraceSoket 없음"), *GetActorLabel());
 		return false;

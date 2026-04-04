@@ -9,11 +9,7 @@ ATeloWeaponBase::ATeloWeaponBase()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-	SetRootComponent(Root);
-
-	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
-	WeaponMesh->SetupAttachment(Root);
+	RootComponent = WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 
 	// 콜리전 끄기
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -33,20 +29,21 @@ void ATeloWeaponBase::Tick(float DeltaTime)
 
 }
 
-bool ATeloWeaponBase::GetAttackTraceData(FVector& OutStart, FVector& OutEnd) const
+bool ATeloWeaponBase::GetTraceSoketVector(FVector& OutA, FVector& OutB) const
 {
 	if (!WeaponMesh) return false;
-	if (TraceSocketA.IsNone() || TraceSocketB.IsNone()) return false;
+	if (TraceSocketA.IsNone() || !WeaponMesh->DoesSocketExist(TraceSocketA)) return false;
 
-	if (!WeaponMesh->DoesSocketExist(TraceSocketA) ||
-		!WeaponMesh->DoesSocketExist(TraceSocketB))
+	if (!bUseTwoSocketTrace) 
 	{
-		return false;
+		OutA = OutB = WeaponMesh->GetSocketLocation(TraceSocketA);
+		return true;
 	}
 
-	OutStart = WeaponMesh->GetSocketLocation(TraceSocketA);
-	OutEnd = WeaponMesh->GetSocketLocation(TraceSocketB);
+	if(TraceSocketB.IsNone() || !WeaponMesh->DoesSocketExist(TraceSocketB)) return false;
 
+	OutA = WeaponMesh->GetSocketLocation(TraceSocketA);
+	OutB = WeaponMesh->GetSocketLocation(TraceSocketB);
 	return true;
 }
 
