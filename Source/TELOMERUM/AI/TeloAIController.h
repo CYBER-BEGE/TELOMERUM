@@ -22,34 +22,40 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	/** Variables **/
+	/* AI BehaviorTree 설정 */
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	class UBehaviorTree* BehaviorTree;
 
-	class UBlackboardComponent* BlackboardComponent;
-
-	class UAIPerceptionComponent* AIPerceptionComponent;
-
+	/* 시야 감지 설정 */
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	class UAISenseConfig_Sight* SightConfig;
 
+	/* 데미지 감지 설정 */
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	class UAISenseConfig_Damage* DamageConfig;
 
+	/* 기척 감지 설정 */
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	class UAISenseConfig_Hearing* HearingConfig;
 
-	// LastTargetLocation 보정 범위
+	/* LastTargetLocation 보정 범위 */
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	FVector ProjectionExtent;
 
-	/** Functions **/
-	//virtual void OnPossess(APawn* InPawn) override;
-	
-	/* Perceive */
+	/* AI BlackboardComponent 캐시 변수 */
+	class UBlackboardComponent* BlackboardComponent;
+
+	/* AI AIPerceptionComponent 캐시 변수 */
+	class UAIPerceptionComponent* AIPerceptionComponent;
+
+	/* 감지 중일때 호출되는 함수*/
 	UFUNCTION()
 	void OnTargetperceived(AActor* Actor, FAIStimulus Stimulus);
+
+	/* 감지중인 타겟 갱신하는 함수 */
 	void UpdateTargetActor(AActor* Actor, const FVector& LastStimulusLocation);
+
+	/* 감지 결과를 반환하는 함수 */
 	bool IsSensing(AActor* Actor, FAISenseID SenseID) const;
 	
 };

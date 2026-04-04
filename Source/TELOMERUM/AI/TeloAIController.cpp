@@ -84,6 +84,8 @@ void ATeloAIController::BeginPlay()
 	else UE_LOG(LogTemp, Error, TEXT("ATeloAIController: BehaviorTree is NULL")); // 블루프린트의 BT 등록 확인
 }
 
+/* ==================== Perception ==================== */
+
 void ATeloAIController::OnTargetperceived(AActor* Actor, FAIStimulus Stimulus)
 {
 	UBlackboardComponent* BlackBoard = GetBlackboardComponent();
