@@ -15,6 +15,7 @@
 #include "Player/TeloPlayerCharacter.h"
 #include "Player/TeloInteractComponent.h"
 
+
 /* ==================== Subsystem Lifecycle ==================== */
 
 void UTeloUISubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -23,7 +24,7 @@ void UTeloUISubsystem::Initialize(FSubsystemCollectionBase& Collection)
 }
 
 
-/* ==================== Screen Widget Management ==================== */
+/* ==================== Screen Widget Setup ==================== */
 
 void UTeloUISubsystem::OpenScreenWidget(UTeloScreenWidgetBase* ScreenWidget)
 {

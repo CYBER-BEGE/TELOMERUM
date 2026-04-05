@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "TeloCharacterBase.h"
+
 #include "TeloEnemyCharacter.generated.h"
 
 /**
@@ -48,12 +49,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LockOn")
 	void SetLockOnMarkerVisible(bool bVisible);
 
-	/* PatrolSpline 넘겨주기 */
-	class ATeloPatrolSpline* GetPatrolSpline() const { return PatrolSpline; }
-
 protected:
-	/* Take Damage */
+	/* 외부에서 호출되는 데미지 적용 함수 */
 	virtual void ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse);
 
+	/* 공격 판정 함수: 공격 적중 시 */
 	void HitActor(const FHitResult& HitResult) override;
+
+public:
+	/* PatrolSpline 넘겨주기 */
+	class ATeloPatrolSpline* GetPatrolSpline() const { return PatrolSpline; }
 };

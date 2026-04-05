@@ -2,9 +2,11 @@
 
 
 #include "TeloCharacterBase.h"
+
 #include "Engine/DamageEvents.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimInstance.h"
+
 #include "TeloWeaponBase.h"
 
 // Sets default values
@@ -50,6 +52,31 @@ void ATeloCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 }
 
+/* ==================== HP ==================== */
+
+bool ATeloCharacterBase::RecoverHP(float Amount)
+{
+	if (Amount <= 0.0f)
+	{
+		return false;
+	}
+
+	// 이미 최대 HP라면 회복 실패
+	if (NowHP >= MaxHP)
+	{
+		return false;
+	}
+
+	NowHP = FMath::Clamp(NowHP + Amount, 0.0f, MaxHP);
+
+	UE_LOG(LogTemp, Log, TEXT("[%s] HP Recover: %f / Current HP: %f"),
+		*GetActorLabel(),
+		Amount,
+		NowHP);
+
+	return true;
+}
+
 void ATeloCharacterBase::ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse)
 {
 	if (!bIsDamageable) return;
@@ -61,109 +88,23 @@ void ATeloCharacterBase::ApplyDamage(float Damage, AActor* DamageCauser, const F
 	GetWorldTimerManager().SetTimer(DamageTimerHandle, this, &ATeloCharacterBase::DamageCooldown, 0.2f, false);
 }
 
-float ATeloCharacterBase::GetAttackDistance() const
-{
-	/*
-	if (AttackSocketName.IsNone()) return 0.0f;
-
-	const FVector TraceStart = GetMesh()->GetSocketLocation(AttackSocketName); // 공격 시작점 (소켓 위치)
-	const FVector TraceEnd = TraceStart + (GetActorForwardVector() * AttackRange); // 정면으로 공격범위 적용
-
-	// Trace 길이 계산 후 반환
-	return FVector::Dist(TraceStart, TraceEnd);*/
-
-	FVector TraceStart;
-	FVector TraceEnd;
-	float TraceRadius = 0.0f;
-
-	if (WeaponInstance && WeaponInstance->GetAttackTraceData(TraceStart, TraceEnd))
-	{
-		return FVector::Dist(TraceStart, TraceEnd);
-	}
-
-	if (WeaponSocketName.IsNone()) return 0.0f;
-
-	TraceStart = GetMesh()->GetSocketLocation(WeaponSocketName);
-	TraceEnd = TraceStart + (GetActorForwardVector() * AttackRange);
-
-	return FVector::Dist(TraceStart, TraceEnd);
-}
-
-void ATeloCharacterBase::AttackRequest(AActor* Target)
-{
-	StartAttack(Target);
-}
-
-bool ATeloCharacterBase::IsWeaponComponentAttached()
-{
-	if (!WeaponAttachComponent)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[%s] WeaponAttachComponent 없음"), *GetActorLabel());
-		return false;
-	}
-
-	if (WeaponSocketName.IsNone())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[%s] WeaponSocketName 없음"), *GetActorLabel());
-		return false;
-	}
-
-	WeaponAttachComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocketName);
-	return true;
-}
-
-ATeloWeaponBase* ATeloCharacterBase::SpawnWeapon(TSubclassOf<class ATeloWeaponBase> NewWeaponClass)
-{
-	if (!NewWeaponClass)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[%s] 스폰하려는 WeaponClass 없음"), *GetActorLabel());
-		return nullptr;
-	}
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
-	SpawnParams.Instigator = GetInstigator();
-
-	return GetWorld()->SpawnActor<ATeloWeaponBase>(NewWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
-}
-
-bool ATeloCharacterBase::EquipWeapon(ATeloWeaponBase* NewWeapon)
-{
-	if (!NewWeapon)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[%s] 생성된 Weapon 객체 없음"), *GetActorLabel());
-		return false;
-	}
-
-	if (!WeaponAttachComponent)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[%s] WeaponAttachComponent 없음"), *GetActorLabel());
-		return false;
-	}
-
-	NewWeapon->AttachToComponent(WeaponAttachComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-	WeaponInstance = NewWeapon;
-
-	return true;
-}
-
 float ATeloCharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	if (NowHP <= 0.0f) return 0.0f;
 
 	UE_LOG(LogTemp, Display, TEXT("[%s] %s에게 피격당함"), *this->GetActorLabel(), *DamageCauser->GetActorLabel());
-	
+
 	NowHP -= Damage;
 	// 방어 데미지 감소
 
-	if (NowHP > 0.0f) 
+	if (NowHP > 0.0f)
 	{
 		// HP UI 업데이트
 		UE_LOG(LogTemp, Display, TEXT("[%s] HP: %f"), *this->GetActorLabel(), NowHP);
-		
+
 		// 피격 약넉백?
 	}
-	else 
+	else
 	{
 		// 사망
 		UE_LOG(LogTemp, Warning, TEXT("죽었습니다"));
@@ -177,35 +118,6 @@ void ATeloCharacterBase::DamageCooldown()
 	bIsDamageable = true;
 }
 
-void ATeloCharacterBase::DrawAttackDebug(FVector TraceStart, FVector TraceEnd)
-{
-	/*
-	const FVector CapsuleCenter = (TraceStart + TraceEnd) * 0.5f;
-	const float HalfHeight = FVector::Dist(TraceStart, TraceEnd) * 0.5f;
-	const FQuat CapsuleRotation = FRotationMatrix::MakeFromZ(TraceEnd - TraceStart).ToQuat();
-
-	// 시작점(파랑)
-	DrawDebugSphere(GetWorld(), TraceStart, AttackSize, 16, FColor::Green, false, 5.0f);
-
-	// 끝점(빨강)
-	DrawDebugSphere(GetWorld(), TraceEnd, AttackSize, 16, FColor::Red, false, 5.0f);
-
-	// 공격방향(노랑)
-	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Yellow, false, 5.0f, 0, 2.0f);
-
-	// Sweep 경로(파랑)
-	DrawDebugCapsule(GetWorld(), CapsuleCenter, HalfHeight, AttackSize, CapsuleRotation, FColor::Blue, false, 5.0f);
-	*/
-
-	const FVector CapsuleCenter = (TraceStart + TraceEnd) * 0.5f;
-	const float HalfHeight = FVector::Dist(TraceStart, TraceEnd) * 0.5f;
-	const FQuat CapsuleRotation = FRotationMatrix::MakeFromZ(TraceEnd - TraceStart).ToQuat();
-
-	DrawDebugPoint(GetWorld(), TraceStart, 12.0f, FColor::Green, false, 5.0f);
-	DrawDebugPoint(GetWorld(), TraceEnd, 12.0f, FColor::Red, false, 5.0f);
-	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Yellow, false, 5.0f, 0, 2.0f);
-}
-
 void ATeloCharacterBase::DrawHitDebug(const FHitResult& Hit)
 {
 	// 히트 지점(빨강)
@@ -216,6 +128,11 @@ void ATeloCharacterBase::DrawHitDebug(const FHitResult& Hit)
 }
 
 /* ==================== Attack ==================== */
+
+void ATeloCharacterBase::AttackRequest(AActor* Target)
+{
+	StartAttack(Target);
+}
 
 void ATeloCharacterBase::StartAttack(AActor* Target)
 {
@@ -269,7 +186,7 @@ void ATeloCharacterBase::StartAttackTrace()
 	FVector TraceA;
 	FVector TraceB;
 
-	if (!GetAttackTracePoints(TraceA, TraceB)) return;
+	if (!GetAttackTracePoint(TraceA, TraceB)) return;
 
 	UE_LOG(LogTemp, Display, TEXT("[%s] Attack Trace 시작"), *GetActorLabel());
 
@@ -286,7 +203,7 @@ void ATeloCharacterBase::TickAttackTrace()
 	FVector TraceA;
 	FVector TraceB;
 
-	if (!GetAttackTracePoints(TraceA, TraceB)) return;
+	if (!GetAttackTracePoint(TraceA, TraceB)) return;
 
 	const FVector CurrentTraceA = TraceA;
 	const FVector CurrentTraceB = TraceB;
@@ -303,7 +220,7 @@ void ATeloCharacterBase::TickAttackTrace()
 	ObjectParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 
 	FCollisionShape CollisionShape;
-	CollisionShape.SetSphere(AttackSize);
+	CollisionShape.SetSphere(AttackRadius);
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
@@ -338,24 +255,32 @@ void ATeloCharacterBase::EndAttackTrace()
 	AlreadyHitActors.Empty();
 }
 
-bool ATeloCharacterBase::GetAttackTracePoints(FVector& TraceA, FVector& TraceB) const
+float ATeloCharacterBase::GetAttackDistance() const
 {
-	TraceA = FVector::ZeroVector;
-	TraceB = FVector::ZeroVector;
+	/*
+	if (AttackSocketName.IsNone()) return 0.0f;
 
-	if (!WeaponInstance)
+	const FVector TraceStart = GetMesh()->GetSocketLocation(AttackSocketName); // 공격 시작점 (소켓 위치)
+	const FVector TraceEnd = TraceStart + (GetActorForwardVector() * AttackRange); // 정면으로 공격범위 적용
+
+	// Trace 길이 계산 후 반환
+	return FVector::Dist(TraceStart, TraceEnd);*/
+
+	FVector TraceStart;
+	FVector TraceEnd;
+	float TraceRadius = 0.0f;
+
+	if (WeaponInstance && WeaponInstance->GetTraceSoketVector(TraceStart, TraceEnd))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[%s] WeaponInstance 없음"), *GetActorLabel());
-		return false;
+		return FVector::Dist(TraceStart, TraceEnd);
 	}
 
-	if (!WeaponInstance->GetAttackTraceData(TraceA, TraceB))
-	{
-		UE_LOG(LogTemp, Display, TEXT("[%s] 현재 장착중인 Weapon에 TraceSoket 없음"), *GetActorLabel());
-		return false;
-	}
+	if (WeaponSocketName.IsNone()) return 0.0f;
 
-	return true;
+	TraceStart = GetMesh()->GetSocketLocation(WeaponSocketName);
+	TraceEnd = TraceStart + (GetActorForwardVector() * AttackRange);
+
+	return FVector::Dist(TraceStart, TraceEnd);
 }
 
 void ATeloCharacterBase::HitActor(const FHitResult& HitResult)
@@ -383,25 +308,106 @@ void ATeloCharacterBase::RotateToTarget(const AActor* Target)
 	}
 }
 
-bool ATeloCharacterBase::RecoverHP(float Amount)
+void ATeloCharacterBase::DrawAttackDebug(FVector TraceStart, FVector TraceEnd)
 {
-	if (Amount <= 0.0f)
+	/*
+	const FVector CapsuleCenter = (TraceStart + TraceEnd) * 0.5f;
+	const float HalfHeight = FVector::Dist(TraceStart, TraceEnd) * 0.5f;
+	const FQuat CapsuleRotation = FRotationMatrix::MakeFromZ(TraceEnd - TraceStart).ToQuat();
+
+	// 시작점(파랑)
+	DrawDebugSphere(GetWorld(), TraceStart, AttackSize, 16, FColor::Green, false, 5.0f);
+
+	// 끝점(빨강)
+	DrawDebugSphere(GetWorld(), TraceEnd, AttackSize, 16, FColor::Red, false, 5.0f);
+
+	// 공격방향(노랑)
+	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Yellow, false, 5.0f, 0, 2.0f);
+
+	// Sweep 경로(파랑)
+	DrawDebugCapsule(GetWorld(), CapsuleCenter, HalfHeight, AttackSize, CapsuleRotation, FColor::Blue, false, 5.0f);
+	*/
+
+	const FVector CapsuleCenter = (TraceStart + TraceEnd) * 0.5f;
+	const float HalfHeight = FVector::Dist(TraceStart, TraceEnd) * 0.5f;
+	const FQuat CapsuleRotation = FRotationMatrix::MakeFromZ(TraceEnd - TraceStart).ToQuat();
+
+	DrawDebugPoint(GetWorld(), TraceStart, 12.0f, FColor::Green, false, 5.0f);
+	DrawDebugPoint(GetWorld(), TraceEnd, 12.0f, FColor::Red, false, 5.0f);
+	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Yellow, false, 5.0f, 0, 2.0f);
+}
+
+bool ATeloCharacterBase::GetAttackTracePoint(FVector& TraceA, FVector& TraceB) const
+{
+	TraceA = FVector::ZeroVector;
+	TraceB = FVector::ZeroVector;
+
+	if (!WeaponInstance)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("[%s] WeaponInstance 없음"), *GetActorLabel());
 		return false;
 	}
 
-	// 이미 최대 HP라면 회복 실패
-	if (NowHP >= MaxHP)
+	if (!WeaponInstance->GetTraceSoketVector(TraceA, TraceB))
 	{
+		UE_LOG(LogTemp, Display, TEXT("[%s] 현재 장착중인 Weapon에 TraceSoket 없음"), *GetActorLabel());
 		return false;
 	}
 
-	NowHP = FMath::Clamp(NowHP + Amount, 0.0f, MaxHP);
+	return true;
+}
 
-	UE_LOG(LogTemp, Log, TEXT("[%s] HP Recover: %f / Current HP: %f"),
-		*GetActorLabel(),
-		Amount,
-		NowHP);
+/* ==================== Weapon ==================== */
+
+bool ATeloCharacterBase::IsWeaponComponentAttached()
+{
+	if (!WeaponAttachComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[%s] WeaponAttachComponent 없음"), *GetActorLabel());
+		return false;
+	}
+
+	if (WeaponSocketName.IsNone())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[%s] WeaponSocketName 없음"), *GetActorLabel());
+		return false;
+	}
+
+	WeaponAttachComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocketName);
+	return true;
+}
+
+ATeloWeaponBase* ATeloCharacterBase::SpawnWeapon(TSubclassOf<class ATeloWeaponBase> NewWeaponClass)
+{
+	if (!NewWeaponClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[%s] 스폰하려는 WeaponClass 없음"), *GetActorLabel());
+		return nullptr;
+	}
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = GetInstigator();
+
+	return GetWorld()->SpawnActor<ATeloWeaponBase>(NewWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+}
+
+bool ATeloCharacterBase::EquipWeapon(ATeloWeaponBase* NewWeapon)
+{
+	if (!NewWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[%s] 생성된 Weapon 객체 없음"), *GetActorLabel());
+		return false;
+	}
+
+	if (!WeaponAttachComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[%s] WeaponAttachComponent 없음"), *GetActorLabel());
+		return false;
+	}
+
+	NewWeapon->AttachToComponent(WeaponAttachComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	WeaponInstance = NewWeapon;
 
 	return true;
 }

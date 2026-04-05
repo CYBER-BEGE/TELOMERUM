@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
+
 #include "TeloAnimNotiState_TraceAttack.generated.h"
 
 /**

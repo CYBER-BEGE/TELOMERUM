@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+
 #include "TeloDamageable.generated.h"
 
 // This class does not need to be modified.
@@ -19,6 +20,7 @@ class TELOMERUM_API ITeloDamageable
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+	/* 외부에서 호출되는 데미지 적용 함수 */
 	UFUNCTION(BlueprintCallable, Category = "Damageable")
 	virtual void ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse) = 0;
 

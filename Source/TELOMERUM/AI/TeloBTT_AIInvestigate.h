@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include "BehaviorTree/BlackboardComponent.h"
-
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
+#include "BehaviorTree/BlackboardComponent.h"
+
 #include "TeloBTT_AIInvestigate.generated.h"
 
 /**
@@ -23,6 +23,7 @@ protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComponent, uint8* NodeMemory) override;
 
 private:
+	/* 수색 반경 */
 	UPROPERTY(EditAnywhere, Category = "Investigate")
-	float InvestigateRadius = 600.f; // 수색 반경
+	float InvestigateRadius = 600.f;
 };

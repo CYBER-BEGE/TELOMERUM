@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
+
 #include "TeloBTT_ClearLastTargetLocation.generated.h"
 
 /**

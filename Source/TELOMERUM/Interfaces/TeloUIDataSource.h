@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+
 #include "UI/TeloUIDataTypes.h"
+
 #include "TeloUIDataSource.generated.h"
 
 // This class does not need to be modified.

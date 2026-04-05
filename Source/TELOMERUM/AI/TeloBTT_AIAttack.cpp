@@ -2,10 +2,12 @@
 
 
 #include "TeloBTT_AIAttack.h"
+
 #include "AIController.h"
 #include "GameFramework/Actor.h"
-#include "TeloCharacterBase.h"
 #include "BehaviorTree/BlackboardComponent.h"
+
+#include "TeloCharacterBase.h"
 
 UTeloBTT_AIAttack::UTeloBTT_AIAttack()
 {

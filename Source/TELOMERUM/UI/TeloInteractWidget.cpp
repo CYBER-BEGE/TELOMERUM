@@ -2,6 +2,7 @@
 
 
 #include "UI/TeloInteractWidget.h"
+
 #include "Components/TextBlock.h"
 
 void UTeloInteractWidget::SetInteractText(const FText& NewText)

@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/DragDropOperation.h"
+
 #include "Player/TeloInventoryComponent.h"
+
 #include "TeloDragDropOperation.generated.h"
 
 /**

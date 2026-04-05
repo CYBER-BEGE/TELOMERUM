@@ -2,14 +2,13 @@
 
 
 #include "TeloAIController.h"
+
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
-
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Damage.h"
 #include "Perception/AISenseConfig_Hearing.h"
-
 #include "NavigationSystem.h"
 
 ATeloAIController::ATeloAIController()
@@ -83,6 +82,8 @@ void ATeloAIController::BeginPlay()
 	}
 	else UE_LOG(LogTemp, Error, TEXT("ATeloAIController: BehaviorTree is NULL")); // 블루프린트의 BT 등록 확인
 }
+
+/* ==================== Perception ==================== */
 
 void ATeloAIController::OnTargetperceived(AActor* Actor, FAIStimulus Stimulus)
 {

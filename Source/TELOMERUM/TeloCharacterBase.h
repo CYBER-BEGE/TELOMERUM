@@ -2,10 +2,11 @@
 
 #pragma once
 
-#include "Interfaces/TeloDamageable.h"
-
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+
+#include "Interfaces/TeloDamageable.h"
+
 #include "TeloCharacterBase.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnAttackEnd);
@@ -30,36 +31,14 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-public:
-	/* ==================== External API ==================== */
-
-	/* 데미지 적용시키는 함수(공격자 호출) */
-	virtual void ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse);
-
-	/* AI의 Attack 호출 함수 */
-	void AttackRequest(AActor* Target);
-
-	/* 공격 판정 함수 */
-	void StartAttackTrace();
-	void TickAttackTrace();
-	void EndAttackTrace();
-
-	void EndAttack(); // 임시
-
-	/* ==================== Query ==================== */
-
-	float GetAttackDistance() const;
-	FName GetAttackSocketName() const { return WeaponSocketName; } // BT 호환용 임시 유지
-
-	UFUNCTION(BlueprintPure, Category = "Animation State")
-	bool IsAttacking() const { return bIsAttacking; }
-	/* └> AnimNotify 사용하면서 변경점: 외부 미사용 시 protected로 옮기고 UFUNCTION 제거 */
-
-	/* 공격 종료 델리게이트 */
-	FOnAttackEnd OnAttackEnd;
-
 protected:
-	/* ==================== Movement ==================== */
+	/* 최대 HP */
+	UPROPERTY(EditAnywhere, Category = "State")
+	float MaxHP = 100.0f;
+
+	/* 현재 HP */
+	UPROPERTY(EditAnywhere, Category = "State")
+	float NowHP = MaxHP;
 
 	/* 이동 속도 스케일 값 */
 	UPROPERTY(EditAnywhere, Category = "State")
@@ -69,17 +48,33 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "State")
 	float JumpPowerScale = 1.0f;
 
-	/* ==================== HP ==================== */
+	/* 공격 속도 - 현재 미사용(애니메이션 재생속도에 영향을 줄듯) */
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	float AttackSpeed = 1.5f;
 
-	/* 최대 HP */
-	UPROPERTY(EditAnywhere, Category = "State")
-	float MaxHP = 100.0f;
+	/* 공격 사거리 */
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	float AttackRange = 100.0f;
 
-	/* 현재 HP */
-	UPROPERTY(EditAnywhere, Category = "State")
-	float NowHP = MaxHP;
+	/* 공격 범위 */
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	float AttackRadius = 50.0f;
 
-	/* ==================== Weapon ==================== */
+	/* 공격력 */
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	float AttackDamage = 10.0f;
+
+	/* 넉백 임펄스 */
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	float KnockbackImpulse = 250.0f;
+
+	/* 에어본 임펄스 */
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	float KnockupImpulse = 300.0f;
+
+	/* ABP 접근용 State Getter: AnimNotify 사용하면서 공격 중 이동무시 외에 미사용 */
+	UFUNCTION(BlueprintPure, Category = "Animation State")
+	bool IsAttacking() const { return bIsAttacking; }
 
 	/* 무기 장착위치 소켓 이름 (반드시 BP에서 지정) */
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
@@ -97,106 +92,92 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon")
 	class ATeloWeaponBase* WeaponInstance;
 
-	/* ==================== Attack ==================== */
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	float AttackSpeed = 1.5f;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	float AttackRange = 100.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	float AttackSize = 50.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	float AttackDamage = 10.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	float KnockbackImpulse = 250.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	float KnockupImpulse = 300.0f;
-
-	/* 공격 가능 조건 체크, 공격 State 설정 함수 */
-	void StartAttack(AActor* Target);
-	
-	/* 공격 State 초기화 함수 */
-	//void EndAttack();
-
-	/* ==================== Override ==================== */
-
-	virtual void HitActor(const FHitResult& HitResult);
-	virtual void RotateToTarget(const AActor* Target); // 타겟 방향으로 회전
-
-private:
-	/* ==================== State ==================== */
-
-	/* Damage */
-	bool bIsDamageable = true;
-	FTimerHandle DamageTimerHandle;
-
-	/* Attack */
-	bool bCanAttack = true;			// 공격 가능 여부
-	bool bIsAttacking = false;		// 공격 중인지 여부
-	bool bAttackTracing = false;	// 공격 판정 중인지 여부
-
-	/* Attack Trace */
-	FVector PrevTraceA = FVector::ZeroVector;
-	FVector PrevTraceB = FVector::ZeroVector;
-	TSet<TWeakObjectPtr<AActor>> AlreadyHitActors;
-
-	/* ==================== Damage Internal ==================== */
-
-	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-	void DamageCooldown();
-
-	/* ==================== Weapon Internal ==================== */
-
-	/* WeaponAttachComponent 부착 함수 */
-	bool IsWeaponComponentAttached();
-
-	/* 무기 스폰 함수 */
-	class ATeloWeaponBase* SpawnWeapon(TSubclassOf<class ATeloWeaponBase> NewWeaponClass);
-
-	/* 무기 장착 함수 */
-	bool EquipWeapon(class ATeloWeaponBase* NewWeapon);
-
-	/* ==================== Attack Internal ==================== */
-
-	void DrawAttackDebug(FVector TraceStart, FVector TraceEnd);
-	void DrawHitDebug(const FHitResult& Hit);
-
-	bool GetAttackTracePoints(FVector& TraceA, FVector& TraceB) const;
-
-public:
-	/** Interfaces **/
-
-	/* Take Damage */
-	virtual void ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse);
-	
-	/** Functions **/
-
-	/* Attack */
-	FName GetAttackSocketName() const { return AttackSocketName; }
-	float GetAttackDistance() const;
-	void AttackRequest(AActor* Target);
-	FOnAttackEnd OnAttackEnd;
-
-	UFUNCTION(BlueprintPure, Category = "Animation State")
-	bool IsAttacking() const { return bIsAttacking; }
-
-protected:
-	/** Variables **/
-
-	/** Functions **/
-
-	/* Attack */
-	void DoAttack(AActor* Target);
-	void DoAttackEnd();
-	virtual void HitActor(const FHitResult& HitResult);
-	virtual void RotateToTarget(const AActor* Target); // 타겟 방향으로 회전
+/* ==================== HP ==================== */
 
 public:
 	/* HP를 회복하고 성공 여부를 반환 */
 	bool RecoverHP(float Amount);
+
+public:
+	/* 외부에서 호출되는 데미지 적용 함수 */
+	virtual void ApplyDamage(float Damage, AActor* DamageCauser, const FVector& DamageLocation, const FVector& DamageImpulse);
+private:
+	/* 내부 데미지 적용 함수 */
+	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	/* 피격 쿨타임 */
+	void DamageCooldown();
+	/* 피격 디버그 드로잉 함수 */
+	void DrawHitDebug(const FHitResult& Hit);
+
+	/* 피격 State 변수: 피격 가능한 상태인가? */
+	bool bIsDamageable = true;
+	/* 피격 쿨타임 타이머 */
+	FTimerHandle DamageTimerHandle;
+
+/* ==================== Attack ==================== */
+
+public:
+	/* Attack 호출 함수 */
+	void AttackRequest(AActor* Target);
+
+protected:
+	/* 공격 가능 조건 체크, 공격 State 설정 함수 */
+	void StartAttack(AActor* Target);
+public:
+	/* 공격 State 초기화 함수 - 원래 protected 인데 AnimNoti가 사용중이라 임시 public 처리*/
+	void EndAttack();
+
+public:
+	/* 공격 판정 시작 함수 */
+	void StartAttackTrace();
+	/* 공격 판정 함수 */
+	void TickAttackTrace();
+	/* 공격 판정 종료 함수 */
+	void EndAttackTrace();
+
+public:
+	/* WeaponSocketName Getter - 삭제예정, BT 호환용 임시 유지 */
+	FName GetAttackSocketName() const { return WeaponSocketName; }
+	/* 실제 사거리를 리턴하는 함수(AttackRange가 아님) */
+	float GetAttackDistance() const;
+protected:
+	/* 공격 판정 함수: 공격 적중 시 */
+	virtual void HitActor(const FHitResult& HitResult);
+	/* Target 방향으로 회전 */
+	virtual void RotateToTarget(const AActor* Target);
+private:
+	/* 공격 히트박스 디버그 드로잉 함수 */
+	void DrawAttackDebug(FVector TraceStart, FVector TraceEnd);
+	/* 판정지점 받아오는 함수 */
+	bool GetAttackTracePoint(FVector& TraceA, FVector& TraceB) const;
+
+private:
+	/* 공격 State: 공격 가능한 상태인가? */
+	bool bCanAttack = true;
+	/* 공격 State: 공격 중인가? */
+	bool bIsAttacking = false;
+
+	/* 공격 State: 공격 판정이 진행중인가? */
+	bool bAttackTracing = false;
+	/* 이전 판정지점A 벡터 */
+	FVector PrevTraceA = FVector::ZeroVector;
+	/* 이전 판정지점B 벡터 (2소켓 전용) */
+	FVector PrevTraceB = FVector::ZeroVector;
+	/* 이미 공격 판정된 액터 set (중복 데미지 방지용) */
+	TSet<TWeakObjectPtr<AActor>> AlreadyHitActors;
+
+public:
+	/* 공격 종료 델리게이트 */
+	FOnAttackEnd OnAttackEnd;
+
+/* ==================== Weapon ==================== */
+
+private:
+	/* WeaponAttachComponent 부착 함수 */
+	bool IsWeaponComponentAttached();
+	/* 무기 스폰 함수 */
+	class ATeloWeaponBase* SpawnWeapon(TSubclassOf<class ATeloWeaponBase> NewWeaponClass);
+	/* 무기 장착 함수 */
+	bool EquipWeapon(class ATeloWeaponBase* NewWeapon);
+
 };

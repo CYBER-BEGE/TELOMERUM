@@ -2,11 +2,17 @@
 
 
 #include "Player/TeloInteractComponent.h"
-#include "Components/SphereComponent.h"
+
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerController.h"
+
+#include "Components/SphereComponent.h"
+
 #include "Interfaces/TeloInteractable.h"
 #include "UI/TeloInteractWidget.h"
+
+
+/* ==================== ActorComponent Lifecycle ==================== */
 
 // Sets default values for this component's properties
 UTeloInteractComponent::UTeloInteractComponent()
@@ -55,6 +61,43 @@ void UTeloInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 }
+
+
+/* ===================== Overlap Event ==================== */
+
+void UTeloInteractComponent::OnInteractBeginOverlap(
+	UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult
+)
+{
+	// 유효한 상호작용 대상이 범위에 들어왔는지 검사
+	if (!IsValidInteractActor(OtherActor))
+		return;
+
+	InteractCandidateList.AddUnique(OtherActor); // 후보 목록에 추가 (중복 방지)
+	RefreshCurrentInteractActor();
+}
+
+void UTeloInteractComponent::OnInteractEndOverlap(
+	UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex
+)
+{
+	if (OtherActor == nullptr)
+		return;
+
+	InteractCandidateList.Remove(OtherActor);
+	RefreshCurrentInteractActor();
+}
+
+
+/* ===================== Internal Functions ==================== */
 
 ACharacter* UTeloInteractComponent::GetOwnerCharacter() const
 {
@@ -122,20 +165,6 @@ void UTeloInteractComponent::HideInteractWidget()
 	}
 }
 
-void UTeloInteractComponent::SetInteractWidgetSuppressed(bool bSuppressed)
-{
-	bSuppressInteractWidget = bSuppressed;
-
-	if (bSuppressInteractWidget)
-	{
-		HideInteractWidget();
-		return;
-	}
-
-	// 다시 허용되면 현재 주변 상호작용 후보를 기준으로 UI 재계산
-	RefreshCurrentInteractActor();
-}
-
 bool UTeloInteractComponent::IsValidInteractActor(AActor* Actor) const
 {
 	ACharacter* OwnerCharacter = GetOwnerCharacter();
@@ -200,50 +229,8 @@ void UTeloInteractComponent::RefreshCurrentInteractActor()
 	}
 }
 
-void UTeloInteractComponent::OnInteractBeginOverlap(
-	UPrimitiveComponent* OverlappedComponent,
-	AActor* OtherActor,
-	UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex,
-	bool bFromSweep,
-	const FHitResult& SweepResult
-)
-{
-	// 유효한 상호작용 대상이 범위에 들어왔는지 검사
-	if (!IsValidInteractActor(OtherActor))
-		return;
 
-	InteractCandidateList.AddUnique(OtherActor); // 후보 목록에 추가 (중복 방지)
-	RefreshCurrentInteractActor();
-
-	//if (CurrentInteractActor)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("[%s] 현재 가장 가까운 상호작용 대상으로 선택되었습니다."), *CurrentInteractActor->GetActorLabel());
-	//}
-}
-
-void UTeloInteractComponent::OnInteractEndOverlap(
-	UPrimitiveComponent* OverlappedComponent,
-	AActor* OtherActor,
-	UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex
-)
-{
-	if (OtherActor == nullptr)
-		return;
-
-	InteractCandidateList.Remove(OtherActor);
-	RefreshCurrentInteractActor();
-
-	//if (CurrentInteractActor)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("[%s] 현재 가장 가까운 상호작용 대상으로 다시 선택되었습니다."), *CurrentInteractActor->GetActorLabel());
-	//}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("[UTeloInteractComponent] 현재 상호작용 가능한 액터가 없습니다."));
-	//}
-}
+/* ===================== Interact Component Setup ==================== */
 
 void UTeloInteractComponent::TryInteract()
 {
@@ -269,4 +256,18 @@ void UTeloInteractComponent::TryInteract()
 			RefreshCurrentInteractActor();
 		}
 	}
+}
+
+void UTeloInteractComponent::SetInteractWidgetSuppressed(bool bSuppressed)
+{
+	bSuppressInteractWidget = bSuppressed;
+
+	if (bSuppressInteractWidget)
+	{
+		HideInteractWidget();
+		return;
+	}
+
+	// 다시 허용되면 현재 주변 상호작용 후보를 기준으로 UI 재계산
+	RefreshCurrentInteractActor();
 }

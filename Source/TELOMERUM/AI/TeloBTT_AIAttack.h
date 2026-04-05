@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
+
 #include "TeloBTT_AIAttack.generated.h"
 
 /**
@@ -22,18 +23,18 @@ protected:
 	virtual EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& OwnerComponent, uint8* NodeMemory) override;
 
 private:
-	/** Variables **/
-
+	/* 이 Task가 소속된 BehaviorTreeComponent */
 	UPROPERTY()
 	UBehaviorTreeComponent* CachedOwnerComponent = nullptr;
 
+	/* 이 Task를 실행중인 캐릭터 */
 	UPROPERTY()
 	class ATeloCharacterBase* CachedOwnerCharacter = nullptr;
-
-
-	/** Functions **/	
 	
+	/* 델리게이트 초기화 함수 */
 	void ClearDelegate() const;
+
+	/* 공격 종료 수신 시 호출되는 함수 */
 	void HandleAttackEnd();
 
 };

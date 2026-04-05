@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "TeloAnimNoti_EndAttack.h"
+#include "Animation/TeloAnimNoti_EndAttack.h"
+
 #include "TeloCharacterBase.h"
 
 void UTeloAnimNoti_EndAttack::Notify(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)

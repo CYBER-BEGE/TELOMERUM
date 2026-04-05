@@ -2,7 +2,11 @@
 
 
 #include "Player/TeloInventoryComponent.h"
+
 #include "Engine/Texture2D.h"
+
+
+/* ==================== ActorComponent Lifecycle ==================== */
 
 // Sets default values for this component's properties
 UTeloInventoryComponent::UTeloInventoryComponent()
@@ -18,6 +22,9 @@ void UTeloInventoryComponent::BeginPlay()
 	InitializeSlots();
 }
 
+
+/* ===================== Inventory Setup ==================== */
+
 void UTeloInventoryComponent::InitializeSlots()
 {
 	if (SlotCount <= 0)
@@ -28,48 +35,8 @@ void UTeloInventoryComponent::InitializeSlots()
 	Slots.SetNum(SlotCount);
 }
 
-bool UTeloInventoryComponent::IsValidSlotIndex(int32 Index) const
-{
-	return Slots.IsValidIndex(Index);
-}
 
-bool UTeloInventoryComponent::IsSlotEmpty(int32 Index) const
-{
-	if (!IsValidSlotIndex(Index))
-	{
-		return true;
-	}
-
-	return Slots[Index].IsEmpty();
-}
-
-int32 UTeloInventoryComponent::FindStackableSlotIndex(const FTeloInventoryItem& NewItem) const
-{
-	for (int32 Index = 0; Index < Slots.Num(); ++Index)
-	{
-		const FTeloInventorySlot& Slot = Slots[Index];
-
-		if (!Slot.IsEmpty() && Slot.ItemData.ItemID == NewItem.ItemID)
-		{
-			return Index;
-		}
-	}
-
-	return INDEX_NONE;
-}
-
-int32 UTeloInventoryComponent::FindEmptySlotIndex() const
-{
-	for (int32 Index = 0; Index < Slots.Num(); ++Index)
-	{
-		if (Slots[Index].IsEmpty())
-		{
-			return Index;
-		}
-	}
-
-	return INDEX_NONE;
-}
+/* ===================== Inventory Setup ==================== */
 
 /* 아이템 추가 (스택 가능하면 스택, 아니면 빈 슬롯에 추가) */
 bool UTeloInventoryComponent::AddItem(const FTeloInventoryItem& NewItem)
@@ -188,21 +155,6 @@ bool UTeloInventoryComponent::SwapSlot(int32 SlotA, int32 SlotB)
 	return true;
 }
 
-int32 UTeloInventoryComponent::GetItemCount() const
-{
-	int32 OccupiedCount = 0;
-
-	for (const FTeloInventorySlot& Slot : Slots)
-	{
-		if (!Slot.IsEmpty())
-		{
-			++OccupiedCount;
-		}
-	}
-
-	return OccupiedCount;
-}
-
 bool UTeloInventoryComponent::ConsumeItemAtSlot(int32 SlotIndex, int32 Amount)
 {
 	if (!IsValidSlotIndex(SlotIndex))
@@ -238,4 +190,65 @@ bool UTeloInventoryComponent::ConsumeItemAtSlot(int32 SlotIndex, int32 Amount)
 	OnInventoryChanged.Broadcast();
 
 	return true;
+}
+
+bool UTeloInventoryComponent::IsValidSlotIndex(int32 Index) const
+{
+	return Slots.IsValidIndex(Index);
+}
+
+bool UTeloInventoryComponent::IsSlotEmpty(int32 Index) const
+{
+	if (!IsValidSlotIndex(Index))
+	{
+		return true;
+	}
+
+	return Slots[Index].IsEmpty();
+}
+
+int32 UTeloInventoryComponent::GetItemCount() const
+{
+	int32 OccupiedCount = 0;
+
+	for (const FTeloInventorySlot& Slot : Slots)
+	{
+		if (!Slot.IsEmpty())
+		{
+			++OccupiedCount;
+		}
+	}
+
+	return OccupiedCount;
+}
+
+
+/* ============== Inventory Internal Functions ==================== */
+
+int32 UTeloInventoryComponent::FindStackableSlotIndex(const FTeloInventoryItem& NewItem) const
+{
+	for (int32 Index = 0; Index < Slots.Num(); ++Index)
+	{
+		const FTeloInventorySlot& Slot = Slots[Index];
+
+		if (!Slot.IsEmpty() && Slot.ItemData.ItemID == NewItem.ItemID)
+		{
+			return Index;
+		}
+	}
+
+	return INDEX_NONE;
+}
+
+int32 UTeloInventoryComponent::FindEmptySlotIndex() const
+{
+	for (int32 Index = 0; Index < Slots.Num(); ++Index)
+	{
+		if (Slots[Index].IsEmpty())
+		{
+			return Index;
+		}
+	}
+
+	return INDEX_NONE;
 }
