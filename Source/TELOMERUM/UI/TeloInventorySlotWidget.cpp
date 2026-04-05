@@ -16,6 +16,7 @@
 #include "UI/TeloInventoryEntryWidget.h"
 #include "UI/TeloDragDropOperation.h"
 
+
 /* ===================== Widget Event Handlers ==================== */
 
 FReply UTeloInventorySlotWidget::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)

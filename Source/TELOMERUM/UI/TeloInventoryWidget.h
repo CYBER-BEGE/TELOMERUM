@@ -17,6 +17,7 @@ class TELOMERUM_API UTeloInventoryWidget : public UTeloScreenWidgetBase
 {
 	GENERATED_BODY()
 
+
 	/* ==================== UUserWidget Overrides ==================== */
 public:
 	/* 키 입력 처리 함수 */
@@ -26,6 +27,7 @@ public:
 	/* 화면이 닫힐 때 인벤토리 변경 델리게이트 바인딩 해제 */
 	virtual void OnScreenClosed() override;
 	
+
 	/* ===================== Inventory UI Properties ==================== */
 protected:
 	/* 인벤토리 아이템을 표시하는 위젯 클래스 */
@@ -39,6 +41,7 @@ protected:
 	/* 한 줄에 표시할 슬롯 개수 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true", ClampMin = "1"))
 	int32 InventoryColumnCount = 5;
+
 
 	/* ===================== Widget Components ==================== */
 protected:
@@ -58,6 +61,7 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* SelectedItemDescriptionText;
 
+
 	/* ===================== Inventory UI State ==================== */
 private:
 	/* 현재 생성된 슬롯 위젯들 */
@@ -67,12 +71,14 @@ private:
 	/* 현재 선택된 슬롯 인덱스 */
 	int32 SelectedSlotIndex = INDEX_NONE;
 
+
 	/* ===================== Inventory UI Setup ==================== */
 public:
 	/* 인벤토리 UI를 새로고침하는 함수 */
 	void RefreshInventory();
 	/* 인벤토리 아이템이 선택됐을 때 호출되는 함수 */
 	void SelectItem(const struct FTeloInventoryItem& ItemData);
+
 
 	/* ===================== Internal Functions ==================== */
 private:

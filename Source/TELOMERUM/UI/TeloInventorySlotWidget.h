@@ -22,6 +22,7 @@ class TELOMERUM_API UTeloInventorySlotWidget : public UUserWidget
 	/* 드래그 드롭으로 슬롯 이동이 발생했을 때, 원본 슬롯 인덱스와 대상 슬롯 인덱스를 알리는 델리게이트 */
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnInventorySlotDropped, int32, int32);
 
+
 	/* ===================== Widget Event Handlers ==================== */
 public:
 	/* 슬롯 마우스 입력을 자식 위젯보다 먼저 처리 */
@@ -33,6 +34,7 @@ public:
 	/* 다른 슬롯에서 드래그된 아이템이 이 슬롯 위에 드롭됐을 때 처리한다 */
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 
+
 	/* ===================== Widget Components ==================== */
 protected:
 	/* 슬롯 외곽선 */
@@ -42,6 +44,7 @@ protected:
 	/* 슬롯 내부에 아이템 위젯을 담는 컨테이너 */
 	UPROPERTY(meta = (BindWidget))
 	class UOverlay* ItemContainer;
+
 
 	/* ===================== Entry Widget Class ==================== */
 private:
@@ -53,12 +56,14 @@ private:
 	UPROPERTY()
 	class UTeloInventoryEntryWidget* EntryWidgetInstance = nullptr;
 
+
 	/* ==================== Delegates ==================== */
 public:
 	/* 좌클릭 시 슬롯 인덱스를 알리는 델리게이트 */
 	FOnInventorySlotLeftClicked OnSlotLeftClicked;
 	/* 드래그 드롭으로 슬롯 이동이 발생했을 때 호출되는 델리게이트 */
 	FOnInventorySlotDropped OnSlotDropped;
+
 
 	/* ==================== Inventory Slot Setup ==================== */
 public:
@@ -71,10 +76,12 @@ public:
 	/* 현재 슬롯의 선택 상태 표시 */
 	void SetSelected(bool bInSelected);
 
+
 	/* ==================== Internal Functions ==================== */
 private:
 	/* 로컬 플레이어의 UI 서브시스템 반환 */
 	class UTeloUISubsystem* GetTeloUISubsystem() const;
+
 
 	/* ===================== Internal State ==================== */
 private:

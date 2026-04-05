@@ -20,10 +20,12 @@ class TELOMERUM_API UTeloContextEntryWidget : public UUserWidget
 	/* 컨텍스트 메뉴 항목이 클릭되었을 때, 해당 항목의 ActionID를 전달하는 델리게이트 선언 */
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnContextEntryClicked, FName);
 
-	/* ===================== Subsystem Lifecycle ==================== */
+
+	/* ===================== UserWidget Overrides ==================== */
 public:
 	/* 위젯이 초기화될 때, 버튼 클릭 이벤트를 바인딩하는 함수 */
 	virtual bool Initialize() override;
+
 
 	/* ===================== Widget Components ==================== */
 protected:
@@ -35,15 +37,18 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* EntryText;
 
+
 	/* ===================== Delegates ==================== */
 public:
 	/* 메뉴 항목이 클릭되었을 때, 해당 항목의 ActionID를 전달하는 델리게이트 */
 	FOnContextEntryClicked OnEntryClicked;
 
+
 	/* ===================== Context Entry Setup ==================== */
 public:
 	/* 메뉴 항목의 데이터를 설정하는 함수 */
 	void SetActionData(const FTeloContextAction& InActionData);
+
 
 	/* ===================== Internal Functions ==================== */
 private:

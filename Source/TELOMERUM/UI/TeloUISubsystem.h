@@ -17,9 +17,11 @@ class TELOMERUM_API UTeloUISubsystem : public ULocalPlayerSubsystem
 {
 	GENERATED_BODY()
 	
+
 	/* ==================== Subsystem Lifecycle ==================== */
 protected:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
 
 	/* ===================== UI Widget Properties ==================== */
 private:
@@ -35,6 +37,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class UTeloContextWidget> ContextWidgetClass;
 
+
 	/* ===================== UI Widget Instances ==================== */
 private:
 	/* 인벤토리 위젯 인스턴스 */
@@ -49,6 +52,7 @@ private:
 	UPROPERTY()
 	class UTeloContextWidget* ContextWidgetInstance = nullptr;
 
+
 	/* ===================== UI State ==================== */
 private:
 	/* 현재 화면에 표시된 UI 위젯 */
@@ -57,6 +61,7 @@ private:
 
 	/* 현재 아이템 컨텍스트 메뉴가 참조하는 객체 (예: 아이템 데이터) */
 	TWeakObjectPtr<UObject> CurrentContextSource;
+
 
 	/* ==================== Screen Widget Setup ==================== */
 public:
@@ -67,12 +72,14 @@ public:
 	/* ScreenWidget이 현재 열려있는지 확인 */
 	bool IsScreenWidgetOpen(const class UTeloScreenWidgetBase* ScreenWidget) const;
 
+
 	/* ==================== Input Mode Management ==================== */
 private:
 	/* UI 입력 모드 적용 */
 	void ApplyUIInputMode(class UTeloScreenWidgetBase* FocusWidget);
 	/* 게임 입력 모드 적용 */
 	void ApplyGameInputMode();
+
 
 	/* ==================== Inventory ==================== */
 public:
@@ -90,6 +97,7 @@ private:
 	/* 인벤토리 위젯 생성 */
 	void CreateInventoryWidget();
 
+
 	/* ==================== Tooltip ===================== */
 public:
 	/* 툴팁 위젯 클래스 설정 */
@@ -103,6 +111,7 @@ public:
 private:
 	/* 툴팁 위젯 생성 */
 	void CreateTooltipWidget();
+
 
 	/* ==================== Item Context Menu ==================== */
 public:

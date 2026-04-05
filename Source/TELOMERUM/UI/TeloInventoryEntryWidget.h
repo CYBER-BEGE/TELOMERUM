@@ -19,9 +19,11 @@ class TELOMERUM_API UTeloInventoryEntryWidget : public UUserWidget, public ITelo
 	/* 아이템이 클릭됐을 때 부모 위젯에게 알리는 delegate */
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventoryEntryClicked, const FTeloInventoryItem&);
 	
-	/* ==================== Subsystem Lifecycle ==================== */
+
+	/* ==================== UserWidget Overrides ==================== */
 public:
 	virtual bool Initialize() override;
+
 
 	/* ==================== Tooltip & Context Menu ==================== */
 public:
@@ -31,6 +33,7 @@ public:
 	virtual void GetContextActions(TArray<FTeloContextAction>& OutActions) const override;
 	/* 컨텍스트 메뉴 액션이 선택되었을 때 호출됨 */
 	virtual void HandleContextAction(FName ActionID) override;
+
 
 	/* ==================== Widget Components ==================== */
 protected:
@@ -46,6 +49,7 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* EntryButton;
 
+
 	/* ===================== Widget Event Handlers ==================== */
 protected:
 	/* 클릭 이벤트 핸들러 */
@@ -60,10 +64,12 @@ protected:
 	UFUNCTION()
 	void HandleEntryButtonUnhovered();
 
+
 	/* ==================== Delegates ==================== */
 public:
 	/* 아이템이 클릭됐을 때 부모 위젯에게 알리는 delegate */
 	FOnInventoryEntryClicked OnInventoryEntryClicked;
+
 
 	/* ==================== Inventory Entry Setup ==================== */
 public:
@@ -71,6 +77,7 @@ public:
 	void SetItemData(const FTeloInventoryItem& ItemData);
 	/* 현재 아이템이 들어있는 슬롯 인덱스를 설정 */
 	void SetSlotIndex(int32 InSlotIndex);
+
 
 	/* ==================== Cached Data ==================== */
 private:

@@ -20,6 +20,7 @@ class TELOMERUM_API UTeloContextWidget : public UUserWidget
 	/* 컨텍스트 메뉴가 클릭되었을 때, 해당 항목의 ActionID를 전달하는 델리게이트 선언 */
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnContextActionClicked, FName);
 
+
 	/* ==================== Widget Components ==================== */
 protected:
 	/* 메뉴 항목들을 담는 VerticalBox 위젯에 대한 바인딩 변수 */
@@ -30,10 +31,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ContextMenu")
 	TSubclassOf<class UTeloContextEntryWidget> ContextEntryWidgetClass;
 
+
 	/* ==================== Delegates ==================== */
 public:
 	/* 메뉴 항목이 클릭되었을 때, 해당 항목의 ActionID를 전달하는 델리게이트 */
 	FOnContextActionClicked OnActionClicked;
+
 
 	/* ==================== Context Menu Setup ==================== */
 public:
@@ -41,6 +44,7 @@ public:
 	void SetMenuData(const FTeloContextData& InMenuData);
 	/* 화면 좌표가 현재 컨텍스트 위젯 영역 안에 있는지 검사 */
 	bool IsScreenPositionInside(const FVector2D& ScreenPosition) const;
+
 
 	/* ==================== Internal Functions ==================== */
 private:

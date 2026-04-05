@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+
 #include "Interfaces/TeloInteractable.h"
 #include "Item/TeloItemTypes.h"
+
 #include "TeloItemBase.generated.h"
 
 UCLASS()
@@ -13,6 +15,8 @@ class TELOMERUM_API ATeloItemBase : public AActor, public ITeloInteractable
 {
 	GENERATED_BODY()
 	
+
+	/* ==================== Actor Lifecycle ==================== */
 public:	
 	// Sets default values for this actor's properties
 	ATeloItemBase();
@@ -25,13 +29,14 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	/* ==================== Components ==================== */
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Mesh;
 
 
-	/* =============== 아이템 기존 정보 =============== */
-
+	/* ==================== 아이템 기존 정보 ==================== */
+protected:
 	/* 아이템 ID */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	FName ItemID = NAME_None;
@@ -53,8 +58,8 @@ protected:
 	int32 ItemCount = 1;
 
 
-	/* =============== 아이템 사용 관련 =============== */
-
+	/* ==================== 아이템 사용 관련 ==================== */
+protected:
 	/* 아이템이 사용 가능한지 여부 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Use")
 	bool bUsable = false;
@@ -72,8 +77,8 @@ protected:
 	float UseValue = 0.0f;
 
 
-	/* =============== 상호작용 관련 =============== */
-
+	/* ==================== 상호작용 관련 ==================== */
+protected:
 	/* 아이템이 상호작용 가능한지 여부 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Property")
 	bool bCanInteract = true;
@@ -89,13 +94,10 @@ protected:
 public:
 	/* 상호작용 가능한 상태인지 */
 	virtual bool CanInteract(AActor* Interactor) const override;
-
 	/* 상호작용 실행 */
 	virtual void Interact(AActor* Interactor) override;
-
 	/* UI에 표시할 상호작용 문구 */
 	virtual FText GetInteractText() const override;
-
 	/* 인벤토리 데이터 기준으로 월드 아이템 정보를 다시 초기화 */
 	void InitializeFromInventoryItem(const struct FTeloInventoryItem& InItemData);
 };

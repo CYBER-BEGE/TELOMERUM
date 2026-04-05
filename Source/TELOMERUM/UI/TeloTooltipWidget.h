@@ -14,16 +14,19 @@ class TELOMERUM_API UTeloTooltipWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
+
 	/* ==================== UserWidget Overrides ==================== */
 public:
 	/* 툴팁이 visible일 때 자기 스스로 마우스 위치를 따라가게 함 */
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
 
 	/* ==================== Tooltip Properties ==================== */
 protected:
 	/* 마우스 커서로부터 툴팁 위치 오프셋 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tooltip", meta = (AllowPrivateAccess = "true"))
 	FVector2D CursorOffset = FVector2D(12.0f, 12.0f);
+
 
 	/* ===================== UI Widget Components ==================== */
 protected:
@@ -35,10 +38,12 @@ protected:
 	UPROPERTY(meta = (BindWidgetOptional))
 	class UTextBlock* DescriptionText;
 
+
 	/* ===================== Tooltip Setup ==================== */
 public:
 	/* 툴팁 데이터로 UI 업데이트 */
 	void SetTooltipData(const FTeloTooltipData& InTooltipData);
+
 
 	/* ===================== Internal Functions ==================== */
 private:

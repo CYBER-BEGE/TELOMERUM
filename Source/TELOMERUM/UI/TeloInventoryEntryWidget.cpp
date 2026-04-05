@@ -13,7 +13,8 @@
 #include "UI/TeloUISubsystem.h"
 #include "Player/TeloPlayerCharacter.h"
 
-/* ==================== Subsystem Lifecycle ==================== */
+
+/* ==================== UserWidget Overrides ==================== */
 
 bool UTeloInventoryEntryWidget::Initialize()
 {

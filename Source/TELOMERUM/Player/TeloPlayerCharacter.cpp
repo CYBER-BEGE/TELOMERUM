@@ -2,23 +2,28 @@
 
 
 #include "Player/TeloPlayerCharacter.h"
+
 #include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "EnhancedInputSubsystems.h"
+#include "Engine/LocalPlayer.h"
+
+#include "Perception/AISense_Hearing.h"
+#include "Components/SceneComponent.h"
+
 #include "Player/TeloLockOnComponent.h"
 #include "Player/TeloInteractComponent.h"
-#include "Components/SceneComponent.h"
-#include "Enemy/TeloEnemyCharacter.h"
-#include "UI/TeloUISubsystem.h"
-#include "Engine/LocalPlayer.h"
 #include "Player/TeloInventoryComponent.h"
-#include "Perception/AISense_Hearing.h"
+#include "UI/TeloUISubsystem.h"
 #include "Item/TeloItemTypes.h"
 #include "Item/TeloItemBase.h"
+#include "Enemy/TeloEnemyCharacter.h"
 
-// Sets default values
+
+/* ==================== CharacterBase Lifecycle ==================== */
+
 ATeloPlayerCharacter::ATeloPlayerCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -80,7 +85,6 @@ ATeloPlayerCharacter::ATeloPlayerCharacter()
 	GetCharacterMovement()->JumpZVelocity *= JumpPowerScale;				// 점프 힘
 }
 
-// Called when the game starts or when spawned
 void ATeloPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -111,7 +115,6 @@ void ATeloPlayerCharacter::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("[ATeloPlayerCharacter] InventoryAction is NULL"));
 }
 
-// Called every frame
 void ATeloPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -119,7 +122,6 @@ void ATeloPlayerCharacter::Tick(float DeltaTime)
 
 }
 
-// Called to bind functionality to input
 void ATeloPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -166,15 +168,8 @@ void ATeloPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	}
 }
 
-void ATeloPlayerCharacter::ResetMovementComps()
-{
-	GetCharacterMovement()->MaxWalkSpeed = 600.0f * MoveSpeedScale;	// 속도
-	GetCharacterMovement()->GravityScale = 2.0f;					// 중력
-	GetCharacterMovement()->GroundFriction = 8.0f;					// 마찰력
-	GetCharacterMovement()->BrakingDecelerationWalking = 2048.0f;	// 감속력
-	GetCharacterMovement()->BrakingDecelerationFalling = 50.0f;		// 공중 감속력
-	GetCharacterMovement()->AirControl = 0.7f;						// 공중 제어
-}
+
+/* ==================== ACharacter Overrides ==================== */
 
 void ATeloPlayerCharacter::Landed(const FHitResult& Hit)
 {
@@ -192,6 +187,22 @@ bool ATeloPlayerCharacter::CanJumpInternal_Implementation() const
 {
 	return JumpIsAllowedInternal(); // 앉기 시에도 점프 가능하도록 변경
 }
+
+
+/* ==================== Movement Component ==================== */
+
+void ATeloPlayerCharacter::ResetMovementComps()
+{
+	GetCharacterMovement()->MaxWalkSpeed = 600.0f * MoveSpeedScale;	// 속도
+	GetCharacterMovement()->GravityScale = 2.0f;					// 중력
+	GetCharacterMovement()->GroundFriction = 8.0f;					// 마찰력
+	GetCharacterMovement()->BrakingDecelerationWalking = 2048.0f;	// 감속력
+	GetCharacterMovement()->BrakingDecelerationFalling = 50.0f;		// 공중 감속력
+	GetCharacterMovement()->AirControl = 0.7f;						// 공중 제어
+}
+
+
+/* ==================== Move ==================== */
 
 void ATeloPlayerCharacter::MoveInput(const FInputActionValue& Value)
 {
@@ -229,6 +240,9 @@ void ATeloPlayerCharacter::DoMove(float Right, float Forward)
 	}
 }
 
+
+/* ==================== Look ==================== */
+
 void ATeloPlayerCharacter::LookInput(const FInputActionValue& Value)
 {
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
@@ -261,6 +275,9 @@ void ATeloPlayerCharacter::DoLook(float Yaw, float Pitch)
 	AddControllerPitchInput(Pitch);
 }
 
+
+/* ==================== Jump ==================== */
+
 void ATeloPlayerCharacter::DoJumpStart()
 {
 	bCanCrouch = false; // 점프 중에는 앉기 불가능
@@ -275,7 +292,9 @@ void ATeloPlayerCharacter::DoJumpEnd()
 	StopJumping();
 }
 
-// 앉기 키 입력 시 방향키 입력이 없어도 캐릭터가 움직이고 있다면 슬라이딩
+
+/* ==================== Crouch ==================== */
+
 void ATeloPlayerCharacter::DoCrouchStart()
 {
 	if (!bCanCrouch) return; // 앉기 불가능 시 종료
@@ -316,6 +335,9 @@ void ATeloPlayerCharacter::DoCrouchEnd()
 	ResetMovementComps(); // 본래 마찰력/감속력 복구
 	//ApplyLockOnMovementMode(false); // 로코모션 적용
 }
+
+
+/* ==================== Dash ==================== */
 
 // 현재 움직임과 상관없이 입력 값으로 대시
 void ATeloPlayerCharacter::DoDashStart()
@@ -390,6 +412,9 @@ void ATeloPlayerCharacter::DashCooldown()
 	bCanDash = true;
 }
 
+
+/* ==================== LockOn ==================== */
+
 void ATeloPlayerCharacter::DoLockOn()
 {
 	if (LockOnComponent)
@@ -420,6 +445,9 @@ void ATeloPlayerCharacter::DoLockOn()
 //	}
 //}
 
+
+/* ==================== Attack ==================== */
+
 void ATeloPlayerCharacter::AttackInput()
 {
 	AActor* Target = nullptr;
@@ -442,6 +470,9 @@ void ATeloPlayerCharacter::RotateToTarget(const AActor* Target)
 		}
 	}
 }
+
+
+/* ==================== Inventory ==================== */
 
 void ATeloPlayerCharacter::InteractInput()
 {

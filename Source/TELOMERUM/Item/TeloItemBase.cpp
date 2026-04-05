@@ -2,10 +2,13 @@
 
 
 #include "Item/TeloItemBase.h"
+
 #include "Player/TeloPlayerCharacter.h"
 #include "Player/TeloInventoryComponent.h"
 
-// Sets default values
+
+/* ==================== Actor Lifecycle ==================== */
+
 ATeloItemBase::ATeloItemBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -14,7 +17,6 @@ ATeloItemBase::ATeloItemBase()
 	RootComponent = Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 }
 
-// Called when the game starts or when spawned
 void ATeloItemBase::BeginPlay()
 {
 	Super::BeginPlay();
@@ -29,12 +31,14 @@ void ATeloItemBase::BeginPlay()
 	}
 }
 
-// Called every frame
 void ATeloItemBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
+
+
+/* ==================== 상호작용 관련 ==================== */
 
 bool ATeloItemBase::CanInteract(AActor* Interactor) const
 {
