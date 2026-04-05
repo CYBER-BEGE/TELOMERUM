@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "TeloAnimNoti_EndAttack.h"
+#include "Animation/TeloAnimNoti_EndAttack.h"
 
 #include "TeloCharacterBase.h"
 

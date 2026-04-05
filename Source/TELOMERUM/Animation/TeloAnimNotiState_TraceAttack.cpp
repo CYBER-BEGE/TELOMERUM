@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "TeloAnimNotiState_TraceAttack.h"
+#include "Animation/TeloAnimNotiState_TraceAttack.h"
+
 #include "Components/SkeletalMeshComponent.h"
 
 #include "TeloCharacterBase.h"
