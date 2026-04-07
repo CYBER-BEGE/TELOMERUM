@@ -39,6 +39,7 @@ EBTNodeResult::Type UTeloBTT_AIAttack::ExecuteTask(UBehaviorTreeComponent& Owner
 	ClearDelegate();
 	OwnerCharacter->OnAttackEnd.AddUObject(this, &UTeloBTT_AIAttack::HandleAttackEnd);
 
+	AIController->StopMovement();
 	OwnerCharacter->AttackRequest(TargetActor); // 공격 요청
 
 	UE_LOG(LogTemp, Warning, TEXT("[%s] AIAttack: 컨트롤러에서 공격 요청"), *Owner->GetActorLabel());
