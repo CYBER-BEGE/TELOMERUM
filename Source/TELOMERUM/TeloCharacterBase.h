@@ -58,7 +58,7 @@ protected:
 
 	/* 공격 범위 */
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	float AttackRadius = 50.0f;
+	float AttackRadius = 10.0f;
 
 	/* 공격력 */
 	UPROPERTY(EditAnywhere, Category = "Attack")

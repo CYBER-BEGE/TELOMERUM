@@ -307,6 +307,8 @@ void ATeloCharacterBase::DrawAttackDebug(FVector TraceStart, FVector TraceEnd)
 	DrawDebugPoint(GetWorld(), TraceStart, 12.0f, FColor::Green, false, 5.0f);
 	DrawDebugPoint(GetWorld(), TraceEnd, 12.0f, FColor::Red, false, 5.0f);
 	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Yellow, false, 5.0f, 0, 2.0f);
+	DrawDebugSphere(GetWorld(), TraceStart, AttackRadius, 16, FColor::Purple, false, 0.2f);
+	DrawDebugSphere(GetWorld(), TraceEnd, AttackRadius, 16, FColor::Purple, false, 0.2f);
 }
 
 bool ATeloCharacterBase::GetAttackTracePoint(FVector& TraceA, FVector& TraceB) const
