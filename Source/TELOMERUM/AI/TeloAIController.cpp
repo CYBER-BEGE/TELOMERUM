@@ -111,11 +111,13 @@ void ATeloAIController::OnTargetperceived(AActor* Actor, FAIStimulus Stimulus)
 		SenseTypeName = "Hearing";
 	}
 
+	/*
 	UE_LOG(LogTemp, Display, TEXT("[%s] AIController Perception %s / 타겟: %s / 감지 타입: %s"),
 		*GetPawn()->GetActorNameOrLabel(),
 		Stimulus.WasSuccessfullySensed() ? TEXT("성공") : TEXT("실패"),
 		*Actor->GetActorNameOrLabel(),
 		*SenseTypeName);
+	*/
 
 	UpdateTargetActor(Actor, Stimulus.StimulusLocation);
 }

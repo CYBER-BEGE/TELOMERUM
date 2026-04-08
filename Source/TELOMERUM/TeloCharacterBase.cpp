@@ -255,34 +255,6 @@ void ATeloCharacterBase::EndAttackTrace()
 	AlreadyHitActors.Empty();
 }
 
-float ATeloCharacterBase::GetAttackDistance() const
-{
-	/*
-	if (AttackSocketName.IsNone()) return 0.0f;
-
-	const FVector TraceStart = GetMesh()->GetSocketLocation(AttackSocketName); // 공격 시작점 (소켓 위치)
-	const FVector TraceEnd = TraceStart + (GetActorForwardVector() * AttackRange); // 정면으로 공격범위 적용
-
-	// Trace 길이 계산 후 반환
-	return FVector::Dist(TraceStart, TraceEnd);*/
-
-	FVector TraceStart;
-	FVector TraceEnd;
-	float TraceRadius = 0.0f;
-
-	if (WeaponInstance && WeaponInstance->GetTraceSoketVector(TraceStart, TraceEnd))
-	{
-		return FVector::Dist(TraceStart, TraceEnd);
-	}
-
-	if (WeaponSocketName.IsNone()) return 0.0f;
-
-	TraceStart = GetMesh()->GetSocketLocation(WeaponSocketName);
-	TraceEnd = TraceStart + (GetActorForwardVector() * AttackRange);
-
-	return FVector::Dist(TraceStart, TraceEnd);
-}
-
 void ATeloCharacterBase::HitActor(const FHitResult& HitResult)
 {
 	ITeloDamageable* Damageable = Cast<ITeloDamageable>(HitResult.GetActor());

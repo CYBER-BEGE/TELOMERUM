@@ -29,12 +29,24 @@ bool UTeloBTD_CheckAttackDistance::CalculateRawConditionValue(UBehaviorTreeCompo
 		UE_LOG(LogTemp, Warning, TEXT("[%s] CheckAttackDistance: TargetActor 없음"), *Owner->GetActorLabel());
 		return false;
 	}
+
+	FVector TraceA;
+	FVector TraceB;
+
+	if (!OwnerCharacter->GetAttackTracePoint(TraceA, TraceB))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[%s] CheckAttackDistance: AttackTracePoint 없음"), *Owner->GetActorLabel());
+		return false;
+	}
 	
-	FVector AttackSocketLocation = OwnerCharacter->GetMesh()->GetSocketLocation(OwnerCharacter->GetAttackSocketName()); // 공격 소켓 위치
+	const FVector TargetLocation = TargetActor->GetActorLocation();
 
-	float AttackDistance = OwnerCharacter->GetAttackDistance(); // 실제 공격 범위
-	float Distance = FVector::Dist(AttackSocketLocation, TargetActor->GetActorLocation());
+	const float DistanceA = FVector::Dist(TraceA, TargetLocation);
+	const float DistanceB = FVector::Dist(TraceB, TargetLocation);
+	const float ClosestDistance = FMath::Min(DistanceA, DistanceB);
 
-	UE_LOG(LogTemp, Warning, TEXT("[%s] CheckAttackDistance: %s"), *Owner->GetActorLabel(), (Distance <= AttackDistance) ? TEXT("TRUE") : TEXT("FALSE"));
-	return Distance <= AttackDistance;
+	const float SocketDistance = FVector::Dist(TraceA, TraceB);
+
+	UE_LOG(LogTemp, Warning, TEXT("[%s] CheckAttackDistance: %s"), *Owner->GetActorLabel(), (ClosestDistance <= SocketDistance + OwnerCharacter->GetAttackRadius()) ? TEXT("TRUE") : TEXT("FALSE"));
+	return ClosestDistance <= (SocketDistance + OwnerCharacter->GetAttackRadius());
 }
