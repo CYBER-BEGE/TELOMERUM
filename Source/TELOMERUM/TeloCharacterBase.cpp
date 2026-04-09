@@ -255,34 +255,6 @@ void ATeloCharacterBase::EndAttackTrace()
 	AlreadyHitActors.Empty();
 }
 
-float ATeloCharacterBase::GetAttackDistance() const
-{
-	/*
-	if (AttackSocketName.IsNone()) return 0.0f;
-
-	const FVector TraceStart = GetMesh()->GetSocketLocation(AttackSocketName); // 공격 시작점 (소켓 위치)
-	const FVector TraceEnd = TraceStart + (GetActorForwardVector() * AttackRange); // 정면으로 공격범위 적용
-
-	// Trace 길이 계산 후 반환
-	return FVector::Dist(TraceStart, TraceEnd);*/
-
-	FVector TraceStart;
-	FVector TraceEnd;
-	float TraceRadius = 0.0f;
-
-	if (WeaponInstance && WeaponInstance->GetTraceSoketVector(TraceStart, TraceEnd))
-	{
-		return FVector::Dist(TraceStart, TraceEnd);
-	}
-
-	if (WeaponSocketName.IsNone()) return 0.0f;
-
-	TraceStart = GetMesh()->GetSocketLocation(WeaponSocketName);
-	TraceEnd = TraceStart + (GetActorForwardVector() * AttackRange);
-
-	return FVector::Dist(TraceStart, TraceEnd);
-}
-
 void ATeloCharacterBase::HitActor(const FHitResult& HitResult)
 {
 	ITeloDamageable* Damageable = Cast<ITeloDamageable>(HitResult.GetActor());
@@ -335,6 +307,8 @@ void ATeloCharacterBase::DrawAttackDebug(FVector TraceStart, FVector TraceEnd)
 	DrawDebugPoint(GetWorld(), TraceStart, 12.0f, FColor::Green, false, 5.0f);
 	DrawDebugPoint(GetWorld(), TraceEnd, 12.0f, FColor::Red, false, 5.0f);
 	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Yellow, false, 5.0f, 0, 2.0f);
+	DrawDebugSphere(GetWorld(), TraceStart, AttackRadius, 16, FColor::Purple, false, 0.2f);
+	DrawDebugSphere(GetWorld(), TraceEnd, AttackRadius, 16, FColor::Purple, false, 0.2f);
 }
 
 bool ATeloCharacterBase::GetAttackTracePoint(FVector& TraceA, FVector& TraceB) const

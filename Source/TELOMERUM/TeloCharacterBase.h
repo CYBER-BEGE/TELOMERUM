@@ -58,7 +58,7 @@ protected:
 
 	/* 공격 범위 */
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	float AttackRadius = 50.0f;
+	float AttackRadius = 10.0f;
 
 	/* 공격력 */
 	UPROPERTY(EditAnywhere, Category = "Attack")
@@ -138,8 +138,10 @@ public:
 public:
 	/* WeaponSocketName Getter - 삭제예정, BT 호환용 임시 유지 */
 	FName GetAttackSocketName() const { return WeaponSocketName; }
-	/* 실제 사거리를 리턴하는 함수(AttackRange가 아님) */
-	float GetAttackDistance() const;
+	/* 판정지점 받아오는 함수 */
+	bool GetAttackTracePoint(FVector& TraceA, FVector& TraceB) const;
+	/* 공격 범위 Getter */
+	float GetAttackRadius() const { return AttackRadius; }
 protected:
 	/* 공격 판정 함수: 공격 적중 시 */
 	virtual void HitActor(const FHitResult& HitResult);
@@ -148,8 +150,6 @@ protected:
 private:
 	/* 공격 히트박스 디버그 드로잉 함수 */
 	void DrawAttackDebug(FVector TraceStart, FVector TraceEnd);
-	/* 판정지점 받아오는 함수 */
-	bool GetAttackTracePoint(FVector& TraceA, FVector& TraceB) const;
 
 private:
 	/* 공격 State: 공격 가능한 상태인가? */
