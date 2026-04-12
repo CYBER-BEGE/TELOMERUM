@@ -31,7 +31,9 @@ public class TELOMERUM : ModuleRules
             "TELOMERUM/UI",
             "TelOMERUM/Item",
             "TELOMERUM/Trap",
-            "TELOMERUM/Animation"
+            "TELOMERUM/Animation",
+            "TELOMERUM/GameMode",
+            "TELOMERUM/World"
         });
 
         // Uncomment if you are using Slate UI
