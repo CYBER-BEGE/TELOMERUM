@@ -149,9 +149,9 @@ void ATeloPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		// Attack
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::AttackInput);
 
-		//// Block
-		//EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::DoBlockStart);
-		//EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Completed, this, &ATeloPlayerCharacter::DoBlockEnd);
+		// Block
+		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Started, this, &ATeloPlayerCharacter::BlockInputPressed);
+		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Completed, this, &ATeloPlayerCharacter::BlockInputReleased);
 
 		// Lock On
 		EnhancedInputComponent->BindAction(LockOnAction, ETriggerEvent::Completed, this, &ATeloPlayerCharacter::DoLockOn);
@@ -627,4 +627,14 @@ bool ATeloPlayerCharacter::TryDropItemAtSlot(int32 SlotIndex)
 	}
 
 	return true;
+}
+
+void ATeloPlayerCharacter::BlockInputPressed()
+{
+	StartBlock();
+}
+
+void ATeloPlayerCharacter::BlockInputReleased()
+{
+	EndBlock();
 }

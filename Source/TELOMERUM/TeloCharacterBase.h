@@ -180,4 +180,17 @@ private:
 	/* 무기 장착 함수 */
 	bool EquipWeapon(class ATeloWeaponBase* NewWeapon);
 
+/* ==================== Block ==================== */
+
+protected:
+	/* 방어 조건 체크, 방어 State 설정 함수 */
+	void StartBlock();
+	/* 방어 State 초기화 함수 */
+	void EndBlock();
+
+	/* 방어 State: 방어 가능한 상태인가? */
+	bool bCanBlock = true;
+	/* 방어 State: 방어 중인가? */
+	bool bIsBlocking = false;
+
 };

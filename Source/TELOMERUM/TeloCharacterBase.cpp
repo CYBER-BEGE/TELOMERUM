@@ -94,8 +94,11 @@ float ATeloCharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEve
 
 	UE_LOG(LogTemp, Display, TEXT("[%s] %s에게 피격당함"), *this->GetActorLabel(), *DamageCauser->GetActorLabel());
 
+	if (bIsBlocking) 
+	{
+		Damage *= 0.5f; // 방어 시 데미지 50% 경감
+	}
 	NowHP -= Damage;
-	// 방어 데미지 감소
 
 	if (NowHP > 0.0f)
 	{
@@ -384,4 +387,20 @@ bool ATeloCharacterBase::EquipWeapon(ATeloWeaponBase* NewWeapon)
 	WeaponInstance = NewWeapon;
 
 	return true;
+}
+
+void ATeloCharacterBase::StartBlock()
+{
+	if (!bCanBlock || bIsBlocking) return;
+	bIsBlocking = true;
+
+	UE_LOG(LogTemp, Display, TEXT("Start Block"));
+}
+
+void ATeloCharacterBase::EndBlock()
+{
+	if (!bIsBlocking) return;
+	bIsBlocking = false;
+
+	UE_LOG(LogTemp, Display, TEXT("End Block"));
 }

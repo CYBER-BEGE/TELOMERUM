@@ -207,6 +207,12 @@ public:
 	/* 인벤토리 슬롯의 아이템을 월드에 드롭 시도 */
 	bool TryDropItemAtSlot(int32 SlotIndex);
 
+	/* ==================== Block ==================== */
+
+private:
+	/* 방어 InputAction이 감지 될 때 호출되는 함수 */
+	void BlockInputPressed();
+	void BlockInputReleased();
 
 	/* ==================== Blueprint Functions ==================== */
 public:
